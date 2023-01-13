@@ -10,6 +10,8 @@
 	- [Directories layout](./user_guide/directories_layout.md)
 	- [Fetching results with pullers](./user_guide/pullers.md)
 - [Tutorials](./tutorial/index.md)
+	- [Measuring the energy consumption of your program](./tutorial/mesuring.md)
+	- [Fetching results in a program](./tutorial/fetch_results.md)
 - [API Reference](./api_reference/index.md)
 	- [Sensor](./sensor/index.md)
 		- [protocol](./sensor/protocol.md)
