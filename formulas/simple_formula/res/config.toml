@@ -1,0 +1,6 @@
+[formula]
+log-path = "/etc/vjoule/simple_formula.log"
+log-lvl = "info"
+mnt-path = "/etc/vjoule/simple_formula/"
+reconf-sensor = true
+swipe-after = 5

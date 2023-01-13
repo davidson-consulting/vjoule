@@ -1,0 +1,3 @@
+systemctl daemon-reload
+echo "sensor service configured (type systemctl start vjoule_sensor.service to start it)"
+echo "simple_formula service configured (type systemctl start vjoule_simple_formula.service to start it)"

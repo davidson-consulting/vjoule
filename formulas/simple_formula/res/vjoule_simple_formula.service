@@ -1,0 +1,14 @@
+[Unit]
+Description=vjoule simple formula
+Wants=vjoule_sensor.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/vjoule/
+ExecStart=/usr/bin/vjoule_simple_formula
+Restart=always
+Slice=vjoule.slice
+
+
+[Install]
+WantedBy=multi-user.target

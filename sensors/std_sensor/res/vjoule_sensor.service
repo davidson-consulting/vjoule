@@ -1,0 +1,12 @@
+[Unit]
+Description=vjoule sensor
+
+[Service]
+User=root
+WorkingDirectory=/etc/vjoule/
+ExecStart=/usr/bin/vjoule_sensor
+Restart=always
+Slice=vjoule.slice
+
+[Install]
+WantedBy=multi-user.target
