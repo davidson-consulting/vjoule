@@ -67,6 +67,7 @@ Now, we can run our python script inside our `compute_pi` cgroup. This can be do
 $ sudo cgexec -g cpu:measurements.slice/compute_pi python compute_pi.py
 ```
 
+### Getting the results
 You should now have a non-zero value in results files. If some are empty, that's because your computer does not support the energy monitoring of the related component. You should have at least a result for in the `package` file that correspond to the CPU consumption.
 
 The value present in the results files are expressed in Joules. It correspond to the amount of energy consummed since vJoule started to monitor the related cgroup.
