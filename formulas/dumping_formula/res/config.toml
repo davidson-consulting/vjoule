@@ -1,6 +1,0 @@
-[formula]
-log-path = "/etc/vjoule/dumping_formula.log"
-log-lvl = "info"
-mnt-path = "/etc/vjoule/dumping_formula/"
-reconf-sensor = true
-swipe-after = 5

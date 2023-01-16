@@ -7,5 +7,5 @@ set_directory_properties(PROPERTIES
 
 add_custom_target(vjoule_patch_libpfm ALL
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build.sh 
-  COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/libpfm_patched.a ${CMAKE_CURRENT_BINARY_DIR}/libpfm_patched.a
+  #COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/libpfm_patched.a ${CMAKE_CURRENT_BINARY_DIR}/libpfm_patched.a
 )

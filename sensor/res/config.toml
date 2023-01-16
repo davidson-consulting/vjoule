@@ -1,0 +1,13 @@
+[components]
+CPU = "rapl"
+GPU = "nvidia"
+RAM = "rapl"
+
+[sensor]
+freq = 1 # frequency of formula execution / perf event dumping
+log-lvl = "info" # debug < success < info < warn < error < none
+log-path = "/etc/vjoule/sensor.log" # file where logs are written, empty for stdout
+dump = false # if true, dump the reading of CPU, GPU values, and perf events
+formula = "simple" # name of the plugin of the formula to use 
+# perf-events = ["LLC_MISSES"] ; formula and perf-events cannot be used at the same time
+
