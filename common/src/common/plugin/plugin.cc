@@ -1,16 +1,10 @@
-#include <sensor/plugins/plugin.hh>
+#include <common/plugin/plugin.hh>
 #include <common/_.hh>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <dlfcn.h>
-
-using namespace common;
-
-namespace sensor::plugin {
+namespace common::plugin {
 
     Plugin::Plugin (const std::string & kind, const std::string & name)
-	: _path (utils::join_path (utils::join_path (VJOULE_DIR, kind), name)),
+	: _path (utils::join_path (utils::join_path (VJOULE_DIR, "plugins"), name) + ".so"),
 	  _kind (kind)
     {}
 
@@ -44,18 +38,26 @@ namespace sensor::plugin {
 	other._handlePoll = nullptr;
 	other._handleInit = nullptr;
     }
+    
+    const std::string & Plugin::getPath () const {
+	return this-> _path;
+    }
 
-    bool Plugin::init () {
+    const std::string & Plugin::getName () const {
+	return this-> _name;
+    }
+    
+    bool Plugin::init (const common::utils::config::dict & config) {
 	this-> dispose ();
 
 	this-> _handle = dlopen (this-> _path.c_str (), RTLD_LAZY);
-	if (this-> _handle = nullptr) {
+	if (this-> _handle == nullptr) {
 	    utils::Logger::globalInstance ().error ("Failed to load ", this-> _kind, " plugin : ", this-> _path);
 	    return false;
 	}
 	dlerror ();
 
-	this-> _handleInit = (bool (*)()) dlsym (this-> _handle, "init");
+	this-> _handleInit = (bool (*)(const common::utils::config::dict*)) dlsym (this-> _handle, "init");
 	if (this-> _handleInit == nullptr) {
 	    this-> dispose ();
 	    utils::Logger::globalInstance ().error ("Plugin ", this-> _kind, " in ", this-> _path, " has no 'bool init ()' function, error : ", dlerror ());
@@ -70,7 +72,7 @@ namespace sensor::plugin {
 	    return false;
 	}
 
-	this-> _handleDump = (void (*)(std::stringstream&)) dlsym (this-> _handle, "dump");
+	this-> _handleDump = (void (*)(std::ostream&)) dlsym (this-> _handle, "dump");
 	if (this-> _handleDump == nullptr) {
 	    this-> dispose ();
 	    utils::Logger::globalInstance ().error ("Plugin ", this-> _kind, " in ", this-> _path, " has no 'void dump (std::stringstream&)' function, error : ", dlerror ());
@@ -85,7 +87,7 @@ namespace sensor::plugin {
 	    return false;
 	}
 	
-	return this-> _handleInit ();
+	return this-> _handleInit (&config);
     }
 
     bool Plugin::poll () {
@@ -97,7 +99,7 @@ namespace sensor::plugin {
 	return this-> _handlePoll ();
     }
 
-    void Plugin::dump (std::stringstream & s) {
+    void Plugin::dump (std::ostream & s) {
 	if (this-> _handleDump == nullptr) {
 	    utils::Logger::globalInstance ().warn ("Using invalid plugin (maybe just not init) ", this-> _kind, " at : ", this-> _path, ", error : no 'void dump (std::stringstream&)' function");
 	    return;

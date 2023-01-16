@@ -19,6 +19,6 @@ install (TARGETS vjoule_sensor DESTINATION /usr/bin/)
 install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/config.toml DESTINATION /etc/vjoule/)
 install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/cgroups DESTINATION /etc/vjoule/)
 
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/vjoule_std_sensor.service DESTINATION /etc/systemd/system)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/vjoule_sensor.service DESTINATION /etc/systemd/system)
 
 

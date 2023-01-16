@@ -46,14 +46,23 @@ namespace common::utils {
 	this-> _path = logPath;
     }
 
-    void Logger::redirect (const std::string& logPath) {
+    void Logger::setName (const std::string & name) {
+	this-> _name = name;
+    }
+    
+    void Logger::redirect (const std::string& logPath, bool erase) {
 	if (logPath != "") {
-	    this-> _file = std::ofstream (logPath, std::ios::out);
+	    if (erase) {
+		this-> _file = std::ofstream (logPath, std::ios::out | std::ios::trunc);
+	    }
+	    
+	    this-> _file = std::ofstream (logPath, std::ios::app);	    
 	    this-> _stream = &this-> _file;
 	    this-> _path = logPath;
 	} else {
 	    this-> _file.close ();
 	    this-> _stream = &std::cout;
+	    this-> _path = "";
 	}
 	
 	(*this-> _stream) << std::fixed << std::setprecision(8);
@@ -89,6 +98,17 @@ namespace common::utils {
     
     const std::string& Logger::getLogFilePath () const {
 	return this-> _path;
+    }
+
+    std::string  Logger::getLogLevel () const {
+	if (this-> _level == LogLevel::NONE) return "none";
+	if (this-> _level == LogLevel::ERROR) return "error";
+	if (this-> _level == LogLevel::WARN) return "warn";
+	if (this-> _level == LogLevel::INFO) return "info";
+	if (this-> _level == LogLevel::SUCCESS) return "success";
+	if (this-> _level == LogLevel::STRANGE) return "strange";
+	if (this-> _level == LogLevel::DEBUG) return "debug";
+	return "all";
     }
 
     Logger& Logger::globalInstance () {
