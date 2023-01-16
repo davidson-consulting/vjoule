@@ -6,18 +6,26 @@ For instance, all processes related to vJoule (the sensor and the formula) are b
 
 If you want to monitor the energy consumption of a given process, you will need to attach this process to a cgroup (the `vjoule` cgroup or one you've created) and configure the formula to monitor this cgroup (reminder: the configuration file is stored in `/etc/vjoule/simple_formula/config.toml`).
 
-For instance, this can be done in command line like this:
+For instance, let's say you want to measure the energy consumption of the API you've built. This can be done in command line like this:
 ```
-# Create a cgroup "test" in a "test" slice (a group of cgroup)
-sudo cgcreate -g cpu:test.slice/test
+$ # Create a cgroup "api" in a "measurements" slice (a group of cgroup)
+$ sudo cgcreate -g cpu:measurements.slice/api
 
-# Run a command that will be attached to the test cgroup
-sudo cgexec -g cpu:test.slice/test mycommand
+$ # The "measurements" slice could contains other components of you application
+$ # Like the database for instance
+$ # To do so :
+$ sudo cgcreate -g cpu:measurements.slice/database
 
-# OR
+$ # Run a command that will be attached to the api cgroup
+$ sudo cgexec -g cpu:measurements.slice/api mycommand
 
-# Attach an existing process, by its pid, to the test cgroup
-sudo cgclassify -g cpu:test.slice/test mypid
+$ # OR
+
+$ # Attach an existing process, by its pid, to the api cgroup
+$ sudo cgclassify -g cpu:measurements.slice/api mypid
 ```
+Should you use `cgexec` or `cgclassify`? It depends on your context. If you want to monitor a running process like a webserver, use `cgclassify` with the webserver's pid. If you want to run a command and see how much energy it consummed during its execution, use `cgexec`. 
 
-As you've seen you can create a hierarchy of cgroups that will be monitored by vJoule (here you need to add `test.slice` to the monitored cgroups in the formula configuration). 
+You don't want to use those linux commands directly? There is chances you can find librairies to manage cgroups in your favorite programming language.
+
+As you've seen you can create a hierarchy of cgroups that will be monitored by vJoule (here you need to add `measurements.slice` to the monitored cgroups in the sensor configuration). 

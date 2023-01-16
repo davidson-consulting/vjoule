@@ -8,6 +8,8 @@ Now that vJoule is installed on your computer, let's try it. Remember that vJoul
 vJoule CLI is conveniently called `vjoule`. You can use it to estimate the energy consumption of a given command, like this: 
 
 ```
+$ # Here, ls is not a subcommand of vjoule
+$ # We mesure the energy consummed by the ls command execution
 $ vjoule ls
 ```
 
@@ -17,7 +19,7 @@ You can also use vjoule on a command that needs parameters. In this case, we wil
 $ vjoule stress --cpu 2 --timeout 2s
 ```
 
-Of course, you can use vjoule while executing, let's say, python a script.
+Of course, you can use vjoule while executing, let's say, a python script.
 
 ```
 $ vjoule python myscript.py
