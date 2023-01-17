@@ -1,5 +1,5 @@
-Package: vjoule-0.1
-Version: 0.1
+Package: vjoule-0.2
+Version: 0.2
 Architecture: amd64
 Maintainer: dimitri.saingre@davidson.fr, emile.cadorel@davidson.fr
 Description: vjoule sensor and formula

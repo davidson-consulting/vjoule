@@ -10,7 +10,7 @@ namespace sensor {
 
     Sensor::Sensor (int argc, char ** argv) :
 	common::sensor::Sensor ("std_sensor", argc, argv),
-	_systemWatcher ("")
+	_systemWatcher ("/sys/fs/cgroup/")
     {}
 
     void Sensor::preRun () {
@@ -153,10 +153,7 @@ namespace sensor {
 	// Poll the rapl values
 	this-> _raplReader.poll (this-> _report);
 	
-	if (!this-> _head.simulation) {
-	    // Poll the current status of the watched metrics
-	    this-> _systemWatcher.poll (this-> _report.globalMetrics);
-	}
+	this-> _systemWatcher.poll (this-> _report.globalMetrics);
 
 	for (int i = 0; i < this-> _report.cgroupPackets.size () ; i++) { 
 	    auto & packet = this-> _report.cgroupPackets [i];
