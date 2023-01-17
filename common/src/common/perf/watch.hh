@@ -7,7 +7,7 @@
 #include <perfmon/pfmlib.h>
 #include <cstdint>
 
-namespace sensor::perf {
+namespace common::perf {
 
     /**
      * Watch the performance event associated to a cgroup
@@ -119,6 +119,11 @@ namespace sensor::perf {
 	 */
 	void dispose ();
 
+	/**
+	 * Clear everything
+	 */
+	static void clear ();
+	
 	/**
 	 * Call dispose
 	 */

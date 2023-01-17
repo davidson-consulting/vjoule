@@ -2,10 +2,7 @@
 freq = 1 # frequency of formula execution / perf event dumping
 log-lvl = "info" # debug < success < info < warn < error < none
 log-path = "/etc/vjoule/sensor.log" # file where logs are written, empty for stdout
-dump = false # if true, dump the reading of CPU, GPU values, and perf events
-
-[formula]
-name = "divider"
+core = "divider" 
 
 [cpu]
 name = "rapl"

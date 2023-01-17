@@ -9,6 +9,10 @@ namespace common::cgroup {
 	return this-> _name;
     }
 
+    bool Cgroup::operator < (const Cgroup & other) const {
+	return this-> _name < other._name;
+    }
+    
 }
 
 std::ostream& operator<< (std::ostream& stream, const common::cgroup::Cgroup & group) {

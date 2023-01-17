@@ -21,7 +21,7 @@ namespace common::plugin {
     
     bool Factory::configurePlugin (const std::string & kind, const common::utils::config::dict & config) {
 	if (!config.has <std::string> ("name")) {
-	    utils::Logger::globalInstance ().error ("Plugin of kind : ", kind, " has no 'name'");
+	    LOG_ERROR ("Plugin of kind : ", kind, " has no 'name'");
 	    return false;
 	}
 
@@ -33,6 +33,11 @@ namespace common::plugin {
 	    auto it = this-> _plugins.find (name);
 	    if (it == this-> _plugins.end ()) {	
 		plugin = new Plugin (kind, config.get <std::string> ("name"));
+		if (!plugin-> configure ()) {
+		    delete plugin;
+		    return false;
+		}
+		
 		ret = plugin-> init (config);
 		this-> _plugins.emplace (name, plugin);
 	    } else {

@@ -20,7 +20,8 @@ namespace common::cgroup {
 	 * @returns: the name of the cgroup
 	 */
 	const std::string& getName () const;
-	
+
+	bool operator< (const Cgroup & other) const;
     };
 
 }

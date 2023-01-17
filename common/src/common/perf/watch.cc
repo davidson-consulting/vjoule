@@ -1,4 +1,4 @@
-#include <sensor/perf/watch.hh>
+#include <common/perf/watch.hh>
 #include <sys/sysinfo.h>
 #include <fcntl.h>
 
@@ -31,8 +31,8 @@ struct read_format {
 };
 
 
-namespace sensor::perf {
-
+namespace common::perf {
+    
     bool __PERF_IS_INIT__ = false;
     
     PerfEventWatcher::PerfEventWatcher (const std::string & cgroupPath) :
@@ -92,7 +92,7 @@ namespace sensor::perf {
 	if (this-> _cgroupPath != "") {
 	    this-> _cgroupFd = open (this-> _cgroupPath.c_str (), O_RDONLY);
 	    if (this-> _cgroupFd == -1) {
-		common::utils::Logger::globalInstance  ().error ("Failed to open cgroup.");
+		LOG_ERROR ("Failed to open cgroup.");
 		return;
 	    }
 	    perfFlags = PERF_FLAG_PID_CGROUP;
@@ -111,7 +111,7 @@ namespace sensor::perf {
 		} else this-> _toClose.push_back (fd);
 		
 		if (fd == -1) {
-		  common::utils::Logger::globalInstance ().error ("Failed to open perf event for cgroup : ", this-> _cgroupPath, " on cpu : ", cpuId, " ", strerror (errno));
+		  LOG_ERROR ("Failed to open perf event for cgroup : ", this-> _cgroupPath, " on cpu : ", cpuId, " ", strerror (errno));
 		    continue;
 		}
 	    }
@@ -142,7 +142,7 @@ namespace sensor::perf {
 	    pe.disabled = 1;
 		
 	    if (pe.size == 0) {
-		common::utils::Logger::globalInstance ().error ("Undefined perf event : ", event);
+		LOG_ERROR ("Undefined perf event : ", event);
 		continue;
 	    } else {
 		attrs.push_back (pe);
@@ -153,7 +153,7 @@ namespace sensor::perf {
 	return attrs;
     }
 
-    perf_event_attr PerfEventWatcher::findPerfEvent (const std::string & name) const {
+    perf_event_attr PerfEventWatcher::findPerfEvent (const std::string & name) const {	
 	pfm_perf_encode_arg_t arg = {};
 	perf_event_attr attr = {};	
 	arg.size = sizeof (arg);
@@ -183,7 +183,7 @@ namespace sensor::perf {
 	for (int cpuId = 0 ; cpuId < this-> _fds.size () ; cpuId ++) {
 	    auto size = read (this-> _fds[cpuId], this-> _cache.data (), this-> _cache.size ());
 	    if (size != this-> _cache.size ()) {
-		common::utils::Logger::globalInstance ().error ("Failed to read perf event for cgroup : ", this-> _cgroupPath, " on cpu : ", cpuId, " read : ", size, " when expecting : ", sizeof(long long) * this-> _cache.size ());
+		LOG_ERROR ("Failed to read perf event for cgroup : ", this-> _cgroupPath, " on cpu : ", cpuId, " read : ", size, " when expecting : ", sizeof(long long) * this-> _cache.size ());
 		continue;
 	    }
 
@@ -211,6 +211,8 @@ namespace sensor::perf {
     const std::string& PerfEventWatcher::getCgroupName () const {
 	return this-> _cgroupPath;
     }
+
+
     
     /**
      * ===================================================================================
@@ -222,7 +224,7 @@ namespace sensor::perf {
     
     void PerfEventWatcher::dispose () {
 	if (this-> _fds.size () != 0 || this-> _toClose.size () != 0) {
-	    common::utils::Logger::globalInstance ().info ("Disposing perf watcher : ", this-> _cgroupPath);
+	    LOG_INFO ("Disposing perf watcher : ", this-> _cgroupPath);
 	    
 	    for (auto & it : this-> _fds) {
 		ioctl(it, PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP);

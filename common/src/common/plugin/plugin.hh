@@ -29,12 +29,6 @@ namespace common::plugin {
 	// The dispose function of the plugin
 	void (*_handleDispose) () = nullptr;
 
-	// The poll function of the plugin
-	bool (*_handlePoll) () = nullptr;
-
-	// The dumping function of the plugin
-	void (*_handleDump) (std::ostream &) = nullptr;
-
 	// The init function of the plugin
 	bool (*_handleInit) (const common::utils::config::dict *) = nullptr;
 	
@@ -53,16 +47,6 @@ namespace common::plugin {
 	Plugin (const std::string & kind, const std::string & name);
 
 	/**
-	 * Move ctor
-	 */
-	Plugin (Plugin && other);
-
-	/**
-	 * Move affect
-	 */
-	void operator= (Plugin && other);
-
-	/**
 	 * @returns: the path of the plugin
 	 */
 	const std::string & getPath () const;
@@ -76,17 +60,19 @@ namespace common::plugin {
 	 * @returns: true if the plugins is of kind 'kind' and has the name 'name'
 	 */
 	bool is (const std::string & kind, const std::string & name);
+
+	/**
+	 * Configure the plugin so it is now usable
+	 * @warning: does not call the init function of the plugin that is made manually by the method 'init'
+	 * @returns: true if the logging succeeded, false otherwise
+	 */
+	bool configure ();
 	
 	/**
 	 * Execute the init function of the plugin
 	 */
 	bool init (const common::utils::config::dict & config);
 	
-	/**
-	 * Execute the poll function of the plugin
-	 */
-	bool poll ();
-
 	/**
 	 * @return: a function pointer of the plugin
 	 */
@@ -98,11 +84,6 @@ namespace common::plugin {
 
 	    return nullptr;
 	}
-	
-	/**
-	 * Dump the plugin informations into stream
-	 */
-	void dump (std::ostream & stream);
 
 	/**
 	 * Execute the dispose function of the plugin

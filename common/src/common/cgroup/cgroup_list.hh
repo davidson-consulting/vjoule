@@ -4,6 +4,7 @@
 #include <common/utils/_.hh>
 
 #include <vector>
+#include <set>
 #include <string>
 
 namespace common::cgroup {
@@ -35,7 +36,7 @@ namespace common::cgroup {
 	 * Run the cgroup lister
 	 * @returns: a list of cgroups
 	 */
-	std::vector <Cgroup> run () const;
+	std::set <Cgroup> run () const;
     };
     
 }

@@ -12,20 +12,28 @@ namespace common::cgroup {
     CgroupLister::CgroupLister () {}
     
     CgroupLister::CgroupLister (const std::vector <std::string> & rules) {
-		this-> _customCgroups = rules;
+	this-> _customCgroups = rules;
     }
 
-    std::vector <Cgroup> CgroupLister::run () const {
-		std::vector <Cgroup> result;
+    std::set <Cgroup> CgroupLister::run () const {
+	std::set <Cgroup> list;	
+	list.emplace (Cgroup (""));
+	
+	if (this-> _customCgroups.size () != 0) {
+	    // fetch all matching cgroups
+	    for(auto rule: this-> _customCgroups) {
 		glob_t globbuf;
-		// fetch all matching cgroups
-		for(auto rule: this->_customCgroups) {
-			glob(common::utils::join_path (this-> _cgroupRootPath, rule).c_str(), GLOB_ONLYDIR | GLOB_APPEND, NULL, &globbuf);
+		int i = glob (common::utils::join_path (this-> _cgroupRootPath, rule).c_str (), GLOB_ONLYDIR, NULL, &globbuf);
+		if (i != GLOB_NOMATCH) {
+		    for(int i = 0; i < globbuf.gl_pathc; i++) {
+			list.emplace (Cgroup (globbuf.gl_pathv[i]));			
+		    }
 		}
-
-		for(int i = 0; i < globbuf.gl_pathc; i++) {
-			result.push_back(Cgroup(globbuf.gl_pathv[i]));
-		}
-		return result;
+		globfree (&globbuf);
+	    }
+	    
+	}
+	
+	return list;
     }
 }
