@@ -29,6 +29,11 @@ namespace tools::vjoule
 			exit(-1);
 		}
 
+		if ((strcmp(argv[1], "--help") == 0) || (strcmp(argv[1], "-h") == 0)) {
+			std::cerr << "Usage: vjoule cmd [options...]" << std::endl;
+			exit(-1);
+		}
+
 		std::vector<std::string> subargs;
 		for (int i = 2; i < argc; i++)
 		{
