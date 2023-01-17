@@ -36,34 +36,6 @@ namespace common::cgroup {
 	 * @returns: a list of cgroups
 	 */
 	std::vector <Cgroup> run () const;
-
-    private :
-	
-	/**
-	 * Recursively traverse the cgroup directory to get all the cgroups
-	 * @params:
-	 *  - currentPath: the directory to traverse
-	 * @returns: 
-	 *  - groups: the list of groups
-	 */
-	void recursiveTraverse (std::vector<Cgroup>& groups, const std::string & currentPath) const;
-
-	/**
-	 * Traverse the machine.slice cgroup
-	 * @params:
-	 *   - vmPath: the path of the machine slice super cgroup
-	 * @returns: the list of VM cgroups
-	 */
-	void traverseVMs (std::vector <Cgroup> & groups, const std::string& vmPath) const;
-
-	/**
-	 * Traverse a custom super cgroup slice
-	 * @params:
-	 *    - groupPath: the path of the slice super cgroup
-	 * @returns: the list of custom cgroups
-	 */
-	void traverseCustomCgroup (std::vector <Cgroup> & groups, const std::string & groupPath) const;
-
     };
     
 }
