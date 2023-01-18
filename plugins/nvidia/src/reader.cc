@@ -124,9 +124,7 @@ namespace nvidia {
 	return this-> _deviceEnergy[device];
     }
 
-    void NvmlReader::dispose () {
-	LOG_INFO ("dipose");
-    }
+    void NvmlReader::dispose () {}
 
     std::string NvmlReader::getCgroupName (uint64_t pid) {
 	auto it = this-> _savedPids.find (pid);

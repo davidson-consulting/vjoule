@@ -42,10 +42,18 @@ extern "C" std::string help () {
     ss << "nvidia (" << __PLUGIN_VERSION__ << ")" << std::endl;
     ss << __COPYRIGHT__ << std::endl << std::endl;
 
-    ss << "Nvidia is a device plugin, it retreive the consumption nvidia graphics card using nvml." << std::endl;
+    ss << "Nvidia is a device plugin, it retreive the consumption of nvidia graphics card using nvml." << std::endl;
     ss << "It can be only be used for the component [gpu]." << std::endl;
-    ss << "There is no specific configuration to pass to the component in the configuration file." << std::endl;
-    ss << "The plugin is capable of managing multiple devices, if multiple graphics card are found on the machine." << std::endl;
+    ss << "This plugin takes only one element of configuration 'cgroup-consumption'." << std::endl << std::endl;
+    ss << "===" << std::endl;
+    ss << "[gpu]" << std::endl;
+    ss << "name = \"nvidia\"" << std::endl;
+    ss << "cgroup-consumption = true" << std::endl;
+    ss << "===" << std::endl << std::endl << std::endl;
+
+    ss << "If 'cgroup-consumption' is true, then the plugin will retreive the name of the cgroups using the device, and their percentage of usage." << std::endl;
     ss << "Depending on the graphics card, cgroup usage can be available or not. Warning messages are displayed if it is not available." << std::endl;
+    
+    ss << "The plugin is capable of managing multiple devices, if multiple graphics card are found on the machine." << std::endl;
     return ss.str ();	
 }
