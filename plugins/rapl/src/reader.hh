@@ -4,6 +4,8 @@
 #define __PROJECT__ "RAPL"
 #endif
 
+#define __PLUGIN_VERSION__ "1.0"
+
 #include "utils.hh"
 
 #include <common/utils/_.hh>

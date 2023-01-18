@@ -14,6 +14,11 @@ namespace sensor {
 	_argv (argv)
     {
 	this-> initAppOptions ();
+	if (this-> _pluginHOpt-> count () > 0) {
+	    this-> displayPluginHelp ();
+	    exit (0);
+	}
+	
 	if (this-> _cfgPathOpt-> count () > 0) {
 	    this-> _cfgPath = this-> _cfgPathOpt-> as<std::string> ();
 	} else this-> _cfgPath = utils::join_path (VJOULE_DIR, "config.toml");
@@ -62,13 +67,17 @@ namespace sensor {
     
     void Sensor::initAppOptions () {
 	std::string configPath, logPath, logLevel;
+	std::string pluginH;
 	int port;
 	float freq;
+	bool h;
 	
 	this-> _cfgPathOpt = this-> _app.add_option ("-c,--config-path", configPath, "the path of the configuration file");
 	this-> _logPathOpt = this-> _app.add_option ("-l,--log-path", logPath, "the path of the log file");
 	this-> _logLvlOpt = this-> _app.add_option ("-v,--log-lvl", logLevel, "the lvl of the log");
 	this-> _freqOpt = this-> _app.add_option ("-f,--freq", freq, "the frequency of the sensor");
+	this-> _pluginHOpt = this-> _app.add_option ("--ph,--plugin-help", pluginH, "display the help of a plugin, takes a plugin name as parameter");
+
 	
 	try {
 	    this-> _app.parse (this-> _argc, this-> _argv);
@@ -142,12 +151,47 @@ namespace sensor {
     }
 
     void Sensor::configurePlugin (const std::string & kind, const common::utils::config::dict & config) {
-	if (!this-> _factory.configurePlugin (kind, config)) {
-	    LOG_ERROR ("Failed to configure plugin of kind ", kind, " : ", config);
+	auto k = kind;
+	if (k.find (":") != std::string::npos) {
+	    k = kind.substr (0, k.find (":"));
+	}
+	
+	if (!this-> _factory.configurePlugin (k, config)) {
+	    LOG_ERROR ("Failed to configure plugin of kind '", k, "' : ", config);
 	    // exit (-1);
 	}
     }
-    
-    
+
+
+    /**
+     * ===================================================================================
+     * ===================================================================================
+     * ================================        HELP         ==============================
+     * ===================================================================================
+     * ===================================================================================
+     */    
+
+
+    void Sensor::displayPluginHelp () {
+	auto pluginName = this-> _pluginHOpt-> as<std::string> ();
+	auto plugin = new common::plugin::Plugin ("", pluginName);
+	if (!plugin-> configure ()) {
+	    std::cerr << "No plugin named '" << pluginName << "' found" << std::endl;
+	    delete plugin;
+	    return;
+	}
+	
+	auto helpFunc = plugin-> getFunction <common::plugin::HelpFunc_t> ("help");
+	if (helpFunc == nullptr) {
+	    std::cerr << "Plugin '" << pluginName << "' found, but has no help function." << std::endl;
+	    delete plugin;
+	    return;
+	}
+
+	std::cout << helpFunc () ;
+
+	plugin-> dispose ();
+	delete plugin;	
+    }        
 
 }

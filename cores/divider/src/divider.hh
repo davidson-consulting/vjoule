@@ -1,6 +1,7 @@
 #pragma once
 
 #define __PROJECT__ "DIVIDER"
+#define __PLUGIN_VERSION__ "1.0"
 
 #include <common/_.hh>
 #include <vector>

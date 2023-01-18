@@ -19,5 +19,6 @@ namespace common::plugin {
     typedef uint32_t (*GpuGetNbDevices_t) ();
     typedef void (*GpuGetEnergy_t) (float* power);
     typedef float (*GpuGetDeviceUsage_t) (uint32_t device, const char * cgroupName);
-    
+
+    typedef std::string (*HelpFunc_t) ();
 }

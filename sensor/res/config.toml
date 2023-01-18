@@ -10,5 +10,6 @@ name = "rapl"
 [ram]
 name = "rapl"
 
-
+[gpu:0]
+name = "rapl"
 

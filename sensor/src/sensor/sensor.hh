@@ -46,6 +46,9 @@ namespace sensor {
 	CLI::Option * _logLvlOpt;
 
 	CLI::Option * _freqOpt;
+
+	CLI::Option * _pluginHOpt;
+
 	
     public:
 
@@ -68,6 +71,12 @@ namespace sensor {
 	 */
 	void initAppOptions ();
 
+	/**
+	 * Display the help for a plugin
+	 */
+	void displayPluginHelp ();
+
+	
 	/**
 	 * Configure the sensor from a configuration file
 	 */
