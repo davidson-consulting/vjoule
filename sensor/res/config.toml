@@ -11,5 +11,5 @@ name = "rapl"
 name = "rapl"
 
 [gpu:0]
-name = "rapl"
+name = "nvidia"
 
