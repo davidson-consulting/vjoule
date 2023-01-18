@@ -158,7 +158,7 @@ namespace sensor {
 	
 	if (!this-> _factory.configurePlugin (k, config)) {
 	    LOG_ERROR ("Failed to configure plugin of kind '", k, "' : ", config);
-	    // exit (-1);
+	    exit (-1);
 	}
     }
 
