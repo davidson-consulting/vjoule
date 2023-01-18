@@ -186,15 +186,18 @@ namespace divider {
 	for (uint64_t i = 0 ; i < this-> _gpuGet.size () ; i++) {
 	    this-> _gpuGet[i](this-> _gpuEnergyCache[i].data ());
 	    for (uint64_t j = 0 ; j < this-> _cgroupList.size () ; j++) {		  
-		for (uint64_t device = 0 ; device < this-> _gpuEnergyCache[i].size () ; device++) {  
+		for (uint64_t device = 0 ; device < this-> _gpuEnergyCache[i].size () ; device++) {
+		    auto use = this-> _gpuPerfEvents[i](device);
 		    if (j == 0) {
 			auto & cgroup = this-> _results[this-> _cgroupList[0].getName ()];
 			cgroup.gpu += this-> _gpuEnergyCache[i][device];
 		    } else {
 			auto & name = this-> _cgroupList[j].getName ();
-			auto usage = this-> _gpuPerfEvents [i] (device, name.c_str ());
-			auto & cgroup = this-> _results[name];
-			cgroup.gpu += (this-> _gpuEnergyCache[i][device] * usage);
+			auto jt = use.find (name);
+			if (jt != use.end ()) {
+			    auto & cgroup = this-> _results[name];
+			    cgroup.gpu += (this-> _gpuEnergyCache[i][device] * jt-> second);
+			}
 		    }
 		}
 	    }

@@ -9,8 +9,10 @@
 
 nvidia::NvmlReader __GLOBAL_NVML__;
 
-extern "C" bool init (const common::utils::config::dict*) {    
-    return __GLOBAL_NVML__.configure ();
+extern "C" bool init (const common::utils::config::dict* cfg) {
+    bool perCgroup = true;
+    if (cfg != nullptr) { perCgroup = cfg-> getOr <bool> ("cgroup-consumption", true); }
+    return __GLOBAL_NVML__.configure (perCgroup);
 }
 
 extern "C" void poll () {
@@ -27,8 +29,8 @@ extern "C" void gpu_get_energy (float * energy) {
     }
 }
 
-extern "C" float gpu_cgroup_usage (uint32_t, const char*) {
-    return 0;
+extern "C" std::unordered_map<std::string, float> gpu_cgroup_usage (uint32_t device) {
+    return __GLOBAL_NVML__.getDeviceUsage (device);
 }
 
 extern "C" void dispose () {

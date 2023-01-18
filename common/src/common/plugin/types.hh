@@ -18,7 +18,7 @@ namespace common::plugin {
     
     typedef uint32_t (*GpuGetNbDevices_t) ();
     typedef void (*GpuGetEnergy_t) (float* power);
-    typedef float (*GpuGetDeviceUsage_t) (uint32_t device, const char * cgroupName);
+    typedef std::unordered_map<std::string, float> (*GpuGetDeviceUsage_t) (uint32_t device);
 
     typedef std::string (*HelpFunc_t) ();
 }

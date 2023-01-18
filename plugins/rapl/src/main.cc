@@ -31,8 +31,8 @@ extern "C" void gpu_get_energy (float * energy) {
     energy[0] = __GLOBAL_RAPL__.getGpuEnergy ();
 }
 
-extern "C" float gpu_cgroup_usage (uint32_t, const char*) {
-    return 0;
+extern "C" std::unordered_map<std::string, float> gpu_cgroup_usage (uint32_t) {
+    return {};
 }
 
 extern "C" void dispose () {
