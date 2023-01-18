@@ -47,6 +47,9 @@ namespace rapl {
 	// The number of cores
 	int _totalCores;
 
+	// true iif pp1 is available
+	bool _gpuAvail = false;
+	
 
 	float _energy_pp0;
 	float _energy_pp1;
@@ -92,6 +95,11 @@ namespace rapl {
 	 * @returns: the consumption of pp1 (0 might mean it is not available)
 	 */
 	float getGpuEnergy () const;
+
+	/**
+	 * @returns: the number of devices
+	 */
+	uint32_t getGpuNbDevices () const;
 	
 	/**
 	 * Dispose the rapl reader

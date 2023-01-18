@@ -60,6 +60,21 @@ namespace divider {
 	    std::vector <float> cache;
 	    cache.resize (nbDevice ());
 	    this-> _gpuEnergyCache.push_back (std::move (cache));
+
+
+	    auto get = it-> getFunction <common::plugin::GpuGetEnergy_t> ("gpu_get_energy");
+	    if (get == nullptr) {
+		LOG_ERROR ("Invalid 'gpu' plugin '", it-> getName (), "' has no 'void gpu_get_energy (float * energyDevices)' function");
+		return false;
+	    }
+	    this-> _gpuGet.push_back (get);
+
+	    auto perf_event = it-> getFunction<common::plugin::GpuGetDeviceUsage_t> ("gpu_cgroup_usage");
+	    if (perf_event == nullptr) {
+		LOG_ERROR ("Invalid 'gpu' plugin '", it-> getName (), "' has no 'float gpu_cgroup_usage (uint32_t device, const char* cgroupName)' function");
+		return false;
+	    }
+	    this-> _gpuPerfEvents.push_back (perf_event);	    
 	}
 
 	if (this-> _gpuPlugins.size () == 0) {
@@ -170,11 +185,17 @@ namespace divider {
     void Divider::computeGpuEnergy () {
 	for (uint64_t i = 0 ; i < this-> _gpuGet.size () ; i++) {
 	    this-> _gpuGet[i](this-> _gpuEnergyCache[i].data ());
-	    for (uint64_t device = 0 ; device < this-> _gpuEnergyCache[i].size () ; i++) {
-		for (auto & it : this-> _cgroupList) {		
-		    auto usage = this-> _gpuPerfEvents [i] (device, it.getName ().c_str ());
-		    auto & cgroup = this-> _results[it.getName ()];
-		    cgroup.gpu += (this-> _gpuEnergyCache[i][device] * usage);
+	    for (uint64_t j = 0 ; j < this-> _cgroupList.size () ; j++) {		  
+		for (uint64_t device = 0 ; device < this-> _gpuEnergyCache[i].size () ; device++) {  
+		    if (j == 0) {
+			auto & cgroup = this-> _results[this-> _cgroupList[0].getName ()];
+			cgroup.gpu += this-> _gpuEnergyCache[i][device];
+		    } else {
+			auto & name = this-> _cgroupList[j].getName ();
+			auto usage = this-> _gpuPerfEvents [i] (device, name.c_str ());
+			auto & cgroup = this-> _results[name];
+			cgroup.gpu += (this-> _gpuEnergyCache[i][device] * usage);
+		    }
 		}
 	    }
 	}	
