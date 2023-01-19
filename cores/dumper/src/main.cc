@@ -31,11 +31,11 @@ extern "C" std::string help () {
     ss << "freq = 1 # frequency of update in hertz (the higher the faster)" << std::endl;
     ss << "log-lvl = \"info\" # debug < success < info < warn < error < none" << std::endl;
     ss << "log-path = \"/etc/vjoule/log\" # log file (empty means stdout)" << std::endl;
-    ss << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl;
+    ss << "core = \"dumper\" # the name of the core plugin to use for the sensor" << std::endl;
     ss << "perf-counters = [\"LLC_MISSES\", \"PERF_COUNT_HW_CPU_CYCLES\"] # The list of performances counters to monitor" << std::endl;
     ss << std::endl;
     ss << "# following configuration is optional" << std::endl;
-    ss << "# It activates some part of the divider" << std::endl;
+    ss << "# It activates some part of the dumper" << std::endl;
     ss << std::endl;
     ss << "[cpu] # configuration to enable CPU energy reading" << std::endl;
     ss << "name = \"rapl\" # rapl plugin for compatible intel or amd cpus" << std::endl;
@@ -52,7 +52,7 @@ extern "C" std::string help () {
     ss << "name = \"rapl\" # rapl plugin form compatible intel of amd cpus" << std::endl;
     ss << "===" << std::endl << std::endl;
 
-    ss << "The divider core plugin uses another configuration file, in '/etc/vjoule/cgroups', to filter the cgroups that are watched by the sensor, and ignore unwanted cgroups." << std::endl;
+    ss << "The dumper core plugin uses another configuration file, in '/etc/vjoule/cgroups', to filter the cgroups that are watched by the sensor, and ignore unwanted cgroups." << std::endl;
     ss << "This configuration file is a list of rules, every rules must start with a slice (a cgroup that contains other cgroups)." << std::endl;
     ss << "For example 'my.slice/*'., will make the sensor watch all the cgroups in the slice 'my.slice', and 'system.slice/docker*' will watch all the cgroups in 'system.slice' that starts with 'docker'." << std::endl;
     ss << "Basically, it list all the cgroups that would be found if the command 'ls my_rule' was run in the cgroup mount directory." << std::endl;
