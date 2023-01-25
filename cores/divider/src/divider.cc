@@ -13,6 +13,8 @@ namespace divider {
 
     bool Divider::configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory) {
 	this-> _cgroupFile = utils::join_path (VJOULE_DIR, "cgroups");
+	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
+
 	if (!this-> configureGpuPlugins (factory)) return false;
 	if (!this-> configureCpuPlugin (factory)) return false;
 	if (!this-> configureRamPlugin (factory)) return false;
@@ -317,7 +319,7 @@ namespace divider {
 	    resultDir = c.getName ().substr (strlen ("/sys/fs/cgroup"));
 	}
 	
-	resultDir = utils::join_path (utils::join_path (VJOULE_DIR, "results"), resultDir);
+	resultDir = utils::join_path (this-> _outputDir, resultDir);
 	std::filesystem::create_directories (resultDir);
 	
 	r.cpuFd = fopen (utils::join_path (resultDir, "cpu").c_str (), "w");
@@ -338,7 +340,7 @@ namespace divider {
 	if (c.getName ().size () > strlen ("/sys/fs/cgroup")) {
 	    resultDir = c.getName ().substr (strlen ("/sys/fs/cgroup"));
 	}	
-	resultDir = utils::join_path (utils::join_path (VJOULE_DIR, "results"), resultDir);
+	resultDir = utils::join_path (this-> _outputDir, resultDir);
 
 	this-> _results.erase (c.getName ());
 	std::filesystem::remove (utils::join_path (resultDir, "cpu").c_str ());

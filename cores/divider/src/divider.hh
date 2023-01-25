@@ -24,6 +24,9 @@ namespace divider {
     class Divider {
     private:
 
+	// directory where results should be written
+	std::string _outputDir;
+
 	// The list of cgroup to watch
 	std::vector <common::cgroup::Cgroup> _cgroupList;
 	

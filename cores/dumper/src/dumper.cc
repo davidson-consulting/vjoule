@@ -14,6 +14,8 @@ namespace dumper {
 
     bool Dumper::configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory) {
 	this-> _cgroupFile = utils::join_path (VJOULE_DIR, "cgroups");
+	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
+
 	if (!this-> configureGpuPlugins (factory)) return false;
 	if (!this-> configureCpuPlugin (factory)) return false;
 	if (!this-> configureRamPlugin (factory)) return false;
@@ -152,14 +154,15 @@ namespace dumper {
     }
 
     void Dumper::createResultsFiles() {
-	this-> _resultsPerfOs = std::ofstream(utils::join_path (VJOULE_DIR, "cgroups.csv"), std::ios::out);
+	std::filesystem::create_directories (this-> _outputDir);
+	this-> _resultsPerfOs = std::ofstream(utils::join_path (this-> _outputDir, "cgroups.csv"), std::ios::out);
 	this-> _resultsPerfOs << "TIMESTAMP;CGROUP";
 	for (auto perfEvent: this-> _perfEvents) {
 	    this-> _resultsPerfOs << ";" << perfEvent;
 	}
 	this-> _resultsPerfOs << std::endl;
 
-	this-> _resultsEnergyOs = std::ofstream(utils::join_path (VJOULE_DIR, "energy.csv"), std::ios::out);
+	this-> _resultsEnergyOs = std::ofstream(utils::join_path (this-> _outputDir, "energy.csv"), std::ios::out);
 	this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU" << std::endl;
     }
 
