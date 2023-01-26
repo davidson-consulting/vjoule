@@ -1,5 +1,0 @@
-systemctl stop vjoule_sensor.service
-systemctl stop vjoule_simple_formula.service
-
-echo "sensor service stop"
-rm -rf /etc/vjoule/
