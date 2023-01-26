@@ -174,6 +174,11 @@ namespace dumper {
 	 * Write the results
 	 */
 	void writeResults ();
+
+	/**
+	 * Mount the result directory in tmpfs
+	 */
+	void mountResultDir ();
 	
     };
     

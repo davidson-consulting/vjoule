@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
+#include <sys/mount.h>
 
 using namespace common;
 
@@ -34,6 +35,10 @@ namespace dumper {
 	    this-> _perfEvents.push_back (lstPerfEvents.get<std::string> (i));
 	}
 
+	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
+	    this-> mountResultDir ();
+	}
+	
 	this-> _notif.onUpdate ().connect (this, &Dumper::onCgroupUpdate);
 	this-> configureCgroups ();
 	
@@ -162,6 +167,22 @@ namespace dumper {
 	this-> writeResults ();
     }
 
+
+    void Dumper::mountResultDir () {
+	auto mntType = utils::get_mount_type (this-> _outputDir);
+	if (mntType == "tmpfs") {
+	    LOG_INFO ("Result directory ", this-> _outputDir, " is already mounted in tmpfs");
+	    return;
+	}
+
+	int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
+	if (rc != 0) {
+	    LOG_WARN ("Failed to mount result dir ", this-> _outputDir, " in tmpfs.");
+	} else {
+	    LOG_INFO ("Result dir ", this-> _outputDir, " is mounted in tmpfs");
+	}
+    }        
+    
     void Dumper::createResultsFiles() {
 	std::filesystem::create_directories (this-> _outputDir);
 	this-> _resultsPerfOs = std::ofstream(utils::join_path (this-> _outputDir, "cgroups.csv"), std::ios::out);

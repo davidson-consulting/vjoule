@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
-
+#include <sys/mount.h>
 
 #include <mntent.h>
 
@@ -18,9 +18,7 @@ namespace divider {
 	this-> _cgroupFile = utils::join_path (VJOULE_DIR, "cgroups");
 	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
 	this-> _deleteRes = cfg.getOr <bool> ("delete-res", true);
-
-	this-> mountResultDir ();
-
+	
 	bool v2 = false;
 	this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
 	if (!v2) {
@@ -48,6 +46,10 @@ namespace divider {
 	    return false;
 	}	
 
+	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
+	    this-> mountResultDir ();
+	}
+	
 	this-> _notif.onUpdate ().connect (this, &Divider::onCgroupUpdate);
 	this-> configureCgroups ();
 		
@@ -328,7 +330,18 @@ namespace divider {
     }
 
     void Divider::mountResultDir () {
-	// std::cout << utils::get_mount_type (this-> _outputDir) << std::endl;
+	auto mntType = utils::get_mount_type (this-> _outputDir);
+	if (mntType == "tmpfs") {
+	    LOG_INFO ("Result directory ", this-> _outputDir, " is already mounted in tmpfs");
+	    return;
+	}
+
+	int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
+	if (rc != 0) {
+	    LOG_WARN ("Failed to mount result dir ", this-> _outputDir, " in tmpfs.");
+	} else {
+	    LOG_INFO ("Result dir ", this-> _outputDir, " is mounted in tmpfs");
+	}
     }        
 
     void Divider::createResultDirectory (const common::cgroup::Cgroup & c) {
