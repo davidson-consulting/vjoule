@@ -74,7 +74,7 @@ namespace dumper {
 	}
 
 	if (this-> _gpuPlugins.size () == 0) {
-	    LOG_INFO ("Core 'divide', No 'gpu' plugin in use");
+	    LOG_INFO ("Core 'dumper', No 'gpu' plugin in use");
 	}
 
 	
@@ -85,7 +85,7 @@ namespace dumper {
 	auto cpus = factory.getPlugins ("cpu");
 	if (cpus.size () > 0) {
 	    this-> _cpuPlugin = cpus[0];
-	    if (cpus.size () > 1) LOG_WARN ("Core 'divider' can manage only one CPU plugin.");
+	    if (cpus.size () > 1) LOG_WARN ("Core 'dumper' can manage only one CPU plugin.");
 	    auto poll = this-> _cpuPlugin-> getFunction<common::plugin::PluginPollFunc_t> ("poll");
 	    if (poll == nullptr) {
 		LOG_ERROR ("Invalid 'cpu' plugin '", this-> _cpuPlugin-> getName (), "' has no 'void poll ()' function");
@@ -101,7 +101,7 @@ namespace dumper {
 	    this-> _cpuGet = get;	    
 	} else {
 	    this-> _cpuPlugin = nullptr;
-	    LOG_INFO ("Core 'divide', No 'cpu' plugin in use");
+	    LOG_INFO ("Core 'dumper', No 'cpu' plugin in use");
 	}
 	
 	return true;
@@ -111,7 +111,7 @@ namespace dumper {
 	auto rams = factory.getPlugins ("ram");
 	if (rams.size () > 0) {
 	    this-> _ramPlugin = rams[0];
-	    if (rams.size () > 1) LOG_WARN ("Core 'divider' can manage only one RAM plugin.");
+	    if (rams.size () > 1) LOG_WARN ("Core 'dumper' can manage only one RAM plugin.");
 	    auto poll = this-> _ramPlugin-> getFunction<common::plugin::PluginPollFunc_t> ("poll");
 	    if (poll == nullptr) {
 		LOG_ERROR ("Invalid 'ram' plugin '", this-> _ramPlugin-> getName (), "' has no 'void poll ()' function");
@@ -128,7 +128,7 @@ namespace dumper {
 	    this-> _ramGet = get;
 	} else {
 	    this-> _ramPlugin = nullptr;
-	    LOG_INFO ("Core 'divide', No 'ram' plugin in use");
+	    LOG_INFO ("Core 'dumper', No 'ram' plugin in use");
 	}
 
 	return true;
@@ -277,7 +277,7 @@ namespace dumper {
 	    if (use) {
 		bool at_least_slice = line.find ('/') != std::string::npos;	    
 		if (!at_least_slice) {
-		    LOG_WARN ("Core 'divide', cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
+		    LOG_WARN ("Core 'dumper', cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
 		} else {
 		    rules.push_back (line);
 		}

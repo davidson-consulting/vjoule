@@ -25,6 +25,8 @@ namespace divider {
     Notifier::Notifier () {}
     
     void Notifier::dispose () {
+	this-> _watching.clear ();
+	
 	for (auto & it : this-> _wds) {
 	    inotify_rm_watch (this-> _fd, it);
 	}
@@ -40,25 +42,81 @@ namespace divider {
 	this-> dispose ();
 	
 	this-> _fd = inotify_init ();
-	std::set <std::string> watched;
+	std::map <std::string, int> done;
+	bool needRoot = false;
+	
 	for (auto & it : cgroups) {
-	    auto parent = utils::join_path ("/sys/fs/cgroup", utils::parent_directory (it));
-	    if (parent != "/sys/fs/cgroup") {
-		watched.emplace (parent);
-	    }
-	}
+	    std::string current = utils::join_path ("/sys/fs/cgroup", utils::parent_directory (it));
+	    std::string sub = "";
+	    bool willInsert = false;
+	    
+	    while (current != "/sys/fs/cgroup") {
+		if (utils::file_exists (current)) {
+		    willInsert = true;
+		} else if (utils::parent_directory (current) == "/sys/fs/cgroup") {
+		    sub = current.substr (strlen ("/sys/fs/cgroup/"));
+		    current = "/sys/fs/cgroup";
+		    willInsert = true;
+		}
 
-	
-	for (auto & it : watched) {
-	    this-> _wds.push_back (inotify_add_watch (this-> _fd, it.c_str (), IN_CREATE | IN_DELETE | IN_MODIFY));
+		if (willInsert) {
+		    auto id = done.find (current);
+		    if (id == done.end ()) {
+			this-> _wds.push_back (inotify_add_watch (this-> _fd, current.c_str (), IN_CREATE | IN_DELETE | IN_MODIFY));
+			Watcher w (current, {sub});
+			this-> _watching.emplace (this-> _wds.back (), w);
+			done.emplace (current, this-> _wds.back ());
+		    } else {
+			this-> _watching[id-> second].inners.emplace (sub);
+		    }		    
+
+		    if (current != "/sys/fs/cgroup") {
+			auto n = utils::parent_directory (current);
+			sub = current.substr (n.length () + 1);
+			current = n;
+			
+			auto id = done.find (current);
+			if (id == done.end ()) {
+			    this-> _wds.push_back (inotify_add_watch (this-> _fd, current.c_str (), IN_DELETE));
+			    Watcher w (current, {sub});
+			    this-> _watching.emplace (this-> _wds.back (), w);
+			    done.emplace (current, this-> _wds.back ());
+			} else {
+			    this-> _watching[id-> second].inners.emplace (sub);
+			}		    
+		    }
+		    		    
+		    break;
+		} 
+		
+		auto next = utils::parent_directory (current);
+		sub = current.substr (next.length() + 1);
+		current = next;
+	    }	    
 	}
-	
+	      	
 	auto configDirPath = utils::parent_directory (cgroupFile);	
 	
 	// add the watcher to the configuration directory
-	this-> _wds.push_back (inotify_add_watch (this-> _fd, configDirPath.c_str (), IN_CREATE | IN_DELETE | IN_MODIFY));	
+	this-> _wds.push_back (inotify_add_watch (this-> _fd, configDirPath.c_str (), IN_CREATE | IN_DELETE | IN_MODIFY));
+	Watcher w (configDirPath, {"cgroups"});
+	this-> _watching.emplace (this-> _wds.back (), w);
+
+	this-> printWatching ();
     }
     
+    void Notifier::printWatching () const {
+	std::stringstream ss;
+	int i = 0;
+	for (auto & it : this-> _watching) {
+	    if (i != 0) ss << ", ";
+	    ss << "[" << it.second.root << "/" << it.second.inners << "]";
+	    i += 1;
+	}
+	
+	LOG_DEBUG ("Notifier watching ", ss.str ());
+    }
+
     void Notifier::start () {
 	concurrency::spawn (this, &Notifier::waitLoop);
     }
@@ -76,6 +134,7 @@ namespace divider {
 	return this-> _onCgroupUpdate;
     }
 
+       
     void Notifier::waitLoop (common::concurrency::thread) {
 	char buffer[EVENT_BUF_LEN];
 	while (true) {
@@ -89,15 +148,14 @@ namespace divider {
 		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];      
 		if (event-> len != 0) { // there is an event to read
 		    if (event-> mask & IN_CREATE || event-> mask & IN_DELETE | event-> mask & IN_MODIFY) {
-			// we don't want to emit for the modification of port, or log files. the only interesting file in config is config.toml
-			if (event-> wd == this-> _wds.back () && std::string (event-> name) == "cgroups") { 
-			    this-> _onCgroupUpdate.emit ();
-			    return;
-			} else if (event-> wd != this-> _wds.back ()) { // cgroup modification
-			    LOG_DEBUG ("Notify update : ", event-> name);
-			    this-> _onCgroupUpdate.emit ();
-			    return;
-			}
+			auto sub = this-> _watching.find (event-> wd);
+			if (sub != this-> _watching.end ()) {
+			    if (sub-> second.inners.find ("") != sub-> second.inners.end () || sub-> second.inners.find (event-> name) != sub-> second.inners.end ()) {
+				LOG_DEBUG ("Notify update : ", sub-> second.root, "/", event-> name);
+				this-> _onCgroupUpdate.emit ();
+				return;
+			    }
+			}			
 		    }
 		}
 		i += EVENT_SIZE + event->len;

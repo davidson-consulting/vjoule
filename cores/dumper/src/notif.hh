@@ -3,15 +3,21 @@
 #include <common/concurrency/_.hh>
 #include <common/_.hh>
 #include <vector>
+#include <map>
 
 namespace dumper {
 
     /**
-     * This class notify when a modification is made to a file that modifies the context of the divider
+     * This class notify when a modification is made to a file that modifies the context of the dumper
      */
     class Notifier {
     private :
 
+	struct Watcher {
+	    std::string root;
+	    std::set <std::string> inners;
+	};
+	
 	// Event triggered when there is an update in cgroup file system
 	common::concurrency::signal<> _onCgroupUpdate;
 
@@ -22,6 +28,9 @@ namespace dumper {
 
 	// the watch handle
 	std::vector <int> _wds;
+
+	// The new slices
+	std::map <int, Watcher> _watching;
 
 	// The watching thread
 	common::concurrency::thread _th;
@@ -81,6 +90,11 @@ namespace dumper {
 	 * Traverse the cgroup sub directories to attach watchers
 	 */
 	void traverseCgroupDirectories (const std::string & path);
+
+	/**
+	 * Print the elements that are watched by the notifier
+	 */
+	void printWatching () const;
 	
     };
   

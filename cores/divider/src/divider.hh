@@ -42,6 +42,9 @@ namespace divider {
 	// If true cgroups have changed
 	bool _needUpdate = false;
 
+	// If true delete result directory when associated cgroups disappear 
+	bool _deleteRes = true;
+
 	// The notifier used to check cgroup modifications
 	Notifier _notif;
 	

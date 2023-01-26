@@ -4,13 +4,10 @@ log-lvl = "info" # debug < success < info < warn < error < none
 log-path = "/etc/vjoule/sensor.log" # file where logs are written, empty for stdout
 core = "divider" 
 output-dir = "/etc/vjoule/results"
+delete-res = true # delete cgroup result directories when the cgroup no longer exists
 
 [cpu]
 name = "rapl"
 
 [ram]
 name = "rapl"
-
-[gpu:0]
-name = "nvidia"
-cgroup-consumption = false

@@ -14,6 +14,7 @@ namespace divider {
     bool Divider::configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory) {
 	this-> _cgroupFile = utils::join_path (VJOULE_DIR, "cgroups");
 	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
+	this-> _deleteRes = cfg.getOr <bool> ("delete-res", true);
 
 	if (!this-> configureGpuPlugins (factory)) return false;
 	if (!this-> configureCpuPlugin (factory)) return false;
@@ -256,7 +257,9 @@ namespace divider {
 		lst.erase (this-> _cgroupList[i]);
 	    } else {
 		this-> _cgroupWatchers[i].dispose ();
-		this-> removeResultDirectory (this-> _cgroupList[i]);
+		if (this-> _deleteRes) {
+		    this-> removeResultDirectory (this-> _cgroupList[i]);
+		}
 	    }
 	}
 		
