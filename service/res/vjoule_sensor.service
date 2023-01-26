@@ -1,0 +1,12 @@
+[Unit]
+Description=vjoule service
+
+[Service]
+User=root
+WorkingDirectory=/etc/vjoule/
+ExecStart=/usr/bin/vjoule_service
+Restart=always
+Slice=vjoule.slice
+
+[Install]
+WantedBy=multi-user.target

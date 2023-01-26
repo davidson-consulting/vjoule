@@ -1,0 +1,11 @@
+[book]
+title = "vJoule doc"
+authors = ["Emile Cadorel", "Dimitri Saingre"]
+description = "Documentation for vJoule."
+src = "src"
+language = "en"
+
+[output.html]
+additional-css = ["js/custom.css"]
+additional-js = ["js/custom.js"]
+site-url= "/v1.0/"

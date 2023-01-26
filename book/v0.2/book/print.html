@@ -1,0 +1,819 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>vJoule doc</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Documentation for vJoule.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+        <link rel="stylesheet" href="custom.css">
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/pullers.html"><strong>3.3.</strong> Fetching results with pullers</a></li><li><a href="./user_guide/dumping_formula.html"><strong>3.4.</strong> The dumping formula</a></li></ul></li><li><a href="./tutorial/index.html"><strong>4.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>4.1.</strong> Evaluate a script</a></li><li><a href="./tutorial/fetch_results.html"><strong>4.2.</strong> Fetching results in a program</a></li></ul></li><li><a href="./api_reference/index.html"><strong>5.</strong> API Reference</a></li><li><ul class="section"><li><a href="./sensor/index.html"><strong>5.1.</strong> Sensor</a></li><li><ul class="section"><li><a href="./sensor/protocol.html"><strong>5.1.1.</strong> protocol</a></li><li><a href="./sensor/impl.html"><strong>5.1.2.</strong> c++ implementation</a></li><li><ul class="section"><li><a href="./sensor/impl-sensor.html"><strong>5.1.2.1.</strong> class sensor::Sensor</a></li><li><a href="./sensor/impl-notif.html"><strong>5.1.2.2.</strong> class sensor::Notifier</a></li><li><a href="./sensor/impl-perf-event.html"><strong>5.1.2.3.</strong> class sensor::perf::PerfEventWatcher</a></li><li><a href="./sensor/impl-cgroup-lister.html"><strong>5.1.2.4.</strong> class sensor::cgroup::CgroupLister</a></li></ul></li></ul></li><li><a href="./formulas/index.html"><strong>5.2.</strong> Formula</a></li><li><ul class="section"><li><a href="./formulas/simple-formula.html"><strong>5.2.1.</strong> Simple formula</a></li><li><a href="./formulas/smartwatts-formula.html"><strong>5.2.2.</strong> Smartwatts formula</a></li><li><a href="./formulas/implementing-new-formula.html"><strong>5.2.3.</strong> Implementing a new formula</a></li></ul></li><li><a href="./pullers/index.html"><strong>5.3.</strong> Pullers</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars" title="Toggle sidebar"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush" title="Change theme"></i>
+                    </div>
+
+                    <h1 class="menu-title">vJoule doc</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="print.html#welcome-to-vjoules-documentation" id="welcome-to-vjoules-documentation"><h1>Welcome to vJoule's documentation</h1></a>
+<p>Nowadays, developers are more and more aware of the environmental cost of the software and infrastructures they build and deploy.</p>
+<p>vJoule is a tool that allows you to measure the energy consumptions of running processes. Under the hood, vJoule will estimate the energy consumption of all monitored processes based on the current energy consumption measured on your computer.</p>
+<p>You will find here all the informations you need to get started with vJoule.</p>
+<p>vJoule is a tool developed at Davidson Consulting and inspired by other tools like PowerAPI.</p>
+<a class="header" href="print.html#getting-started" id="getting-started"><h1>Getting started</h1></a>
+<p>This section will help you get started with vJoule.</p>
+<p>You'll learn how vJoules works, how to install it and how to test it.</p>
+<a class="header" href="print.html#what-is-vjoule" id="what-is-vjoule"><h2>What is vJoule?</h2></a>
+<p>vJoule is a tool that can be used to estimate the energy consumption a set of running processes. Technically, vJoule is built from two components:</p>
+<ul>
+<li>The <em>sensor</em>, responsible to collect different metrics (current energy consumption of the host and performances counters)</li>
+<li>The <em>formula</em>, responsible to estimate the energy consumption of each monitored processes, based on the informations gathered by the sensor.</li>
+</ul>
+<p>It a nutshell, vJoules split the energy consumption of the host (<em>via</em> the sensor) among the monitored processes (<em>via</em> the formula).</p>
+<p><img src="images/vJoule_principles.svg" alt="vJoule main concept" /></p>
+<p>You currently have two ways to interact with vJoule :</p>
+<ul>
+<li>As a <strong>command line interface</strong> : useful for easy and quick usage</li>
+<li>As a <strong>linux service</strong> : useful if you want to interact with vJoule in a program</li>
+</ul>
+<a class="header" href="print.html#current-limitations" id="current-limitations"><h3>Current limitations</h3></a>
+<p>vJoule cannot be used inside a virtual machine as it needs direct access to the hardware.</p>
+<a class="header" href="print.html#installation" id="installation"><h2>Installation</h2></a>
+<a class="header" href="print.html#from-deb-recommended" id="from-deb-recommended"><h3>From .deb (recommended)</h3></a>
+<p>vJoule can be installed from deb files found in the Github releases. The <code>vjoule_&lt;VERSION&gt;.deb</code> package will install three systemd services: <code>vjoule_sensor</code> (that will gather the required hardware infos) and <code>vjoule_simple_formula</code> (responsible for the actual estimations of the energy consummed by the monitored processes), <code>vjoule_dumping_formula</code> (a secondary formula, used for debugging purposes).</p>
+<p>You can install the .deb file (once downloaded) by running <code>dpkg -i vjoule_&lt;VERSION&gt;.deb</code>.</p>
+<a class="header" href="print.html#from-sources" id="from-sources"><h3>From sources</h3></a>
+<p>vJoules uses CMake as a build tool.</p>
+<p>You will need to have installed cmake, g++ and git.</p>
+<a class="header" href="print.html#first-tests" id="first-tests"><h1>First tests</h1></a>
+<p>Now that vJoule is installed on your computer, let's try it. Remember that vJoule is available through two interfaces:</p>
+<ul>
+<li>A <strong>command line interface</strong>, useful for simple and quick usage</li>
+<li>A linux <strong>service</strong>, useful if you need to embeed vJoule in a program</li>
+</ul>
+<a class="header" href="print.html#vjoule-through-the-command-line-interface-cli" id="vjoule-through-the-command-line-interface-cli"><h2>vJoule, through the command line interface (CLI)</h2></a>
+<p>vJoule CLI is conveniently called <code>vjoule</code>. You can use it to estimate the energy consumption of a given command, like this:</p>
+<pre><code>$ # Here, ls is not a subcommand of vjoule
+$ # We mesure the energy consummed by the ls command execution
+$ vjoule ls
+</code></pre>
+<p>You can also use vjoule on a command that needs parameters. In this case, we will estimate the energy consumption of the <code>stress</code> command.</p>
+<pre><code>$ vjoule stress --cpu 2 --timeout 2s
+</code></pre>
+<p>Of course, you can use vjoule while executing, let's say, a python script.</p>
+<pre><code>$ vjoule python myscript.py
+</code></pre>
+<a class="header" href="print.html#vjoule-through-the-service" id="vjoule-through-the-service"><h2>vJoule, through the service</h2></a>
+<p>As the CLI can be a bit limited for embeeding vJoule in a program, vJoule is available through a linux systemd service.</p>
+<p>You'll need to start both sensor and formula first:</p>
+<pre><code>$ sudo systemctl start vjoule_sensor
+$ sudo systemctl start vjoule_simple_formula
+</code></pre>
+<p>You can verify that both services are up either by checking with <code>systemctl</code>:</p>
+<pre><code>$ sudo systemctl status vjoule_sensor
+$ sudo systemctl status vjoule_simple_formula
+</code></pre>
+<p>Or by checking for the logs of both services:</p>
+<pre><code>$ cat /etc/vjoule/sensor.log
+$ cat /etc/vjoule/simple_formula.log
+</code></pre>
+<p>By default, vJoule is configured for monitoring the energy consumption of its two services. To see how much energy uses the formula, have a look in the directory <code>/etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service</code>. You'll see several files where are stored the current energy consummed by the formula on different components of your computer. By printing the content of the <code>package</code> file, you will see the energy consummed by the CPU to run the formula. Other files may be empty because your hardware do not expose those informations.</p>
+<p>Check out the tutorial section of this book to learn how to use vJoule to monitor the energy consumption of your own processes.</p>
+<a class="header" href="print.html#user-guide" id="user-guide"><h1>User Guide</h1></a>
+<p>In this section, you will learn more about the concepts and technical details about vJoule. In particular:</p>
+<ul>
+<li>vJoule uses cgroup to know which process to monitor. But what are cgroups?</li>
+<li>Where are the main configuration files of vJoule? Where to find the different energy consumption estimations?</li>
+<li>How can I fetch results from within a program?</li>
+<li>A another formula (the dumping formula), used to print directly the performances counters the sensor fetch.</li>
+</ul>
+<a class="header" href="print.html#cgroups" id="cgroups"><h1>cgroups</h1></a>
+<p>vJoule monitor the energy consumption of processes through their cgroup. In a nutshell, a cgroup if a set of linux processes. Cgroups can be used to limit the resources usage of a set of running processes. With vJoule, you can estimate the energy consumption of a set of processes by putting them in a cgroup and asking vJoule to monitor this cgroup.</p>
+<p>For instance, all processes related to vJoule (the sensor and the formula) are by default attached to the <code>vjoule</code> cgroup.</p>
+<p>If you want to monitor the energy consumption of a given process, you will need to attach this process to a cgroup (the <code>vjoule</code> cgroup or one you've created) and configure the formula to monitor this cgroup (reminder: the configuration file is stored in <code>/etc/vjoule/simple_formula/config.toml</code>).</p>
+<p>For instance, let's say you want to measure the energy consumption of the API you've built. This can be done in command line like this:</p>
+<pre><code>$ # Create a cgroup &quot;api&quot; in a &quot;measurements&quot; slice (a group of cgroup)
+$ sudo cgcreate -g cpu:measurements.slice/api
+
+$ # The &quot;measurements&quot; slice could contains other components of you application
+$ # Like the database for instance
+$ # To do so :
+$ sudo cgcreate -g cpu:measurements.slice/database
+
+$ # Run a command that will be attached to the api cgroup
+$ sudo cgexec -g cpu:measurements.slice/api mycommand
+
+$ # OR
+
+$ # Attach an existing process, by its pid, to the api cgroup
+$ sudo cgclassify -g cpu:measurements.slice/api mypid
+$ # TIP : For a process with multiple PIDs, you can use pidof like:
+$ sudo cgclassify -g cpu:measurements.slice/api `pidof apache2`
+</code></pre>
+<p>Should you use <code>cgexec</code> or <code>cgclassify</code>? It depends on your context. If you want to monitor a running process like a webserver, use <code>cgclassify</code> with the webserver's pid. If you want to run a command and see how much energy it consummed during its execution, use <code>cgexec</code>.</p>
+<p>You don't want to use those linux commands directly? There is chances you can find librairies to manage cgroups in your favorite programming language.</p>
+<p>As you've seen you can create a hierarchy of cgroups that will be monitored by vJoule (here you need to add <code>measurements.slice</code> to the monitored cgroups in the sensor configuration). </p>
+<a class="header" href="print.html#files-of-interests" id="files-of-interests"><h1>Files of interests</h1></a>
+<p>Once vJoule is installed, you should find a directory for each vJoule services. Those directories (located in <code>/etc/vjoule</code>) contains configurations, logs and results. For example, the sensor configuration is located in <code>/etc/vjoule/sensor</code> and the simple formula configuration is located in <code>/etc/vjoule/simple_formula</code>.</p>
+<a class="header" href="print.html#configuration-files-and-logs" id="configuration-files-and-logs"><h2>Configuration files and logs</h2></a>
+<a class="header" href="print.html#log-files" id="log-files"><h3>Log files</h3></a>
+<ul>
+<li><code>/etc/vjoule/sensor.log</code>: the log file of the <code>std_sensor</code>,</li>
+<li><code>/etc/vjoule/simple_formula.log</code>: the log file of the <code>simple_formula</code></li>
+</ul>
+<a class="header" href="print.html#configuration-files" id="configuration-files"><h3>Configuration files</h3></a>
+<ul>
+<li><code>/etc/vjoule/sensor/config.toml</code>: the configuration file of the <code>std_sensor</code>. It can be modified to change the sensor log level and the list of cgroup monitored,</li>
+<li><code>/etc/vjoule/simple_formula/config.toml</code>: the configuration file of the <code>simple_formula</code>. It can be modified to change the formula log level.</li>
+</ul>
+<a class="header" href="print.html#energy-estimation-results" id="energy-estimation-results"><h2>Energy estimation results</h2></a>
+<p><code>/etc/vjoule/simple_formula/MYCGROUP/</code> contains the energy consumption estimation of the cgroup <code>MYCGROUP</code>. This where you will find the informations you're looking for.</p>
+<p>By default, vJoule is configured to monitor its own services in a cgroup named <code>vjoule.slice</code>. The energy consumption of the sensor will then be stored in self-updating files located in <code>/etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service</code>.</p>
+<p>vJoule will give you up to five results files:</p>
+<ul>
+<li>memory - The energy consumption of the RAM</li>
+<li>package - The energy consumption of the CPU</li>
+<li>pp0 - The energy consumption of the CPU cores only</li>
+<li>pp1 - The energy consumption of the CPU uncores and last level cache</li>
+<li>psys - The energy consumption of the CPU socket</li>
+</ul>
+<p>The main estimation of interest is <code>package</code>, that correspond to the energy consummed by the CPU for running your process. Other values are not always available, depending on what your hardware exposes.</p>
+<p>The value stored in the file correspond to the energy consumption, in joule, since vJoule have started monitoring this process.</p>
+<a class="header" href="print.html#signal-file" id="signal-file"><h2>Signal file</h2></a>
+<p>The values in the result files are updated periodically by the formula. To ensure you do not miss a currently writting value while measuring the energy consumption of a task, you will need to use the signal file. This file, located in <code>/etc/vjoule/simple_formula/formula.signal</code>, is updated each time the formula has written new values. You can watch this file with <code>inotify</code> (see the examples for different programming languages in the pullers).</p>
+<a class="header" href="print.html#pullers" id="pullers"><h1>Pullers</h1></a>
+<p>We have implemented several <code>pullers</code> programs that will fetch the results. Feel free to use them (see the dedicated section in the documentation). </p>
+<a class="header" href="print.html#the-dumping-formula" id="the-dumping-formula"><h1>The dumping formula</h1></a>
+<p>The dumping formula is a different formula that can be used to dump selected performances counters in a CSV file. You can use the dumping formula in combination with the sensor.</p>
+<a class="header" href="print.html#starting-the-dumping-formula" id="starting-the-dumping-formula"><h2>Starting the dumping formula</h2></a>
+<p>Assuming you already have installed vjoule, you should be able to start the dumping formula as a linux service:</p>
+<pre><code>$ # if not already done, start the sensor
+$ sudo systemctl start vjoule_sensor
+$ sudo systemctl start vjoule_dumping_formula
+</code></pre>
+<a class="header" href="print.html#finding-results" id="finding-results"><h2>Finding results</h2></a>
+<p>The dumping formula will dump every performances counters sent by the sensor in a CSV file. This file can be found in the dumping formula's directory, in <code>/etc/vjoule/dumping_formula</code></p>
+<a class="header" href="print.html#select-the-performances-counters-you-want" id="select-the-performances-counters-you-want"><h2>Select the performances counters you want</h2></a>
+<p>The sensor fetch two performances counters by default (the number of hardware cpu cycle and the number of last level cache misses). You choose whatever performances counters you want by configuring the sensor (through its configuration file, found in <code>/etc/vjoule/sensor/config.toml</code>).</p>
+<p>Please keep in mind that there is some restrictions in the number of performances counters you can query at the same time, especially if you have hyper threading activated on your computer. If you get a lot of zeros in the results, chances are that you tried to select too much performances counters. Try to remove some.</p>
+<a class="header" href="print.html#tutorial" id="tutorial"><h1>Tutorial</h1></a>
+<p>This section aims to provide practical tutorials to learn to use vJoule for your experiments.</p>
+<a class="header" href="print.html#measuring-the-energy-consumption-of-your-program" id="measuring-the-energy-consumption-of-your-program"><h1>Measuring the energy consumption of your program</h1></a>
+<p>In this tutorial, we will learn to use vJoule to measure the energy consumption of a simple python script. Please make sure that vJoule is already installed on your computer.</p>
+<a class="header" href="print.html#your-program-to-evaluate" id="your-program-to-evaluate"><h2>Your program to evaluate</h2></a>
+<p>Let's say you want to measure the energy consumption of the following python script.</p>
+<pre><code class="language-python">import sys
+
+# Compute the value of Pi. 
+# A higher value of prec will lead to a higher precision.
+def computePi(prec):
+    res = 0
+    for i in range(prec):
+        res += (4.0 / prec) / (1.0 + ((i - 0.5) * (1.0 / prec)) * ((i - 0.5) * (1.0 / prec)))
+    return res
+
+if __name__ == &quot;__main__&quot;:
+    if len(sys.argv) &lt; 2:
+        print(&quot;Usage: python compute_pi.py precision&quot;)
+    else:
+        print(computePi(int(sys.argv[1])))
+</code></pre>
+<a class="header" href="print.html#using-vjoule-cli" id="using-vjoule-cli"><h2>Using vJoule CLI</h2></a>
+<p>Using vJoule CLI is pretty straightforward, just run python with vJoule:</p>
+<pre><code>$ vjoule python compute_pi.py 1000  
+</code></pre>
+<a class="header" href="print.html#using-vjoule-linux-service" id="using-vjoule-linux-service"><h2>Using vJoule linux service</h2></a>
+<p>vJoule linux service offers a more flexible solution.</p>
+<a class="header" href="print.html#making-sure-that-vjoule-services-are-up" id="making-sure-that-vjoule-services-are-up"><h3>Making sure that vJoule services are up</h3></a>
+<p>We will first make sure everything is running with the following commands:</p>
+<pre><code>$ sudo systemctl status vjoule_sensor
+$ sudo systemctl status vjoule_simple_formula
+</code></pre>
+<p>If one or both services are not running, start them:</p>
+<pre><code>$ sudo systemctl start vjoule_sensor
+$ sudo systemctl start vjoule_simple_formula
+</code></pre>
+<a class="header" href="print.html#creating-a-cgroup-for-our-process" id="creating-a-cgroup-for-our-process"><h3>Creating a cgroup for our process</h3></a>
+<p>Remember that vJoule uses cgroups to know which processes to monitor. For a quick introduction to cgroups, refer to the <a href="../user_guide/cgroups.md">dedicated section</a> in the user guide.</p>
+<p>vJoule needs at least a two level cgroup hierarchy. We can organize it as follows:</p>
+<ul>
+<li>A cgroup named <code>measurements.slice</code> for our test,</li>
+<li>Inside <code>measurements.slice</code>, a cgroup named <code>compute_pi</code> in which we will attach our python script.</li>
+</ul>
+<p>This can be done with <code>cgcreate</code>:</p>
+<pre><code>$ sudo cgcreate -g cpu:measurements.slice/compute_pi
+</code></pre>
+<p>We will configure vJoule to monitor the energy consumption of each cgroups present in <code>measurements.slice</code>. To do so, we will edit our sensor's configuration (present in <code>/etc/vjoule/sensor/config.toml</code>) by adding <code>measurements.slice</code> to the list of cgroups.</p>
+<p>vJoule will now reload itself and create a result directory for our cgroups, in <code>/etc/vjoule/simple_formula/measurements.slice</code>. Inside, you should have a <code>compute_pi</code> directory with a file for every energy value (memory, package...).</p>
+<p>Now, we can run our python script inside our <code>compute_pi</code> cgroup. This can be done with <code>cgexec</code>:</p>
+<pre><code>$ sudo cgexec -g cpu:measurements.slice/compute_pi python compute_pi.py
+</code></pre>
+<a class="header" href="print.html#getting-the-results" id="getting-the-results"><h3>Getting the results</h3></a>
+<p>You should now have a non-zero value in results files. If some are empty, that's because your computer does not support the energy monitoring of the related component. You should have at least a result for in the <code>package</code> file that correspond to the CPU consumption.</p>
+<p>The value present in the results files are expressed in Joules. It correspond to the amount of energy consummed since vJoule started to monitor the related cgroup.</p>
+<a class="header" href="print.html#fetching-the-results-in-a-program" id="fetching-the-results-in-a-program"><h3>Fetching the results in a program</h3></a>
+<p>We have implemented several <code>pullers</code> programs that will fetch the results. Feel free to use them.</p>
+<a class="header" href="print.html#api-reference" id="api-reference"><h1>API Reference</h1></a>
+<p>This section present technical details on how vJoule works under the hood, especially the communication protocols between the sensor and the formula.</p>
+<a class="header" href="print.html#sensor" id="sensor"><h1>Sensor</h1></a>
+<p>The sensor is the part of vjoule retreiving <code>perf_events</code>. It
+divides the <code>perf_events</code> in to subgroups, system and cgroups. The
+sensor works with cgroup v2. An adaptation for cgroup v1 should be
+relatively easy.</p>
+<a class="header" href="print.html#installation-1" id="installation-1"><h2>Installation</h2></a>
+<p>The sensor uses the patched version of the libpfm. This
+patched version can be found in the directory <code>patch_libpfm</code>, and is
+compiled and linked automatically using the cmake files.</p>
+<pre><code class="language-bash">./deb/create-deb.sh
+sudo dpkg -i ./build/vjoule_1.0.deb
+</code></pre>
+<p>The sensor binary is installed in
+<code>/usr/bin/vjoule_sensor</code>. Configuration files are put in
+<code>/etc/vjoule/</code>. A service file is put in <code>/etc/systemd/system/vjoule_sensor.service</code></p>
+<a class="header" href="print.html#uninstallation" id="uninstallation"><h2>Uninstallation</h2></a>
+<pre><code class="language-bash">sudo dpkg -r vjoule-1.0
+</code></pre>
+<a class="header" href="print.html#usage" id="usage"><h2>Usage</h2></a>
+<p>The sensor is a service, that is started using the command :</p>
+<pre><code>sudo systemctl start vjoule_sensor.service
+</code></pre>
+<p>And stopped :</p>
+<pre><code>sudo systemctl stop vjoule_sensor.service
+</code></pre>
+<a class="header" href="print.html#configuration" id="configuration"><h2>Configuration</h2></a>
+<p>The configuration of the sensor is made using a <code>toml</code> file. An
+example of this file is presented below. The configuration file has to
+be located in <code>/etc/vjoule/sensor/config.toml</code>. Basically, every file
+read or generated by the sensor are located in the directory
+<code>/etc/vjoule/</code>. Configuration file must be present but every
+parameters are optional and have a default value.</p>
+<pre><code class="language-toml">[sensor]
+addr = &quot;0.0.0.0:0&quot;
+freq = 1.0
+log-lvl = &quot;info&quot;
+log-path = &quot;/etc/vjoule/sensor.log&quot;
+
+[cgroups]
+slices = [&quot;custom.slice&quot;]
+
+[events]
+system = [&quot;RAPL_ENERGY_PKG&quot;, &quot;TSC&quot;, &quot;APERF&quot;, &quot;MPERF&quot;]
+
+cgroups = [&quot;CPU_CLK_THREAD_UNHALTED:REF_P&quot;,
+           &quot;CPU_CLK_THREAD_UNHALTED:THREAD_P&quot;,
+           &quot;LLC_MISSES&quot;,
+           &quot;INSTRUCTIONS_RETIRED&quot;]
+</code></pre>
+<ul>
+<li>
+<p><code>sensor</code> defines information about the sensor deamon.</p>
+<ul>
+<li>
+<p><code>addr</code> is the address on which the sensor is listening for
+formulas to connect. By setting its port value to <code>0</code>, it will get
+the first port that is available. The used port is defined in
+<code>/etc/vjoule/port</code>. Default value is <code>0.0.0.0:0</code>.</p>
+</li>
+<li>
+<p><code>freq</code> defines the frequency in Hz of the sensor (number of report sent by seconds to the formulas). Default value is <code>1.0</code></p>
+</li>
+<li>
+<p><code>log-lvl</code> defines the level of the logger, default value is <code>success</code>, possible values <code>none &lt; error &lt; warn &lt; info &lt; success &lt; strange &lt; all</code>.</p>
+</li>
+<li>
+<p><code>log-path</code> defines the path of the log file, default is empty which means to stdout.</p>
+</li>
+<li>
+<p><code>max-open-files</code> defines the number of file descriptor the process can open, default is 65535. This is a linux limit, when there many cgroup to observe we need to open more than 1024 files (default linux limit).</p>
+</li>
+<li>
+<p><code>poll-freq</code> applicable only in nfs mode (sensor inside virtual machines). Defines the speed of the polling, to discover the new reports from the host formula. (nfs does not implement inotify, so we need to poll to check for modifications).</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>cgroups</code> defines information about the cgroup watched by the sensor.</p>
+<ul>
+<li><code>slices</code> defines the list of slices watched by the sensor. Other slices are ignored.
+For example, by defining <code>slices=[&quot;custom.slice&quot;]</code>, all sub cgroups inside <code>custom.slice</code> (<code>custom.slice/my-cgroup</code>, <code>custom/my-second-cgroup</code>) are watched, but not directly <code>custom.slice</code>. It is also not recursive, so <code>custom.slice/sub.slice/test</code> is watched through <code>custom/sub.slice</code> but not directly.</li>
+</ul>
+</li>
+<li>
+<p><code>events</code> defines the list of event being watched by the sensor</p>
+<ul>
+<li><code>system</code> the list of system event being watched</li>
+<li><code>cgroups</code> the list of events being watched for every cgroup being watched by the sensor</li>
+</ul>
+</li>
+</ul>
+<a class="header" href="print.html#report-protocol" id="report-protocol"><h1>Report protocol</h1></a>
+<p>Reports are sent to all the formulas connected to the address of the
+sensor. The protocol is in raw data, so it should be only be read
+using a formula written with the same protocol. There are two
+different kind of packet that can be sent. The header, sent when a new
+connexion is made. And the packet sent whenever a report is available.</p>
+<p>Protocol implementation is made in the <code>common::net</code> namespace.</p>
+<a class="header" href="print.html#header" id="header"><h3>Header</h3></a>
+<p>The byte description of the header :</p>
+<table><thead><tr><th> offset </th><th> size </th><th> type </th><th> content </th></tr></thead><tbody>
+<tr><td> 0 </td><td> 4 </td><td> int </td><td> the size of the whole packet <code>packet_size</code></td></tr>
+<tr><td> 4 </td><td> 4 </td><td> int </td><td> nb entries </td></tr>
+<tr><td> 8 </td><td> <code>packet_size</code> - 8 </td><td> [(short, int, [char])] </td><td> content of the header </td></tr>
+</tbody></table>
+<p>The content of the header is a map of metric names (list of pairs) :</p>
+<table><thead><tr><th> offset </th><th> size </th><th> type </th><th> content </th></tr></thead><tbody>
+<tr><td> 0 </td><td> 2 </td><td> short </td><td> The id of the metric </td></tr>
+<tr><td> 2 </td><td> 4 </td><td> int </td><td> size of the metric names <code>metric_name_size</code> </td></tr>
+<tr><td> 6 </td><td> <code>metric_name_size</code> </td><td> [char] </td><td> the metric name </td></tr>
+</tbody></table>
+<p>An example of header packet (int are written in full text to be readable, but are sent in raw by the sensor) :</p>
+<pre><code>| packet size | nb entries | id | name size |   name          | id | name size | name | id | name size |  name   | id | name size |   name   | 
+  40             4            0     15        RAPL_ENERGY_PKG    1     3           TSC   2     5         APERF      3    5           MPERF
+</code></pre>
+<a class="header" href="print.html#report" id="report"><h2>Report</h2></a>
+<p>The byte description of a report packet :</p>
+<table><thead><tr><th> offset </th><th> size </th><th> type </th><th> content </th></tr></thead><tbody>
+<tr><td> 0 </td><td> 4 </td><td> int </td><td> the size of the whole packet <code>packet_size</code> </td></tr>
+<tr><td> 4 </td><td> 4 </td><td> float </td><td> energy pp0 in Joules </td></tr>
+<tr><td> 8 </td><td> 4 </td><td> float </td><td> energy pp1 in Joules </td></tr>
+<tr><td> 12 </td><td> 4 </td><td> float </td><td> energy pkg in Joules </td></tr>
+<tr><td> 16 </td><td> 4 </td><td> float </td><td> energy dram in Joules </td></tr>
+<tr><td> 20 </td><td> 4 </td><td> float </td><td> energy psys in Joules </td></tr>
+<tr><td> 24 </td><td> 4 </td><td> int </td><td> number of global metric <code>nb_system_metrics</code> </td></tr>
+<tr><td> 28 </td><td> <code>nb_system_metrics</code> * (2 + 8) </td><td> [(short, long)] </td><td> list of system metrics values </td></tr>
+<tr><td> </td><td> 4 </td><td> int </td><td> nb cgroups <code>nbcgroups</code> </td></tr>
+<tr><td> </td><td> <code>packet_size</code> - (<code>nb_system_metrics</code> * (2 + 8) + 4) </td><td> [cgroup content] </td><td> cgroup metrics </td></tr>
+</tbody></table>
+<p>The cgroup metrics is a list of cgroup names and metrics values :</p>
+<table><thead><tr><th> offset </th><th> size </th><th> type </th><th> content </th></tr></thead><tbody>
+<tr><td> 0 </td><td> 4 </td><td> int </td><td> cgroup name size <code>name_size</code> </td></tr>
+<tr><td> 4 </td><td> <code>name_size</code> </td><td> [char] </td><td> the name of the cgroup </td></tr>
+<tr><td> <code>name_size</code> + 4 </td><td> 4 </td><td> int </td><td> nb metrics <code>nb_metrics</code> </td></tr>
+<tr><td> <code>name_size</code> + 8 </td><td> <code>nb_metrics</code> * (2 + 8) </td><td> [(short, long)] </td><td> metrics values </td></tr>
+</tbody></table>
+<p>An example of report packet :</p>
+<pre><code>| packet size | energy pp0 | energy pp1 | energy pkg | energy dram | energy psys | nb system metrics | id |    value   | id |    value  | nb cgroups | name size | name | nb metrics | id |   value  | id |  value   | name size |  name | nb metrics | id |  value    | id |  value     | 
+     113          12.1         0.001        10.92        1.4           0       2                0   98108989378   7   189082738       2          4         test      2         3    17878329    9  189789326     5        test2     2           3   8717896178    9   1878718897
+</code></pre>
+<a class="header" href="print.html#sensor-c-implementation" id="sensor-c-implementation"><h1>Sensor C++ implementation</h1></a>
+<p>This chapter presents the design of the c++ implementation of the
+sensor. It uses the common library for net communication, and some
+other utilities. It is link to the libpfm library, in the
+<code>patch_libpfm</code> directory, that is a patch of the libpfm to manage MSR
+events.</p>
+<p>The idea of the following sub chapters is to present an overview of
+the implementation, so that the relationships between classes and
+functions are easier to understand, but does not aim to present the
+full documentation (i.e. function prototypes etc.).</p>
+<a class="header" href="print.html#class-sensorsensor" id="class-sensorsensor"><h1>class <code>sensor::Sensor</code></h1></a>
+<p>This class contains the main part of the sensor. It runs 3 threads
+(main, and two separate threads).</p>
+<a class="header" href="print.html#main-thread" id="main-thread"><h2>Main thread</h2></a>
+<p>The main thread is responsible of the creation of the configuration,
+and is able to start/stop the other two threads if needed (by a
+configuration update for example). It waits a notification from
+<code>sensor::Notifier</code>, that is triggered by a modification of the context
+(creation or deletion of a cgroup, modification of the configuration
+file, etc.).</p>
+<p><img src="images/sensor_diagram_main_thread.png" alt="Sensor diagram" /></p>
+<p>Listing, and configuring the watchers is made in the function
+<code>Sensor::configure</code>. This function should be called within <code>this-&gt; _mutex</code> locking, as it is not done inside the function itself.</p>
+<p>Methods <code>Sensor::createHeader</code> and <code>Sensor::createPacket</code> pre
+allocates the memory of the packet for the memory polling, to gain
+some time, by avoiding allocation during the event polling. The packet
+that is created is used in the report thread.</p>
+<p>Method <code>Sensor::onContextChange</code> is the slot connected to the
+<code>sensor::Notifier</code>. This function updates everything (middle and right
+parts of the above diagram).</p>
+<a class="header" href="print.html#accept-formula-thread" id="accept-formula-thread"><h2>Accept formula thread</h2></a>
+<p>This thread is pretty simple, it simply wait for new incoming
+connexions from formulas, and register them as clients. This thread
+uses a <code>net::TcpListener</code>, and create <code>net::TcpStream</code> when clients
+are connected.</p>
+<p>This is in this thread that <code>net::Header</code> is transmitted to the
+clients.</p>
+<a class="header" href="print.html#report-thread" id="report-thread"><h2>Report thread</h2></a>
+<p>The report thread uses the perf watcher
+<code>sensor::perf::PerfEventWatcher</code> created by the main thread, and sent
+the result to the client connected in the accept thread
+<code>net::TcpStream</code>. Client deconnexion is managed in this thread.</p>
+<p><img src="images/sensor_diagram_report_thread.png" alt="Sensor report thread" /></p>
+<p>This thread send <code>net::Packet</code> to clients.</p>
+<a class="header" href="print.html#class-sensornotifier" id="class-sensornotifier"><h1>class sensor::Notifier</h1></a>
+<p>This class is used to wait for modification in term of cgroup
+filesytem, or configuration file. The idea being, that by using system
+waits, less cpu usage is required, and it is therefore not necessary
+to read all the cgroup topology at each report iteration.</p>
+<p>This class uses the <code>inotify</code> system, to wait for modification of both
+<code>config::cgroups::mnt</code> (defined in the configuration file, or
+<code>/sys/fs/cgroup</code> by default), and the configuration file
+<code>/etc/vjoule/config.toml</code>. This is set by calling
+<code>Notifier::configuration</code> method.</p>
+<p>When a modification happens a signal is emitted. This signal can be
+connected to any slots. <code>Notifier::onUpdate ().connect (slot)</code>.</p>
+<p>The notifier can be executed in <code>sync</code> mode (on the current thread),
+or by spawning a thread, using the methods <code>Notifier::startSync</code>,
+<code>Notifier::start</code>.</p>
+<p>Disposing the notifier clear the <code>inotify</code> watchers.</p>
+<a class="header" href="print.html#class-sensorperfperfeventwatcher" id="class-sensorperfperfeventwatcher"><h1>class sensor::perf::PerfEventWatcher</h1></a>
+<p>This class is configuring and polling the values of the <code>perf_event</code>
+being watch for a given cgroup. If no cgroup is configured
+(<code>PerfEventWatcher::_cgroupPath == &quot;&quot;</code>), then system events are watched.</p>
+<a class="header" href="print.html#configuration-1" id="configuration-1"><h2>Configuration</h2></a>
+<p>The configuration <code>PerfEventWatcher::configure</code> is made with a list of
+event names (e.g. <code>RAPL_ENERGY_PKG</code>, <code>LLC_MISSES</code>, ...). Multiple
+<code>perf_event</code> are grouped, so there is only one reading to
+make. Perf_event watching for cgroup is made per cpu, as it is
+impossible (apparently) for libperf to watch the event of multiple cpu
+core for a cgroup in a single file descriptor. So there is one file
+descriptor per cpu core, and this file descriptor is watching multiple
+events at the same time.</p>
+<p>Configuration uses utility functions
+<code>PerfEventWatcher::findPerfEventAttrs</code>, that look up for the libpfm
+attributes. Only available events are watched, meaning that a
+<code>PerfEventWatcher</code> is working even if there are some undefined event
+in the configuration. Undefined event are logged as errors.</p>
+<a class="header" href="print.html#polling-events" id="polling-events"><h2>Polling events</h2></a>
+<p>The polling of event is made using the file descriptors opened during
+the configuration.  There are two ways of polling events, with and
+without cache. With cache is the prefered method
+<code>PerfEventWatcher::poll (vector&lt;Metric&gt;&amp;)</code> as it does not reallocate
+memory, and is therefore more efficient.</p>
+<p>The polling reset the metric values, the content of the metric is the
+number of events since the last poll.</p>
+<a class="header" href="print.html#disposing" id="disposing"><h2>Disposing</h2></a>
+<p><code>PerfEventWatcher</code> opens many file descriptor that must be closed. For
+that the class was written using the <code>move</code> semantic. Thus it is
+impossible to <code>copy</code> a <code>PerfEventWatcher</code>, it must be moved <code>std::move (watcher)</code>. All disposing are made automatically by the destructor of
+the instance that has the ownership.</p>
+<a class="header" href="print.html#class-sensorcgroupcgrouplister" id="class-sensorcgroupcgrouplister"><h1>class sensor::cgroup::CgroupLister</h1></a>
+<p>Relatively simple class that traverse the cgroup tree, to retreive the
+names and path of the cgroups that must be watched by the sensor.</p>
+<p>The class takes a <code>common::utils::config::dict</code> as parameters. This
+configuration is the <code>[cgroups]</code> parts of the configuration file of
+the sensor. <code>CgroupLister::run</code> returns the list of cgroup to watch.</p>
+<a class="header" href="print.html#formulas" id="formulas"><h1>Formulas</h1></a>
+<p>Formulas are the components responsible to infer the energy
+consumption of each monitored cgroup from the informations sent by the
+sensor. All formulas have the same behavior and work with the same
+interfaces.</p>
+<p>Two formulas are currently available:</p>
+<ul>
+<li><em>simple formula</em>, that split the overall energy consumption of the host for each monitored cgroup by doing a ratio between a selected performance counter (e.g the CPU time usage) and the RAPL value sent by the sensor,</li>
+<li><em>smartwatts formula</em>, that uses a linear regression model to infer the energy consumption of monitored cgroup based on performances counters</li>
+</ul>
+<a class="header" href="print.html#results" id="results"><h2>Results</h2></a>
+<p>When the formula is running, it creates result files for each
+monitored cgroups. These files are located in the <code>mnt-path</code> defined
+in the configuration file. For example for the cgroup <code>custom/test</code>
+and with <code>mnt-path = &quot;/etc/vjoule/simple_formula/&quot;</code>, the
+following result files are written :</p>
+<ul>
+<li><code>/etc/vjoule/simple_formula/custom/test/package</code> the cumulated energy consumption of the cgroup from <code>energy_pkg</code> (cpu consumption)</li>
+<li><code>/etc/vjoule/simple_formula/custom/test/memory</code> the cumulated energy consumption of the cgroup from <code>energy_dram</code> (memory consumption)</li>
+</ul>
+<p>When new values are written to the cgroup result files, the formula
+updates the file <code>formula.signal</code> located in <code>mnt-path</code>. This file
+only contains a useless value, but is created so we can use the
+inotify system to synchronise a puller easily. For example the
+following script prints the <code>package</code> consumption of the cgroup
+<code>custom/test</code> when new values are available.</p>
+<pre><code class="language-bash">while inotifywait /etc/vjoule/simple_formula/formula.signal; do 
+    cat /etc/vjoule/simple-formula/simple_formula/custom/test/package
+done
+</code></pre>
+<p><code>inotify</code> is a basic linux system that can be used directly from a
+program. Examples of pullers written in bash, C++, and in rust are available
+respectively in <code>puller/bash/</code>, <code>puller/c++/</code> and <code>puller/rust</code>.</p>
+<p>The following diagrams gives an idea of how formulas interact with the
+sensor running on the machine, and how they provides results that can
+be used by pullers.</p>
+<p><img src="images/formula_system.png" alt="Formula diagram" /></p>
+<a class="header" href="print.html#simple-formula" id="simple-formula"><h1>Simple formula</h1></a>
+<p>The simple formula is an example of very simple formula. This is how a
+formula should be implemented, where almost only the division
+algorithm should differ.</p>
+<a class="header" href="print.html#installation-2" id="installation-2"><h2>Installation</h2></a>
+<p>The formula is created in the same deb package as the sensor or other formulas.</p>
+<pre><code class="language-bash">./deb/create-deb.sh
+sudo dpkg -i ./build/vjoule_1.0_no_nfs.deb
+</code></pre>
+<p>The formula binary is installed in
+<code>/usr/bin/vjoule_simple_formula</code>. Configuration files are put in
+<code>/etc/vjoule/simple_formula/</code>. A service file is put in
+<code>/etc/systemd/system/vjoule_simple_formula.service</code>.</p>
+<a class="header" href="print.html#unistallation" id="unistallation"><h2>Unistallation</h2></a>
+<pre><code>sudo dpkg -r vjoule-1.0-no_nfs
+</code></pre>
+<a class="header" href="print.html#usage-1" id="usage-1"><h2>Usage</h2></a>
+<p>The simple formula is a service. It depends on the <code>vjoule_sensor.service</code>.</p>
+<pre><code class="language-bash">sudo systemctl start vjoule_simple_formula.service
+</code></pre>
+<p>And stopped :</p>
+<pre><code class="language-bash">sudo systemctl stop vjoule_simple_formula.service
+</code></pre>
+<a class="header" href="print.html#configuration-2" id="configuration-2"><h2>Configuration</h2></a>
+<p>The configuration of the formula is made with a toml file. An example
+of this file is presented below. The configuration file has to be
+located in <code>/etc/vjoule/simple_formula/config.toml</code>. Basically,
+every file read or generated by the formula are located in the
+directory <code>/etc/vjoule/</code>. Configuration file must be present but
+every parameters are optional and have a default value.</p>
+<pre><code class="language-toml">[formula]
+log-path = &quot;/etc/vjoule/formula.log&quot;
+log-lvl = &quot;info&quot;
+mnt-path = &quot;/etc/vjoule/simple-formula/&quot;
+reconf-sensor = true
+</code></pre>
+<ul>
+<li><code>formula</code> defines information about the formula
+<ul>
+<li><code>log-path</code> defines the path of the log file, default is empty which means to stdout.</li>
+<li><code>log-lvl</code> defines the level of the logger, default value is success, possible values <code>none &lt; error &lt; warn &lt; info &lt; success &lt; strange &lt; all</code></li>
+<li><code>mnt-path</code> defines the directory that will receive the result of the formula</li>
+<li><code>reconf-sensor</code>, if true the formula modifies the configuration file of the sensor to make sure it is monitoring the correct metrics. Can be enforced to false, when running two different formulas (for comparison for example).</li>
+</ul>
+</li>
+</ul>
+<a class="header" href="print.html#smartwatts-formula" id="smartwatts-formula"><h1>Smartwatts formula</h1></a>
+<p>This formula is an implementation of the paper <em>SmartWatts: Self-Calibrating Software-Defined Power Meter for Containers</em> by Fieni et al., based on the <a href="https://github.com/vjoule-ng/smartwatts-formula">original python implementation</a>.</p>
+<a class="header" href="print.html#concepts" id="concepts"><h2>Concepts</h2></a>
+<p>This formula dispatch the energy consumption of the host (gathered by the sensor) based on performances events. Smartwatts uses
+a linear regression model to infer the power consumption of each monitored cgroup.</p>
+<a class="header" href="print.html#installation-3" id="installation-3"><h2>Installation</h2></a>
+<p>The formula is created in the same deb package as the sensor or other formulas.</p>
+<pre><code class="language-bash">./deb/create-deb.sh
+sudo dpkg -i ./build/vjoule_1.0_no_nfs.deb
+</code></pre>
+<p>The formula binary is installed in
+<code>/usr/bin/vjoule_smartwatts_formula</code>. Configuration files are put in
+<code>/etc/vjoule/smartwatts_formula/</code>. A service file is put in
+<code>/etc/systemd/system/vjoule_smartwatts_formula.service</code>.</p>
+<a class="header" href="print.html#unistallation-1" id="unistallation-1"><h2>Unistallation</h2></a>
+<pre><code>sudo dpkg -r vjoule-1.0-no-nfs
+</code></pre>
+<a class="header" href="print.html#usage-2" id="usage-2"><h2>Usage</h2></a>
+<p>The smartwatts formula is a service. It depends on the <code>vjoule_sensor.service</code>.</p>
+<pre><code class="language-bash">sudo systemctl start vjoule_smartwatts_formula.service
+</code></pre>
+<p>And stopped :</p>
+<pre><code class="language-bash">sudo systemctl stop vjoule_smartwatts_formula.service
+</code></pre>
+<a class="header" href="print.html#configuration-3" id="configuration-3"><h2>Configuration</h2></a>
+<p>The configuration of the formula is made with a toml file. An example
+of this file is presented below. The configuration file has to be
+located in <code>/etc/vjoule/smartwatts_formula/config.toml</code>. Basically,
+every file read or generated by the formula are located in the
+directory <code>/etc/vjoule/</code>. Configuration file must be present but
+every parameters are optional and have a default value.</p>
+<pre><code class="language-toml">[formula]
+log-path = &quot;/etc/vjoule/formula.log&quot;
+log-lvl = &quot;info&quot;
+mnt-path = &quot;/etc/vjoule/smartwatts-formula/&quot;
+reconf-sensor = true
+</code></pre>
+<ul>
+<li><code>formula</code> defines information about the formula
+<ul>
+<li><code>log-path</code> defines the path of the log file, default is empty which means to stdout.</li>
+<li><code>log-lvl</code> defines the level of the logger, default value is success, possible values none &lt; error &lt; warn &lt; info &lt; success &lt; strange &lt; all</li>
+<li><code>mnt-path</code> defines the directory that will receive the result of the formula</li>
+<li><code>reconf-sensor</code>, if true the formula modifies the configuration file of the sensor to make sure it is monitoring the correct metrics. Can be enforced to false, when running two different formulas (for comparison for example).</li>
+</ul>
+</li>
+</ul>
+<a class="header" href="print.html#implementing-a-new-formula" id="implementing-a-new-formula"><h1>Implementing a new formula</h1></a>
+<p>To implement a new formula, you can use the <code>Formula</code> and <code>Divider</code> interfaces.</p>
+<a class="header" href="print.html#formula-template" id="formula-template"><h2>Formula template</h2></a>
+<p>The <code>Formula</code> template (present in the <code>common::formula</code> namespace) provides a bunch a functionnalities required to implement a formula, including:</p>
+<ul>
+<li>Communication with the sensor</li>
+<li>Reconfiguration of the sensor (if specific performances counters are needed)</li>
+<li>Export of the results as files</li>
+</ul>
+<p>When implementing a new formula, you can directly use the Formula template parametrized with your own implementation of the divider. This is done as follows:</p>
+<pre><code>common::formula::Formula&lt;my_formula::Divider&gt;  formula (&quot;my_formula&quot;);
+formula.run ();
+</code></pre>
+<a class="header" href="print.html#divider-class" id="divider-class"><h2>Divider class</h2></a>
+<p>The <code>Divider</code> interface (present in the <code>common::formula</code>) namespace is the main class to implement when building your own formula. When provided as a parameter to a <code>Formula</code>, its main function <code>divideConsumption</code> will be called when processing packets sent by the sensor. The <code>Divider</code> interface provide the following meethods:</p>
+<ul>
+<li><code>configure</code>: configure the divider from the header</li>
+<li><code>divideConsumption</code>: divide the power consumption from packet information into cgroup consumption</li>
+<li><code>getSystemMetrics</code>: the list of necessary system metrics sent by the sensor for the divider to work</li>
+<li><code>getCgroupMetrics</code>: the list of necessary cgroup metrics sent by the sensor for the divider to work</li>
+</ul>
+<p>The last two methods can be use to reconfigure the sensor to get the required performances counters.</p>
+<a class="header" href="print.html#results-1" id="results-1"><h2>Results</h2></a>
+<p>The results of your formula are put in the directory according to the
+configuration file (<code>mnt-path</code>), by default its value is
+<code>/etc/vjoule/my_formula/</code>.</p>
+<a class="header" href="print.html#pullers-1" id="pullers-1"><h1>Pullers</h1></a>
+<p>Pullers are programs acquiring the result computed by a formula in
+order to display it, or use it for computation. There are example of
+pullers in the directory <code>puller/</code>.</p>
+<a class="header" href="print.html#bash-pullerbash" id="bash-pullerbash"><h2>Bash <code>puller/bash</code></h2></a>
+<p>This is the simplest puller that can be designed. It simple waits for
+the <code>simple_formula</code> signals, and print the consumption of the cgroup
+<code>custom/test</code>. (Cf. <a href="../simple-formula/index.html#results">results</a>)</p>
+<a class="header" href="print.html#c-pullerc" id="c-pullerc"><h2>C++ <code>puller/c++</code></h2></a>
+<p>This c++ version of the puller is an example that read <code>100</code> formula
+reports from the <code>simple_formula</code>. It prints the consumption of all
+the monitored cgroup.</p>
+<a class="header" href="print.html#rust-pullerrust" id="rust-pullerrust"><h2>Rust <code>puller/rust</code></h2></a>
+<p>This rust version is an infinite loop that prints the consumption of
+all the monitored cgroup from the <code>simple_formula</code>.</p>
+<a class="header" href="print.html#python-pullerpy" id="python-pullerpy"><h2>Python <code>puller/py</code></h2></a>
+<p>Python puller are more advanced puller, that can be used to display
+data in graphs or grafana.</p>
+<a class="header" href="print.html#to_plot" id="to_plot"><h3>to_plot</h3></a>
+<p>To plot pulls the results of a formula (given as parameter) and plot
+the result into a figure. The program runs indefinitely until <code>Ctrl-C</code>
+is pressed, then it save the results of the consumption into a line
+graph.</p>
+<pre><code class="language-bash">$ python3 to_plot.py simple
+09:51:34/0
+Reading /etc/vjoule/simple_formula/custom/test
+09:51:35/1
+Reading /etc/vjoule/simple_formula/custom/test
+09:51:36/2
+Reading /etc/vjoule/simple_formula/custom/test
+09:51:37/3
+Reading /etc/vjoule/simple_formula/custom/test
+09:51:38/4
+Reading /etc/vjoule/simple_formula/custom/test
+09:51:39/5
+^C
+Figure exported to out.jpg
+</code></pre>
+<p>formula names are used to create the path of result pulling, where
+signal is located in
+<code>/etc/vjoule/${formula}_formula/formula.signal</code> and results in
+<code>/etc/vjoule/${formula}_formula/</code>.</p>
+<a class="header" href="print.html#to_influxdb" id="to_influxdb"><h3>to_influxdb</h3></a>
+<p>This puller saves the result into an influxdb instance, that can then
+be used to monitor the results using grafana.</p>
+<pre><code class="language-bash">$ python3 to_influxdb.py simple
+09:58:19.607731
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:20.667710
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:21.667741
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:22.675729
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:23.679734
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:24.679768
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:25.667689
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+09:58:26.675723
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_sensor.service
+Reading : /etc/vjoule/simple_formula/vjoule.slice/vjoule_simple_formula.service
+</code></pre>
+<p>Results are stored in <code>localhost:8086</code> using user <code>root</code> in the
+database <code>vjoule-${formula}</code>.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+
+                
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:3001");
+        socket.onmessage = function (event) {
+            if (event.data === "reload") {
+                socket.close();
+                location.reload(true); // force reload from server (not from cache)
+            }
+        };
+
+        window.onbeforeunload = function() {
+            socket.close();
+        }
+    </script>
+
+
+        
+
+        
+
+        
+        <script>
+            $(document).ready(function() {
+                window.print();
+            })
+        </script>
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS script -->
+        
+        <script type="text/javascript" src="custom.js"></script>
+        
+
+    </body>
+</html>
