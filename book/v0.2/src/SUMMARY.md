@@ -12,7 +12,6 @@
 	- [The dumping formula](./user_guide/dumping_formula.md)
 - [Tutorials](./tutorial/index.md)
 	- [Evaluate a script](./tutorial/mesuring.md)
-	- [Evaluate a web service](./tutorial/mesuring_ws.md)
 	- [Fetching results in a program](./tutorial/fetch_results.md)
 - [API Reference](./api_reference/index.md)
 	- [Sensor](./sensor/index.md)

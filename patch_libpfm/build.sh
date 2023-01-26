@@ -6,6 +6,7 @@ then
     ls
     cd libpfm4
     git config pull.rebase true
+    git checkout smartwatts
     git pull origin smartwatts
     make
     cd ..

@@ -15,5 +15,5 @@ chmod 755 /tmp/vjoule/DEBIAN/postrm
 chmod 755 /tmp/vjoule/DEBIAN/prerm
 
 dpkg-deb -Zxz --build /tmp/vjoule
-mv /tmp/vjoule.deb ./vjoule_1.0.deb
+mv /tmp/vjoule.deb ./vjoule_0.2.deb
 

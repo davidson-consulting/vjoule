@@ -23,6 +23,8 @@ $ # OR
 
 $ # Attach an existing process, by its pid, to the api cgroup
 $ sudo cgclassify -g cpu:measurements.slice/api mypid
+$ # TIP : For a process with multiple PIDs, you can use pidof like:
+$ sudo cgclassify -g cpu:measurements.slice/api `pidof apache2`
 ```
 Should you use `cgexec` or `cgclassify`? It depends on your context. If you want to monitor a running process like a webserver, use `cgclassify` with the webserver's pid. If you want to run a command and see how much energy it consummed during its execution, use `cgexec`. 
 

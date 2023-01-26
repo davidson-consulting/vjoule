@@ -82,10 +82,11 @@ namespace sensor::perf {
     void PerfEventWatcher::configure (const std::vector <std::string> & eventList) {
 	this-> dispose ();
 	
-	if (this-> _cgroupPath == "") this-> configureCgroupWatch (eventList, 1);
-	else {
-	    this-> configureCgroupWatch (eventList, get_nprocs ());
+	if (this-> _cgroupPath == "") {
+	    this->_cgroupPath = "/sys/fs/cgroup/";
 	}
+
+	this-> configureCgroupWatch (eventList, get_nprocs ());    
 
 	this-> _cache.resize (this-> _eventList.size () * sizeof (read_value) + sizeof (uint64_t));
 	this-> _cacheSum.resize (this-> _eventList.size ());
@@ -93,16 +94,17 @@ namespace sensor::perf {
    
     void PerfEventWatcher::configureCgroupWatch (const std::vector <std::string> & eventList, int nbCpus) {
 	int perfFlags = 0;
-	if (this-> _cgroupPath != "") {
-	    this-> _cgroupFd = open (this-> _cgroupPath.c_str (), O_RDONLY);
-	    if (this-> _cgroupFd == -1) {
-		common::utils::Logger::globalInstance  ().error ("Failed to open cgroup.");
-		return;
-	    }
-	    perfFlags = PERF_FLAG_PID_CGROUP;
-	} else {
-	    this-> _cgroupFd = -1;	    
+	if (this-> _cgroupPath == "") {
+	   this->_cgroupPath = "/sys/fs/cgroup/";
 	}
+
+	this-> _cgroupFd = open (this-> _cgroupPath.c_str (), O_RDONLY);
+	if (this-> _cgroupFd == -1) {
+	    common::utils::Logger::globalInstance  ().error ("Failed to open cgroup.");
+	    return;
+	}
+	perfFlags = PERF_FLAG_PID_CGROUP;
+
 
 	std::vector <perf_event_attr> attrs = this-> findPerfEventAttrs (eventList, this-> _eventList);
 	
