@@ -13,7 +13,7 @@ namespace common::cgroup {
     private :
 
 	// The root path of cgroup 
-	std::string _cgroupRootPath = "/sys/fs/cgroup";
+	std::string _cgroupRootPath;
 
 	// The list of custom cgroup to take into account
 	std::vector <std::string> _customCgroups;

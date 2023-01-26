@@ -20,6 +20,15 @@ namespace dumper {
 	if (!this-> configureCpuPlugin (factory)) return false;
 	if (!this-> configureRamPlugin (factory)) return false;
 
+	bool v2 = false;
+	this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
+	if (!v2) {
+	    LOG_ERROR ("Cgroup v2 not mounted, only cgroup v2 is supported.");
+	    return false;
+	}
+	
+	LOG_INFO ("Cgroup v2 detected @ ", this-> _cgroupRoot);
+	
 	auto lstPerfEvents = cfg.getOr <common::utils::config::array> ("perf-counters", {});
 	for (int i = 0; i < lstPerfEvents.size(); i++) {
 	    this-> _perfEvents.push_back (lstPerfEvents.get<std::string> (i));
@@ -74,7 +83,7 @@ namespace dumper {
 	}
 
 	if (this-> _gpuPlugins.size () == 0) {
-	    LOG_INFO ("Core 'dumper', No 'gpu' plugin in use");
+	    LOG_INFO ("No 'gpu' plugin in use");
 	}
 
 	
@@ -101,7 +110,7 @@ namespace dumper {
 	    this-> _cpuGet = get;	    
 	} else {
 	    this-> _cpuPlugin = nullptr;
-	    LOG_INFO ("Core 'dumper', No 'cpu' plugin in use");
+	    LOG_INFO ("No 'cpu' plugin in use");
 	}
 	
 	return true;
@@ -128,7 +137,7 @@ namespace dumper {
 	    this-> _ramGet = get;
 	} else {
 	    this-> _ramPlugin = nullptr;
-	    LOG_INFO ("Core 'dumper', No 'ram' plugin in use");
+	    LOG_INFO ("No 'ram' plugin in use");
 	}
 
 	return true;
@@ -277,7 +286,7 @@ namespace dumper {
 	    if (use) {
 		bool at_least_slice = line.find ('/') != std::string::npos;	    
 		if (!at_least_slice) {
-		    LOG_WARN ("Core 'dumper', cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
+		    LOG_WARN ("Cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
 		} else {
 		    rules.push_back (line);
 		}

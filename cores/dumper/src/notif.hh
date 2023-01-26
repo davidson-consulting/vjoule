@@ -35,9 +35,6 @@ namespace dumper {
 	// The watching thread
 	common::concurrency::thread _th;
 
-	// The root directory of cgroup
-	std::string _cgroupRootPath = "/sys/fs/cgroup";
-
 	// The path of the configuration file
 	std::string _configPath;
     

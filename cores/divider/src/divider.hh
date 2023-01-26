@@ -39,6 +39,9 @@ namespace divider {
 	// The file listing cgroup to watch
 	std::string _cgroupFile;
 
+	// The path where the cgroup are mounted
+	std::string _cgroupRoot;
+	
 	// If true cgroups have changed
 	bool _needUpdate = false;
 
@@ -181,6 +184,11 @@ namespace divider {
 	 * Write the consumption results
 	 */
 	void writeConsumption ();
+
+	/**
+	 * Mount the result directory in tmpfs
+	 */
+	void mountResultDir ();
 	
     };
     

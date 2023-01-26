@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 #include <sys/resource.h>
 
+
+#include <mntent.h>
+
 using namespace common;
 
 namespace divider {
@@ -16,6 +19,17 @@ namespace divider {
 	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
 	this-> _deleteRes = cfg.getOr <bool> ("delete-res", true);
 
+	this-> mountResultDir ();
+
+	bool v2 = false;
+	this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
+	if (!v2) {
+	    LOG_ERROR ("Cgroup v2 not mounted, only cgroup v2 is supported.");
+	    return false;
+	}
+
+	LOG_INFO ("Cgroup v2 detected @ ", this-> _cgroupRoot);
+	
 	if (!this-> configureGpuPlugins (factory)) return false;
 	if (!this-> configureCpuPlugin (factory)) return false;
 	if (!this-> configureRamPlugin (factory)) return false;
@@ -81,7 +95,7 @@ namespace divider {
 	}
 
 	if (this-> _gpuPlugins.size () == 0) {
-	    LOG_INFO ("Core 'divide', No 'gpu' plugin in use");
+	    LOG_INFO ("No 'gpu' plugin in use");
 	}
 
 	
@@ -108,7 +122,7 @@ namespace divider {
 	    this-> _cpuGet = get;	    
 	} else {
 	    this-> _cpuPlugin = nullptr;
-	    LOG_INFO ("Core 'divide', No 'cpu' plugin in use");
+	    LOG_INFO ("No 'cpu' plugin in use");
 	}
 	
 	return true;
@@ -135,7 +149,7 @@ namespace divider {
 	    this-> _ramGet = get;
 	} else {
 	    this-> _ramPlugin = nullptr;
-	    LOG_INFO ("Core 'divide', No 'ram' plugin in use");
+	    LOG_INFO ("No 'ram' plugin in use");
 	}
 
 	return true;
@@ -303,7 +317,7 @@ namespace divider {
 	    if (use) {
 		bool at_least_slice = line.find ('/') != std::string::npos;	    
 		if (!at_least_slice) {
-		    LOG_WARN ("Core 'divide', cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
+		    LOG_WARN ("Cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
 		} else {
 		    rules.push_back (line);
 		}
@@ -313,13 +327,16 @@ namespace divider {
 	return rules;
     }
 
+    void Divider::mountResultDir () {
+	// std::cout << utils::get_mount_type (this-> _outputDir) << std::endl;
+    }        
 
     void Divider::createResultDirectory (const common::cgroup::Cgroup & c) {
-	LOG_INFO ("Core 'divide', Create result directory for cgroup [", c.getName (), "]");
+	LOG_INFO ("Create result directory for cgroup [", c.getName (), "]");
 	CgroupResult r {};
 	std::string resultDir = "";
-	if (c.getName ().size () > strlen ("/sys/fs/cgroup")) {
-	    resultDir = c.getName ().substr (strlen ("/sys/fs/cgroup"));
+	if (c.getName ().size () > this-> _cgroupRoot.length ()) {
+	    resultDir = c.getName ().substr (this-> _cgroupRoot.length ());
 	}
 	
 	resultDir = utils::join_path (this-> _outputDir, resultDir);
@@ -333,15 +350,15 @@ namespace divider {
     }
 
     void Divider::removeResultDirectory (const common::cgroup::Cgroup & c) {
-	LOG_INFO ("Core 'divide', Delete result directory for cgroup [", c.getName (), "]");
+	LOG_INFO ("Delete result directory for cgroup [", c.getName (), "]");
 	auto r = this-> _results[c.getName()];
 	if (r.cpuFd != nullptr) fclose (r.cpuFd);
 	if (r.ramFd != nullptr) fclose (r.ramFd);
 	if (r.gpuFd != nullptr) fclose (r.gpuFd);
 
 	std::string resultDir = "";
-	if (c.getName ().size () > strlen ("/sys/fs/cgroup")) {
-	    resultDir = c.getName ().substr (strlen ("/sys/fs/cgroup"));
+	if (c.getName ().size () > this-> _cgroupRoot.length ()) {
+	    resultDir = c.getName ().substr (this-> _cgroupRoot.length ());
 	}	
 	resultDir = utils::join_path (this-> _outputDir, resultDir);
 

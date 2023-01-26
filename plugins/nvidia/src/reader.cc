@@ -1,6 +1,9 @@
 #include "reader.hh"
 #include <math.h>
 
+using namespace common;
+
+
 namespace nvidia {
 
     bool NvmlReader::configure (bool perCgroups) {
@@ -8,6 +11,13 @@ namespace nvidia {
 	    LOG_INFO ("Cgroup consumption disabled.");
 	} else {
 	    LOG_INFO ("Cgroup consumption enabled.");
+
+	    bool v2 = false;
+	    std::string cgroupRoot = utils::get_cgroup_mount_point (v2);
+	    if (!v2) {
+		LOG_ERROR ("Cgroup v2 not mounted, nvidia plugin only supports cgroup v2");
+		return false;
+	    }	    
 	}
 	
 	if (nvmlInit () != NVML_SUCCESS) {
@@ -132,12 +142,15 @@ namespace nvidia {
 	    return it-> second;
 	}
 
+	bool v2 = false;
+	std::string cgroupRoot = utils::get_cgroup_mount_point (v2);
+	
 	std::ifstream t("/proc/" + std::to_string (pid) + "/cgroup");
 	std::stringstream buffer;
 	buffer << t.rdbuf();
 	if (buffer.str ().size () > 3) {
 	    auto str = buffer.str ();
-	    return common::utils::join_path ("/sys/fs/cgroup", str.substr (3, str.find ("\n") - 3));
+	    return common::utils::join_path (cgroupRoot, str.substr (3, str.find ("\n") - 3));
 	} else return "";
     }
 

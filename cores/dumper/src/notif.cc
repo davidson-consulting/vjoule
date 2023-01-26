@@ -43,19 +43,20 @@ namespace dumper {
 	
 	this-> _fd = inotify_init ();
 	std::map <std::string, int> done;
-	bool needRoot = false;
+	bool v2 = false;
+	std::string cgroupRoot = utils::get_cgroup_mount_point (v2);
 	
 	for (auto & it : cgroups) {
-	    std::string current = utils::join_path ("/sys/fs/cgroup", utils::parent_directory (it));
+	    std::string current = utils::join_path (cgroupRoot, utils::parent_directory (it));
 	    std::string sub = "";
 	    bool willInsert = false;
 	    
-	    while (current != "/sys/fs/cgroup") {
+	    while (current != cgroupRoot) {
 		if (utils::file_exists (current)) {
 		    willInsert = true;
-		} else if (utils::parent_directory (current) == "/sys/fs/cgroup") {
-		    sub = current.substr (strlen ("/sys/fs/cgroup/"));
-		    current = "/sys/fs/cgroup";
+		} else if (utils::parent_directory (current) == cgroupRoot) {
+		    sub = current.substr (cgroupRoot.length () + 1);
+		    current = cgroupRoot;
 		    willInsert = true;
 		}
 
@@ -70,7 +71,7 @@ namespace dumper {
 			this-> _watching[id-> second].inners.emplace (sub);
 		    }		    
 
-		    if (current != "/sys/fs/cgroup") {
+		    if (current != cgroupRoot) {
 			auto n = utils::parent_directory (current);
 			sub = current.substr (n.length () + 1);
 			current = n;
