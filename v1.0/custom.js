@@ -8,7 +8,7 @@ $( document ).ready(function() {
     version_button.classList.add ("fa")
 
     var version_name = document.createElement ("span");
-    version_name.textContent = "v0.2";
+    version_name.textContent = "v1.0";
 
     version_button.appendChild (version_name);
     
