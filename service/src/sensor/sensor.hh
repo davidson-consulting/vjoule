@@ -58,11 +58,21 @@ namespace sensor {
 	 *    - argv: command line option content
 	 */
 	Sensor (int argc, char ** argv);
-	
+
+	/**
+	 * Run the sensor in a new thread
+	 */
+	void runAsync() ;
+
 	/**
 	 * Run the sensor (infinite loop)
 	 */
 	void run () ;
+
+	/**
+	 * Main loop of the sensor, used by runAsync and run
+	 */
+	void mainLoop(common::concurrency::thread th);
 	
     private :
 
