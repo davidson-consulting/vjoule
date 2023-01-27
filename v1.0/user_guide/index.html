@@ -2,11 +2,12 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Home - vJoule doc</title>
+        <title>User Guide - vJoule doc</title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="Documentation for vJoule.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <base href="../">
 
         <link rel="stylesheet" href="book.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
@@ -64,7 +65,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./home/index.html" class="active"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>4.</strong> Trouble-shooting</a></li></ul>
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html" class="active"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>4.</strong> Trouble-shooting</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -87,32 +88,25 @@
                 </div>
 
                 <div id="content" class="content">
-                    <a class="header" href="./home/index.html#welcome-to-vjoules-documentation" id="welcome-to-vjoules-documentation"><h1>Welcome to vJoule's documentation</h1></a>
-<p>Nowadays, developers are more and more aware of the environmental cost
-of the software and infrastructures they build and deploy.</p>
-<p>vJoule is a tool that allows you to measure the energy consumptions of
-running processes. Under the hood, vJoule will estimate the energy
-consumption of all monitored processes based on the current energy
-consumption measured on your computer.</p>
-<p>You will find here all the informations you need to get started with
-vJoule.</p>
-<p>vJoule is a tool developed at Davidson Consulting and inspired by
-other tools like PowerAPI.</p>
-<p><br></p>
-<table><thead><tr><th>                                                   </th></tr></thead><tbody>
-<tr><td> <center><strong>Illustration of the concept of vJoule</strong><center>            </td></tr>
-<tr></tr>
-<tr><td> <img src="images/vjoule_concept.svg" alt="vJoule main concept" /> </td></tr>
-<tr></tr>
-</tbody></table>
+                    <a class="header" href="./user_guide/index.html#user-guide" id="user-guide"><h1>User Guide</h1></a>
+<p>In this section, you will learn more about the concepts and technical details about vJoule. In particular :</p>
+<ul>
+<li>vJoule uses cgroup to know which process to monitor. But what are cgroups ?</li>
+<li>Where are the main configuration files of vJoule? Where to find the different energy consumption estimations ?</li>
+<li>How can I fetch results from within a program ?</li>
+</ul>
 
                 </div>
 
                 <!-- Mobile navigation buttons -->
                 
+                    <a rel="prev" href="./getting_started/first_tests.html" class="mobile-nav-chapters previous" title="Previous chapter">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
 
                 
-                    <a rel="next" href="./getting_started/index.html" class="mobile-nav-chapters next" title="Next chapter">
+                    <a rel="next" href="./user_guide/cgroups.html" class="mobile-nav-chapters next" title="Next chapter">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -120,9 +114,13 @@ other tools like PowerAPI.</p>
             </div>
 
             
+                <a href="./getting_started/first_tests.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
 
             
-                <a href="./getting_started/index.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                <a href="./user_guide/cgroups.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-right"></i>
                 </a>
             

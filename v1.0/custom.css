@@ -75,4 +75,7 @@
 }
 
 
-
+#github-url {
+    text-decoration: none;
+    color: #c5c5c5;
+}
