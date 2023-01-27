@@ -26,6 +26,10 @@ namespace divider {
 	    return false;
 	}
 
+	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
+	    this-> mountResultDir ();
+	}
+	
 	LOG_INFO ("Cgroup v2 detected @ ", this-> _cgroupRoot);
 	
 	if (!this-> configureGpuPlugins (factory)) return false;
@@ -45,14 +49,11 @@ namespace divider {
 	    LOG_ERROR ("Failed setting max open files, current max is : ", r.rlim_cur);
 	    return false;
 	}	
-
-	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
-	    this-> mountResultDir ();
-	}
 	
 	this-> _notif.onUpdate ().connect (this, &Divider::onCgroupUpdate);
 	this-> configureCgroups ();
-		
+
+	
 	return true;
     }
 
@@ -332,9 +333,12 @@ namespace divider {
     void Divider::mountResultDir () {
 	auto mntType = utils::get_mount_type (this-> _outputDir);
 	if (mntType == "tmpfs") {
-	    LOG_INFO ("Result directory ", this-> _outputDir, " is already mounted in tmpfs");
-	    return;
+	    umount (this-> _outputDir.c_str ());	    
 	}
+	
+	if (!utils::file_exists (this-> _outputDir)) {
+	    std::filesystem::create_directories (this-> _outputDir);
+	}	
 
 	int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
 	if (rc != 0) {
