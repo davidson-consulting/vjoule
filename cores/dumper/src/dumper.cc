@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
+#include <sys/mount.h>
 
 using namespace common;
 
@@ -20,11 +21,24 @@ namespace dumper {
 	if (!this-> configureCpuPlugin (factory)) return false;
 	if (!this-> configureRamPlugin (factory)) return false;
 
+	bool v2 = false;
+	this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
+	if (!v2) {
+	    LOG_ERROR ("Cgroup v2 not mounted, only cgroup v2 is supported.");
+	    return false;
+	}
+	
+	LOG_INFO ("Cgroup v2 detected @ ", this-> _cgroupRoot);
+	
 	auto lstPerfEvents = cfg.getOr <common::utils::config::array> ("perf-counters", {});
 	for (int i = 0; i < lstPerfEvents.size(); i++) {
 	    this-> _perfEvents.push_back (lstPerfEvents.get<std::string> (i));
 	}
 
+	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
+	    this-> mountResultDir ();
+	}
+	
 	this-> _notif.onUpdate ().connect (this, &Dumper::onCgroupUpdate);
 	this-> configureCgroups ();
 	
@@ -74,7 +88,7 @@ namespace dumper {
 	}
 
 	if (this-> _gpuPlugins.size () == 0) {
-	    LOG_INFO ("Core 'divide', No 'gpu' plugin in use");
+	    LOG_INFO ("No 'gpu' plugin in use");
 	}
 
 	
@@ -85,7 +99,7 @@ namespace dumper {
 	auto cpus = factory.getPlugins ("cpu");
 	if (cpus.size () > 0) {
 	    this-> _cpuPlugin = cpus[0];
-	    if (cpus.size () > 1) LOG_WARN ("Core 'divider' can manage only one CPU plugin.");
+	    if (cpus.size () > 1) LOG_WARN ("Core 'dumper' can manage only one CPU plugin.");
 	    auto poll = this-> _cpuPlugin-> getFunction<common::plugin::PluginPollFunc_t> ("poll");
 	    if (poll == nullptr) {
 		LOG_ERROR ("Invalid 'cpu' plugin '", this-> _cpuPlugin-> getName (), "' has no 'void poll ()' function");
@@ -101,7 +115,7 @@ namespace dumper {
 	    this-> _cpuGet = get;	    
 	} else {
 	    this-> _cpuPlugin = nullptr;
-	    LOG_INFO ("Core 'divide', No 'cpu' plugin in use");
+	    LOG_INFO ("No 'cpu' plugin in use");
 	}
 	
 	return true;
@@ -111,7 +125,7 @@ namespace dumper {
 	auto rams = factory.getPlugins ("ram");
 	if (rams.size () > 0) {
 	    this-> _ramPlugin = rams[0];
-	    if (rams.size () > 1) LOG_WARN ("Core 'divider' can manage only one RAM plugin.");
+	    if (rams.size () > 1) LOG_WARN ("Core 'dumper' can manage only one RAM plugin.");
 	    auto poll = this-> _ramPlugin-> getFunction<common::plugin::PluginPollFunc_t> ("poll");
 	    if (poll == nullptr) {
 		LOG_ERROR ("Invalid 'ram' plugin '", this-> _ramPlugin-> getName (), "' has no 'void poll ()' function");
@@ -128,7 +142,7 @@ namespace dumper {
 	    this-> _ramGet = get;
 	} else {
 	    this-> _ramPlugin = nullptr;
-	    LOG_INFO ("Core 'divide', No 'ram' plugin in use");
+	    LOG_INFO ("No 'ram' plugin in use");
 	}
 
 	return true;
@@ -153,6 +167,22 @@ namespace dumper {
 	this-> writeResults ();
     }
 
+
+    void Dumper::mountResultDir () {
+	auto mntType = utils::get_mount_type (this-> _outputDir);
+	if (mntType == "tmpfs") {
+	    LOG_INFO ("Result directory ", this-> _outputDir, " is already mounted in tmpfs");
+	    return;
+	}
+
+	int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
+	if (rc != 0) {
+	    LOG_WARN ("Failed to mount result dir ", this-> _outputDir, " in tmpfs.");
+	} else {
+	    LOG_INFO ("Result dir ", this-> _outputDir, " is mounted in tmpfs");
+	}
+    }        
+    
     void Dumper::createResultsFiles() {
 	std::filesystem::create_directories (this-> _outputDir);
 	this-> _resultsPerfOs = std::ofstream(utils::join_path (this-> _outputDir, "cgroups.csv"), std::ios::out);
@@ -277,7 +307,7 @@ namespace dumper {
 	    if (use) {
 		bool at_least_slice = line.find ('/') != std::string::npos;	    
 		if (!at_least_slice) {
-		    LOG_WARN ("Core 'divide', cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
+		    LOG_WARN ("Cgroup rule '", line, "' ignored, watched cgroup must be placed inside a slice, maybe you meant : ", line, "/*");
 		} else {
 		    rules.push_back (line);
 		}

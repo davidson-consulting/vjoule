@@ -32,6 +32,9 @@ namespace dumper {
 	// The file listing cgroup to watch
 	std::string _cgroupFile;
 
+	// The path of the cgroup mount point
+	std::string _cgroupRoot;
+	
 	// The current energy values
 	float _cpuEnergy;
 	float _ramEnergy;
@@ -171,6 +174,11 @@ namespace dumper {
 	 * Write the results
 	 */
 	void writeResults ();
+
+	/**
+	 * Mount the result directory in tmpfs
+	 */
+	void mountResultDir ();
 	
     };
     

@@ -39,8 +39,14 @@ namespace divider {
 	// The file listing cgroup to watch
 	std::string _cgroupFile;
 
+	// The path where the cgroup are mounted
+	std::string _cgroupRoot;
+	
 	// If true cgroups have changed
 	bool _needUpdate = false;
+
+	// If true delete result directory when associated cgroups disappear 
+	bool _deleteRes = true;
 
 	// The notifier used to check cgroup modifications
 	Notifier _notif;
@@ -178,6 +184,11 @@ namespace divider {
 	 * Write the consumption results
 	 */
 	void writeConsumption ();
+
+	/**
+	 * Mount the result directory in tmpfs
+	 */
+	void mountResultDir ();
 	
     };
     

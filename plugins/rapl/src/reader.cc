@@ -27,7 +27,6 @@ namespace rapl {
     }
     
     bool RaplReader::openMsrFiles () {
-	LOG_INFO ("RaplReader : try to configure in bare metal mode.");
 	this-> _cpuModel = detect_cpu ();
 	this-> _packageMap = detect_packages (this-> _totalPackages, this-> _totalCores);	
 	this-> _raplAvail = detect_avail (0, this-> _cpuModel);

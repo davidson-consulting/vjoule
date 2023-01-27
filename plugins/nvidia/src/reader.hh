@@ -27,7 +27,7 @@ namespace nvidia {
 	std::vector <bool> _cgroupCapable;
 
 	common::concurrency::timer _timer;
-
+	
     public:
 
 	/**

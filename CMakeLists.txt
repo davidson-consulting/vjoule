@@ -3,7 +3,7 @@ project (vjoule)
 
 add_subdirectory (patch_libpfm)
 add_subdirectory (common)
-add_subdirectory (sensor)
+add_subdirectory (service)
 add_subdirectory (cores/divider)
 add_subdirectory (cores/dumper)
 add_subdirectory (plugins/rapl)

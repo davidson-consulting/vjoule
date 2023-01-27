@@ -9,7 +9,10 @@ using namespace common::utils;
 
 namespace common::cgroup {
 
-    CgroupLister::CgroupLister () {}
+    CgroupLister::CgroupLister () {
+	bool v2 = false;
+	this-> _cgroupRootPath = utils::get_cgroup_mount_point (v2);
+    }
     
     CgroupLister::CgroupLister (const std::vector <std::string> & rules) {
 	this-> _customCgroups = rules;
