@@ -17,7 +17,7 @@ list(REMOVE_ITEM SRC_NO_MAIN src/main.cc)
 
 set(SERVICE_LIBRARIES pfm)
 add_executable (vjoule_service ${SRC})
-add_library (vjoule_sensor_lib ${SRC_NO_MAIN})
+add_library (vjoule_service_lib ${SRC_NO_MAIN})
 
 add_dependencies (vjoule_service vjoule_patch_libpfm)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
