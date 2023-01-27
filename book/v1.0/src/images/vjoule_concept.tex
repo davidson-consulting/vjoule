@@ -1,0 +1,91 @@
+\tikzstyle{every picture}+=[remember picture]
+\tikzstyle{mProjectPP}=[circle,fill=yellow!70, minimum size=20pt,inner sep=0pt]
+\tikzstyle{label}=[rectangle, fill=white, minimum size=40pt, inner sep=0pt]
+\tikzstyle{Box}=[rectangle, fill=white, minimum size=40pt, inner sep=0pt]
+\tikzstyle{Box2}=[rectangle, fill=white, minimum size=20pt, inner sep=0pt]
+
+
+\begin{tikzpicture}
+  % ================ Axis ========================
+  \draw (0, 0) -- coordinate (LEFT) (0, 0);
+  
+  % === ENERGY ===
+
+  \draw[black!50, Box] ($(LEFT.east)+(-3.5, -0.5)$) rectangle ($(LEFT.east)+(12.5, -8.5)$);
+
+  \draw[Box] ($(LEFT.east)+(-2, -7.5)$) -- ($(LEFT.east)+(-2, -7.5)$) node[anchor=center]{\Large \textbf{vJoule}};
+  
+  \fill[yellow, line width=1pt] ($(LEFT.east)+(-1, 0)$) rectangle ($(LEFT.east)+(9, 2)$);
+  \draw[Box] ($(LEFT.east)+(4, 1)$) -- ($(LEFT.east)+(4, 1)$) node[anchor=center]{\large Energy consumption};
+
+
+  \fill[lightblue, line width=1pt] ($(LEFT.east)+(-3, -1)$) rectangle ($(LEFT.east)+(0, -2)$);
+  \draw[Box] ($(LEFT.east)+(-1.5, -1.5)$) -- ($(LEFT.east)+(-1.5, -1.5)$) node[anchor=center]{\large Sensor plugin 1};
+ 
+  \fill[lightgreen, line width=1pt] ($(LEFT.east)+(0.5, -1)$) rectangle ($(LEFT.east)+(3.5, -2)$);
+  \draw[Box] ($(LEFT.east)+(2, -1.5)$) -- ($(LEFT.east)+(2, -1.5)$) node[anchor=center]{\large Sensor plugin 2};
+
+
+  \draw[Box] ($(LEFT.east)+(4.3, -1.5)$) -- ($(LEFT.east)+(4.3, -1.5)$) node[anchor=center]{\large \ldots};
+  
+  \fill[darkyellow, line width=1pt] ($(LEFT.east)+(5, -1)$) rectangle ($(LEFT.east)+(8, -2)$);
+  \draw[Box] ($(LEFT.east)+(6.5, -1.5)$) -- ($(LEFT.east)+(6.5, -1.5)$) node[anchor=center]{\large Sensor plugin n};
+
+
+  \draw[thick, latex-, shorten >= 1pt]($(LEFT.east)+(1, 0)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(-1, -1)$);
+
+  \draw[thick, latex-, shorten >= 1pt]($(LEFT.east)+(3, 0)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(2, -1)$);
+
+  \draw[thick, latex-, shorten >= 1pt]($(LEFT.east)+(5, 0)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(6, -1)$);
+
+
+  \fill[yellow, line width=1pt] ($(LEFT.east)+(10, 0)$) rectangle ($(LEFT.east)+(15, 2)$);
+  \draw[Box] ($(LEFT.east)+(12.5, 1)$) -- ($(LEFT.east)+(12.5, 1)$) node[anchor=center]{\large System usage};
+  
+  \fill[brown, line width=1pt] ($(LEFT.east)+(5, -6)$) rectangle ($(LEFT.east)+(12, -8)$);
+  \draw[Box] ($(LEFT.east)+(8.5, -7)$) -- ($(LEFT.east)+(8.5, -7)$) node[anchor=center]{\large Core plugin};
+
+  
+  \draw[thick, -latex, shorten >= 1pt]($(LEFT.east)+(-1, -2)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(6, -6)$);
+
+  \draw[thick, -latex, shorten >= 1pt]($(LEFT.east)+(2, -2)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(7, -6)$);
+
+  \draw[thick, -latex, shorten >= 1pt]($(LEFT.east)+(6, -2)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(8, -6)$);
+
+  \draw[-{Stealth},    line width=3pt, shorten >= 1pt]($(LEFT.east)+(12, 0)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(10, -6)$);
+  
+
+  \fill[lightblue!50, line width=1pt] ($(LEFT.east)+(-1, -10)$) rectangle ($(LEFT.east)+(3, -12)$);
+  \draw[Box] ($(LEFT.east)+(1, -11)$) -- ($(LEFT.east)+(1, -11)$) node[anchor=center,align=center]{\large Application 1 \\Energy consumption};
+
+  \fill[lightblue!40, line width=1pt] ($(LEFT.east)+(4, -10)$) rectangle ($(LEFT.east)+(8, -12)$);
+  \draw[Box] ($(LEFT.east)+(6, -11)$) -- ($(LEFT.east)+(6, -11)$) node[anchor=center,align=center]{\large Application 2 \\Energy consumption};
+
+  \draw[Box] ($(LEFT.east)+(10, -11)$) -- ($(LEFT.east)+(10, -11)$) node[anchor=center]{\large \ldots};
+  
+  \fill[lightblue!40, line width=1pt] ($(LEFT.east)+(12, -10)$) rectangle ($(LEFT.east)+(16, -12)$);
+  \draw[Box] ($(LEFT.east)+(14, -11)$) -- ($(LEFT.east)+(14, -11)$) node[anchor=center,align=center]{\large Application N \\Energy consumption};
+  
+  \draw[thick, -latex, shorten >= 1pt]($(LEFT.east)+(6, -8)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(2, -10)$);
+
+  \draw[thick, -latex, shorten >= 1pt]($(LEFT.east)+(8, -8)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(6, -10)$);
+
+  \draw[thick, -latex, shorten >= 1pt]($(LEFT.east)+(10, -8)$) to [in=90, out=270] node[below left, yshift=3mm]{} ($(LEFT.east)+(13, -10)$);
+
+  
+  % % ================ Data ========================
+  % \draw[Box] ($(LEFT.east)+(13.5, 10.7)$) -- ($(LEFT.east)+(13.5, 10.7)$) node[anchor=center]{\textbf{HEAP}};
+  % \fill[black!10] ($(LEFT.east)+(10.2, 10)$) rectangle ($(LEFT.east)+(17, 8)$);
+  % \fill[applegreen!20] ($(LEFT.east)+(10.2, 7.9)$) rectangle ($(LEFT.east)+(17, 5)$);
+  % \draw[line width=1pt] ($(LEFT.east)+(10.4, 7)$) rectangle ($(LEFT.east)+(16.8, 7)$);
+  % \draw[line width=1pt] ($(LEFT.east)+(10.4, 6)$) rectangle ($(LEFT.east)+(16.8, 6)$);
+
+  % \draw[Box] ($(LEFT.east)+(13.5, 7.5)$)  ($(LEFT.east)+(13.8, 7.5)$) node[anchor=center]{$1$};
+  % \draw[Box] ($(LEFT.east)+(13.5, 6.5)$)  ($(LEFT.east)+(13.8, 6.5)$) node[anchor=center]{$2$};
+  % \draw[Box] ($(LEFT.east)+(13.5, 5.5)$)  ($(LEFT.east)+(13.8, 5.5)$) node[anchor=center]{$3$};
+  
+  % \draw[thick,->,shorten >=1pt] ($(LEFT.east)+(7.3, 5)$) to [out=0,in=180] node[below left, yshift=3mm] {} ($(LEFT.east)+(9.9, 7.5)$);
+  
+\end{tikzpicture}
+
+% \end{figure}

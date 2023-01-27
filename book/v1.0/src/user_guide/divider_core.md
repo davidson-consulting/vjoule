@@ -5,6 +5,15 @@ service. It divides the consumptions of the watched cgroups using
 their consumption. It can monitor three different kind of sensor
 plugins `cpu`, `gpu` and `ram`. 
 
+A result directory is created for every watched cgroup. Each of them
+will contain three files `cpu`, `ram` and `gpu` containing the
+consumption of the cgroup in joule since its creation (i.e. since the
+moment vjoule started monitoring them).
+
+## Basic tutorial
+
+<script id="asciicast-7EE8sEsoPTS5fgq7wG8vtkmdC" src="https://asciinema.org/a/7EE8sEsoPTS5fgq7wG8vtkmdC.js" async></script>
+
 ## Usage
 
 A default configuration and explanation of the `divider` plugin can be
@@ -12,7 +21,7 @@ acquired by running the command `vjoule_service --ph divider`.
 
 ## Default configuration 
 
-Here the default configuration used by the `divider` core.
+Here an example of configuration that can be used by the `divider` core : 
 
 ```toml
 [sensor]
@@ -49,6 +58,17 @@ name = "nvidia" # nvidia plugin for nvidia GPUs
 [gpu:1] # configuration to enable GPU energy 
 name = "rapl" # rapl plugin form compatible intel of amd cpus
 ```
+
+The flag `delete-res` can sometime comes in handy when monitoring
+cgroups that are appearing and disappearing during the lifetime of an
+experiment. It will forbid the service to remove the result
+directories when the cgroup disappear. By default result directories
+are deleted when cgroups disappear to avoid using two much memory or
+disk space.
+
+On the other hand the flag `mount-tmpfs` will make the `divider`
+plugin mount the result directory in tmpfs, to avoid making I/O access
+when writting the result.
 
 ## Cgroups file
 

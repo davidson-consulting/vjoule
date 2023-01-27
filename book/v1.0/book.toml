@@ -9,3 +9,4 @@ language = "en"
 additional-css = ["js/custom.css"]
 additional-js = ["js/custom.js"]
 site-url= "/v1.0/"
+git-repository-url = "https://github.com/davidson-consulting/vjoule/tree/refactoring"

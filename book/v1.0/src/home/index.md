@@ -13,3 +13,10 @@ vJoule.
 
 vJoule is a tool developed at Davidson Consulting and inspired by
 other tools like PowerAPI.
+
+<br>
+
+|                                                   ||
+|---------------------------------------------------||
+| <center>**Illustration of the concept of vJoule**<center>            ||
+| ![vJoule main concept](images/vjoule_concept.svg) ||
