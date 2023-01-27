@@ -12,8 +12,10 @@ namespace divider {
     Divider::Divider () {}
 
     bool Divider::configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory) {
-	this-> _cgroupFile = utils::join_path (VJOULE_DIR, "cgroups");
+	this-> _cgroupFile = cfg.getOr <std::string> ("cgroups", utils::join_path (VJOULE_DIR, "cgroups"));
+	LOG_INFO ("Divider uses cgroup files located here: ", this-> _cgroupFile);
 	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
+	LOG_INFO ("Divider will output in this dir: ", this-> _outputDir);
 
 	if (!this-> configureGpuPlugins (factory)) return false;
 	if (!this-> configureCpuPlugin (factory)) return false;

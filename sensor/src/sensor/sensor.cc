@@ -32,8 +32,17 @@ namespace sensor {
 	this-> configure (utils::parse_file (configPath));
     }
 
-    void Sensor::run () {
+    void Sensor::runAsync () {
+	LOG_DEBUG ("Starting sensor async");
+	concurrency::spawn (this, &Sensor::mainLoop);
+    }
+    
+    void Sensor::run () {	
 	LOG_DEBUG ("Starting main loop");
+	this-> mainLoop (0);
+    }
+
+    void Sensor::mainLoop (concurrency::thread) {
 	concurrency::timer timer;
 	while (true) {
 	    timer.reset ();

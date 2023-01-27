@@ -13,7 +13,7 @@ namespace dumper {
     Dumper::Dumper () {}
 
     bool Dumper::configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory) {
-	this-> _cgroupFile = utils::join_path (VJOULE_DIR, "cgroups");
+	this-> _cgroupFile = cfg.getOr <std::string> ("cgroups", utils::join_path (VJOULE_DIR, "cgroups"));
 	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
 
 	if (!this-> configureGpuPlugins (factory)) return false;
