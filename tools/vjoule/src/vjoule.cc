@@ -3,8 +3,8 @@
 #include <sys/wait.h>
 #include <fstream>
 
-#include <common/_.hh>
 #include <sensor/_.hh>
+#include <common/_.hh>
 #include <watcher.hh>
 #include <vjoule.hh>
 

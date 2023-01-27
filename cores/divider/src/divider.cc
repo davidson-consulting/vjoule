@@ -18,9 +18,7 @@ namespace divider {
 	this-> _cgroupFile = cfg.getOr <std::string> ("cgroups", utils::join_path (VJOULE_DIR, "cgroups"));
 	LOG_INFO ("Divider uses cgroup files located here: ", this-> _cgroupFile);
 	this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
-<<<<<<< HEAD
 	LOG_INFO ("Divider will output in this dir: ", this-> _outputDir);
-=======
 	this-> _deleteRes = cfg.getOr <bool> ("delete-res", true);
 	
 	bool v2 = false;
@@ -29,7 +27,6 @@ namespace divider {
 	    LOG_ERROR ("Cgroup v2 not mounted, only cgroup v2 is supported.");
 	    return false;
 	}
->>>>>>> c80fa651f2e6560fcdef215604c5592a9e819014
 
 	LOG_INFO ("Cgroup v2 detected @ ", this-> _cgroupRoot);
 	

@@ -11,7 +11,7 @@ file(
 add_executable (vjoule ${SRC})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
-target_include_directories (vjoule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../sensor/src>)
+target_include_directories (vjoule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../service/src>)
 target_link_libraries (vjoule LINK_PUBLIC vjoule_common vjoule_service_lib ${CMAKE_BINARY_DIR}/patch_libpfm/libpfm_patched.a cgroup)
   
 install (TARGETS vjoule DESTINATION /usr/bin/)
