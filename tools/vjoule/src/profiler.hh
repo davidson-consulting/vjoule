@@ -7,7 +7,6 @@ namespace tools::vjoule {
 
     struct ResultRow {
 	float cpu;
-	float gpu;
 	float ram;
     };
 
@@ -58,7 +57,7 @@ namespace tools::vjoule {
 	/**
 	 * Read the current consumption 
 	 */
-	void readConsumption (float &cpu, float &gpu, float &ram) const;
+	void readConsumption (float &cpu, float &ram) const;
 
 	/**
 	 * Run the load on nb cores

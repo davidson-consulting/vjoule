@@ -23,7 +23,7 @@ void printProgress(double percentage) {
 namespace tools::vjoule {
 
     Profiler::Profiler (const CommandLine & cmd)
-	: _cmd (cmd), _nbIter (10)
+	: _cmd (cmd), _nbIter (50)
     {
 	std::string cwd = std::filesystem::current_path().string(); 
 
@@ -55,17 +55,7 @@ namespace tools::vjoule {
 	    ofs << "[ram] # configuration to enable RAM energy reading" << std::endl;
 	    ofs << "name = \"rapl\" # rapl plugin for compatible intel or amd cpus" << std::endl;
 	    ofs << std::endl;
-	}
-	if (this-> _cmd.gpu && this-> _cmd.nvidia) {
-	    ofs << "[gpu:0] # configuration to enable GPU energy reading" << std::endl;
-	    ofs << "name = \"nvidia\" # nvidia plugin for nvidia GPUs" << std::endl;
-	    ofs << std::endl;
-	}
-	
-	if (this-> _cmd.gpu && this-> _cmd.rapl) {
-	    ofs << "[gpu:1] # configuration to enable GPU energy " << std::endl;
-	    ofs << "name = \"rapl\" # rapl plugin form compatible intel of amd cpus" << std::endl;
-	}
+	}	
 	ofs.close ();
 	
 	std::ofstream ofs2 (utils::join_path (this-> _vjouleDir, "cgroups"));
@@ -73,42 +63,9 @@ namespace tools::vjoule {
 	ofs2.close ();
     }
 
-    void Profiler::waitServiceIteration () const {
-	auto resultPath = utils::join_path (this-> _vjouleDir, "results/cpu");
-	if (!std::filesystem::exists (resultPath)) {
-	    throw std::runtime_error ("Divider service is not running");
-	}
-    
-	auto fd = inotify_init (); 
-	auto wd = inotify_add_watch (fd, utils::join_path (this-> _vjouleDir, "results").c_str (), IN_MODIFY); 
-    
-	char buffer[EVENT_BUF_LEN];
-	while (true) {	
-	    auto len = read (fd, buffer, EVENT_BUF_LEN); 
-	    if (len == 0) { 
-		std::cerr << "waiting inotify" << std::endl;
-		exit (-1);
-	    }
-
-	    int i = 0;
-	    while (i < len) { 
-		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
-
-		if (event-> len != 0 && event-> mask & IN_MODIFY && strcmp (event-> name, "cpu") == 0) {
-		    inotify_rm_watch (fd, wd); 
-		    close (fd); 
-		    return; 
-		}
-	    
-		i += EVENT_SIZE + event->len;
-	    }	
-	}    
-    }
-
-    void Profiler::readConsumption (float & cpu, float & gpu, float & ram) const {
+    void Profiler::readConsumption (float & cpu, float & ram) const {
 	auto ramPath = utils::join_path (this-> _vjouleDir, "results/ram");
 	auto cpuPath = utils::join_path (this-> _vjouleDir, "results/cpu");
-	auto gpuPath = utils::join_path (this-> _vjouleDir, "results/gpu");
 
 	if (std::filesystem::exists (ramPath)) {
 	    std::ifstream ramF (ramPath);	
@@ -120,12 +77,6 @@ namespace tools::vjoule {
 	    std::ifstream cpuF (cpuPath);	
 	    cpuF >> cpu;
 	    cpuF.close ();
-	}
-
-	if (std::filesystem::exists (gpuPath)) {
-	    std::ifstream gpuF (cpuPath);	
-	    gpuF >> gpu;
-	    gpuF.close ();
 	}
     }
 
@@ -146,24 +97,23 @@ namespace tools::vjoule {
 	
 	std::vector <ResultRow> results;
 	concurrency::timer t;
-	for (uint64_t i = 0 ; i < get_nprocs () ; i++) {	    
-	    s.forcedIteration ();
-	    t.reset ();
-	    float ocpu = 0, ogpu = 0, oram = 0;
-	    this-> readConsumption (ocpu, ogpu, oram);
-
-	    this-> runLoad (i + 1);
+	for (uint64_t i = 0 ; i < get_nprocs () ; i++) {
 	    printProgress ((double) i / (double) get_nprocs ());
+	    s.forcedIteration ();	    
+	    t.reset ();
+	    float ocpu = 0, oram = 0;
+	    this-> readConsumption (ocpu, oram);
+	    
+	    this-> runLoad (i + 1);
 	    s.forcedIteration ();
-	    float cpu = 0, gpu = 0, ram = 0;
-	    this-> readConsumption (cpu, gpu, ram);
+	    float cpu = 0, ram = 0;
+	    this-> readConsumption (cpu, ram);
 
 	    auto time = t.time_since_start ();
 	    t.reset ();
 	    results.push_back ({
-		(cpu - ocpu) / time,
-		 (gpu - ogpu) / time,
-		 (ram - oram) / time
+		    (cpu - ocpu) / time,
+		    (ram - oram) / time
 		});
 	}
 
@@ -172,13 +122,11 @@ namespace tools::vjoule {
     
     void Profiler::printResult (const std::vector <ResultRow> & res) const {
 	printf ("\n");
-	if (this-> _cmd.cpu && this-> _cmd.ram && this-> _cmd.gpu) {
-	    printf ("%10s | %8s | %8s | %8s |\n", "Nb cores", "CPU", "RAM", "GPU");
-	    printf (" %9c | %8c | %8c | %8c |\n", '-', '-', '-', '-');
-	    for (uint64_t i = 0 ; i < res.size () ; i++) {
-		printf ("%10ld | %8.5f | %8.5f | %8.5f |\n", i, res[i].cpu, res[i].ram, res[i].gpu);
-	    }
-	}
+	printf ("%10s | %8s | %8s |\n", "Nb cores", "CPU", "RAM");
+	printf (" %9c | %8c | %8c |\n", '-', '-', '-');
+	for (uint64_t i = 0 ; i < res.size () ; i++) {
+	    printf ("%10ld | %8.5f | %8.5f |\n", i, res[i].cpu, res[i].ram);
+	}	
     }
 
     void Profiler::runLoad (uint64_t nb) {

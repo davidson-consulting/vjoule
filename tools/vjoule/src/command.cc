@@ -131,9 +131,6 @@ namespace tools::vjoule {
 	    }	    
 	    else if (flg == CPU_FLAG) this-> _content.cpu = false;	    
 	    else if (flg == RAM_FLAG) this-> _content.ram = false;	    
-	    else if (flg == GPU_FLAG) this-> _content.gpu = false;
-	    else if (flg == RAPL_FLAG) this-> _content.rapl = false;	    
-	    else if (flg == NVIDIA_FLAG) this-> _content.nvidia = false;	    
 	    else if (flg != "") {
 		this-> printHelp (CommandType::PROFILE, false);
 		this-> printError (CommandType::PROFILE, flg);
@@ -164,11 +161,11 @@ namespace tools::vjoule {
 
     void CommandParser::printHelp (CommandType type, bool full) const {
 	if (type == CommandType::PROFILE) {
-	    std::cout << "Usage profile [-nv] [-nr] [--no-cpu] [--no-gpu] [--no-ram]" << std::endl;
+	    std::cout << "./vjoule profile" << std::endl;
 	} else if (type == CommandType::EXEC) {
-	    std::cout << "Usage (exec?) [-nv] [-nr] [--no-cpu] [--no-gpu] [--no-ram] cmd [cmd options...]" << std::endl;
+	    std::cout << "./vjoule (exec?) [-nv] [-nr] [--no-cpu] [--no-gpu] [--no-ram] cmd [cmd options...]" << std::endl;
 	} else {
-	    std::cout << "Usage [-h] [-v] (exec | profile)" << std::endl;
+	    std::cout << "./vjoule [-h] [-v] (exec | profile)" << std::endl;
 	}
 
 	if (full) {
@@ -177,11 +174,9 @@ namespace tools::vjoule {
 		std::cout << "optional arguments : " << std::endl;
 		std::cout << "\t-h,--help      \tprint this help and exit" << std::endl;
 		std::cout << "\t-v,--version   \tprint version information and exit" << std::endl;
-		std::cout << "\t-nv,--no-nvidia\tdon't use nvidia plugin for GPU consumption" << std::endl;
-		std::cout << "\t-nr,--no-rapl  \tdon't use rapl plugin for CPU, RAM and GPU consumption" << std::endl;
+		
 		std::cout << "\t    --no-cpu   \tdon't monitor CPU consumption" << std::endl;
 		std::cout << "\t    --no-ram   \tdon't monitor RAM consumption" << std::endl;
-		std::cout << "\t    --no-gpu   \tdon't monitor GPU consumption" << std::endl << std::endl;
 	    }
 
 	    if (type == CommandType::EXEC || type == CommandType::NONE) {
