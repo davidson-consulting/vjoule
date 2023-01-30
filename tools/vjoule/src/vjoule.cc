@@ -7,6 +7,7 @@
 #include <common/_.hh>
 #include <watcher.hh>
 #include <vjoule.hh>
+#include <exporter.hh>
 
 namespace tools::vjoule {
 
@@ -131,11 +132,17 @@ namespace tools::vjoule {
 	    // parent process
 	    s.runAsync();
 
+	    // wait for child process to finish
 	    int status;
 	    wait(&status);
-	    // read and print all results
+
+	    // wait for measurements to finish writing
 	    Watcher w(common::utils::join_path(this-> _vjoule_directory, "latest/vjoule_xp.slice/process"), "cpu");
 	    w.wait();
+
+	    // read and pretty print results
+	    Exporter e(common::utils::join_path(this-> _vjoule_directory, "latest"), this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
+	    e.export_stdout();
 	} else {
 	    // child process
 	    // attach itself to cgroup
