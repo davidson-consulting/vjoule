@@ -141,7 +141,11 @@ namespace tools::vjoule {
 
 	    // read and pretty print results
 	    Exporter e(this-> _working_directory, this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
-	    e.export_stdout();
+	    if (strcmp(this-> _cmd.output.c_str(), "") == 0) {
+		e.export_stdout();
+	    } else {
+		e.export_csv(this-> _cmd.output);
+	    }
 	} else {
 	    // child process
 	    // attach itself to cgroup

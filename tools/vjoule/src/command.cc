@@ -103,7 +103,7 @@ namespace tools::vjoule {
 	    exit (-1);
 	}
 
-	return this-> _argv[i];
+	return this-> _argv[i+1];
     }
 
     void CommandParser::parseProfile () {

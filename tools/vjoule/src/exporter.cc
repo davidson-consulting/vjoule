@@ -19,8 +19,6 @@ namespace tools::vjoule {
     Values process = this-> read_for_process(join_path(this-> _result_dir, "vjoule_xp.slice/process"));
 
     std::stringstream ss;
-    ss << "VJoule" << std::endl << std::endl;
-
     ss << "|CGroup  " << "| ";
     if (this-> _cpu) ss << std::setw(11) << "CPU" << "| ";
     if (this-> _gpu) ss <<  std::setw(11) <<"GPU" << "| ";
@@ -37,6 +35,21 @@ namespace tools::vjoule {
     ss << "|Process " << this-> value_stdout(process) << std::endl;
     
     std::cout << ss.str() << std::endl;
+  }
+
+  void Exporter::export_csv(std::string output_file) {
+    Values global = this-> read_for_process(this-> _result_dir);
+    Values process = this-> read_for_process(join_path(this-> _result_dir, "vjoule_xp.slice/process"));
+
+    std::ofstream ofs(output_file);
+    ofs << "CGroup  ";
+    if (this-> _cpu) ofs << "; " << std::setw(11) << "CPU";
+    if (this-> _gpu) ofs << "; " <<  std::setw(11) <<"GPU";
+    if (this-> _ram) ofs << "; " <<  std::setw(11) <<"RAM";
+    ofs << std::endl;
+
+    ofs << "Global  " << this-> value_csv(global) << std::endl;
+    ofs << "Process " << this-> value_csv(process) << std::endl;
   }
 
   Values Exporter::read_for_process(std::string path) {
@@ -81,6 +94,23 @@ namespace tools::vjoule {
     }
     
     ss << "|";
+    return ss.str();
+  }
+
+  std::string Exporter::value_csv(Values v){
+    std::stringstream ss;
+    if (this-> _cpu) {
+      ss << "; " << std::setw(10) << v.cpu << "j";
+    }
+    
+    if (this-> _gpu) {
+      ss << "; " << std::setw(10) << v.gpu << "j";
+    }
+
+    if (this-> _ram) {
+      ss << "; " << std::setw(10) << v.ram << "j";
+    }
+    
     return ss.str();
   }
 }
