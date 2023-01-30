@@ -1,0 +1,5 @@
+systemctl stop vjoule_service.service
+
+echo "sensor service stop"
+umount /etc/vjoule/results
+rm -rf /etc/vjoule

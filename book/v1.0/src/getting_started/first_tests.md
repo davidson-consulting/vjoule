@@ -5,6 +5,10 @@ Now that vJoule is installed on your computer, let's try it. Remember that vJoul
 - A **command line interface**, useful for simple and quick usage
 - A linux **service**, useful if you need to embeed vJoule in a program
 
+This section presents just a basic test to make sure vjoule is
+properly installed. A more thorough tutorial is presented in the
+section [Divider core](./user_guide/divider_core.html).
+
 ## vJoule, through the command line interface (CLI)
 vJoule CLI is conveniently called `vjoule`. You can use it to estimate the energy consumption of a given command, like this: 
 

@@ -1,6 +1,5 @@
 #include <filesystem>
 #include <fstream>
-#include <unordered_map>
 
 #include <common/_.hh>
 #include <exporter.hh>
@@ -8,62 +7,52 @@
 using namespace common::utils;
 
 namespace tools::vjoule {
-  Exporter::Exporter(std::string result_dir): _result_dir(result_dir){}
+  Exporter::Exporter(std::string result_dir, bool cpu, bool gpu, bool ram): 
+    _result_dir(result_dir),
+    _cpu(cpu),
+    _gpu(gpu),
+    _ram(ram)
+  {}
 
   void Exporter::export_stdout() {
-    // read global values 
     Values global = this-> read_for_process(this-> _result_dir);
-
-    // read every process values
-    std::vector<std::string> processes = this-> list_processes(); 
-    std::unordered_map<std::string, Values> processes_values;
-    for (auto p: processes) {
-      processes_values[p] = this-> read_for_process(join_path(this-> _result_dir, p));
-    }
+    Values process = this-> read_for_process(join_path(this-> _result_dir, "vjoule_xp.slice/process"));
 
     std::stringstream ss;
     ss << "VJoule" << std::endl << std::endl;
 
-    ss << "|CGroup " << std::setw(10) << "| CPU | GPU | RAM |" << std::endl;
-    ss << "|Global " << global << "|" << std::endl;
+    ss << "|CGroup  " << "| ";
+    if (this-> _cpu) ss << std::setw(11) << "CPU" << "| ";
+    if (this-> _gpu) ss <<  std::setw(11) <<"GPU" << "| ";
+    if (this-> _ram) ss <<  std::setw(11) <<"RAM" << "|";
+    ss << std::endl;
 
-    for (auto p: processes) {
-      ss << "|" << p << " " << processes_values[p] << "|" << std::endl;
-    }
-
+    ss << "|" << std::string(8, '-') << "|" << std::string(12, '-') << "|" << std::string(12, '-') << "|" << std::string(12, '-') << "|" << std::endl;
+    
+    ss << "|Global  " << this-> value_stdout(global) << std::endl;
+    ss << "|Process " << this-> value_stdout(process) << std::endl;
+    
     std::cout << ss.str() << std::endl;
-  }
-
-  std::vector<std::string> Exporter::list_processes() {
-    int len = this-> _result_dir.length();
-    std::vector<std::string> results;
-    for (auto& p: std::filesystem::recursive_directory_iterator(this-> _result_dir)) {
-      if (p.is_directory()) {
-	results.push_back(p.path().string().erase(0, len));
-      }
-    }
-
-    return results;
   }
 
   Values Exporter::read_for_process(std::string path) {
     Values v;
 
-    if (file_exists(join_path(path, "cpu"))) {
+    if (this-> _cpu && file_exists(join_path(path, "cpu"))) {
       std::ifstream fCPU(join_path(path, "cpu"));
       std::stringstream buffer;
       buffer << fCPU.rdbuf();
       v.cpu = stof(buffer.str());
     }
 
-    if (file_exists(join_path(path, "gpu"))) {
+    if (this-> _gpu && file_exists(join_path(path, "gpu"))) {
       std::ifstream fCPU(join_path(path, "gpu"));
       std::stringstream buffer;
       buffer << fCPU.rdbuf();
       v.gpu = stof(buffer.str());
     }
 
-    if (file_exists(join_path(path, "ram"))) {
+    if (this-> _ram && file_exists(join_path(path, "ram"))) {
       std::ifstream fCPU(join_path(path, "ram"));
       std::stringstream buffer;
       buffer << fCPU.rdbuf();
@@ -73,21 +62,21 @@ namespace tools::vjoule {
     return v;
   }
 
-  std::ostream& operator<< (std::ostream& os, const Values& v) {
-    os << "| ";
-    if (v.cpu.has_value()) {
-      os << "CPU " << v.cpu.value() << "j";
+  std::string Exporter::value_stdout(Values v){
+    std::stringstream ss;
+    if (this-> _cpu) {
+      ss << "| " << std::setw(10) << v.cpu << "j";
     }
     
-    if (v.gpu.has_value()) {
-      os << " - GPU " << v.gpu.value() << "j";
+    if (this-> _gpu) {
+      ss << "| " << std::setw(10) << v.gpu << "j";
     }
 
-    if (v.ram.has_value()) {
-      os << " - RAM " << v.ram.value() << "j";
+    if (this-> _ram) {
+      ss << "| " << std::setw(10) << v.ram << "j";
     }
-    os << " |";
-
-    return os;
+    
+    ss << "|";
+    return ss.str();
   }
 }

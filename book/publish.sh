@@ -15,7 +15,15 @@ else
     fi
 
     cd ../v1.0
-    mdbook build
+    cd src/images
+    
+    make clean
+    make all
+    rm -rf .build
+    
+    cd ../..
+    
+    mdbook build    
     if [ -d saves ]; then        
 	cp -r saves/* book/
     fi

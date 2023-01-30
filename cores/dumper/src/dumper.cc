@@ -27,6 +27,10 @@ namespace dumper {
 	    LOG_ERROR ("Cgroup v2 not mounted, only cgroup v2 is supported.");
 	    return false;
 	}
+
+	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
+	    this-> mountResultDir ();
+	}
 	
 	LOG_INFO ("Cgroup v2 detected @ ", this-> _cgroupRoot);
 	
@@ -34,16 +38,12 @@ namespace dumper {
 	for (int i = 0; i < lstPerfEvents.size(); i++) {
 	    this-> _perfEvents.push_back (lstPerfEvents.get<std::string> (i));
 	}
-
-	if (cfg.getOr <bool> ("mount-tmpfs", true)) {
-	    this-> mountResultDir ();
-	}
 	
 	this-> _notif.onUpdate ().connect (this, &Dumper::onCgroupUpdate);
 	this-> configureCgroups ();
 	
 	this-> createResultsFiles ();
-
+	
 	return true;
     }
 
@@ -167,13 +167,15 @@ namespace dumper {
 	this-> writeResults ();
     }
 
-
     void Dumper::mountResultDir () {
 	auto mntType = utils::get_mount_type (this-> _outputDir);
 	if (mntType == "tmpfs") {
-	    LOG_INFO ("Result directory ", this-> _outputDir, " is already mounted in tmpfs");
-	    return;
+	    umount (this-> _outputDir.c_str ());	    
 	}
+	
+	if (!utils::file_exists (this-> _outputDir)) {
+	    std::filesystem::create_directories (this-> _outputDir);
+	}	
 
 	int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
 	if (rc != 0) {
@@ -182,7 +184,7 @@ namespace dumper {
 	    LOG_INFO ("Result dir ", this-> _outputDir, " is mounted in tmpfs");
 	}
     }        
-    
+       
     void Dumper::createResultsFiles() {
 	std::filesystem::create_directories (this-> _outputDir);
 	this-> _resultsPerfOs = std::ofstream(utils::join_path (this-> _outputDir, "cgroups.csv"), std::ios::out);

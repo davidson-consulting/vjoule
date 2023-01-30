@@ -59,5 +59,5 @@ Here are some common tracks for explanation :
 	 Step 2 to 5 can be repeated multiple times, if you want to run multiple execution using the same cgroups.
  
  - If the cgroups you are watching appears and disappear during the execution (for example docker containers). 
-   Maybe the divider core plugin has simply deleted the result file when the cgroup disappeared. You can remove that behavior by modifying the flag `delete-res` in the configuration file of the service (cf. [Divider core](./user_guide/divider.html).
+   Maybe the divider core plugin has simply deleted the result file when the cgroup disappeared. You can remove that behavior by modifying the flag `delete-res` in the configuration file of the service (cf. [Divider core](./user_guide/divider_core.html)).
 
