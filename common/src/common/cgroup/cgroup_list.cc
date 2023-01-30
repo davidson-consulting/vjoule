@@ -16,6 +16,8 @@ namespace common::cgroup {
     
     CgroupLister::CgroupLister (const std::vector <std::string> & rules) {
 	this-> _customCgroups = rules;
+	bool v2 = false;
+	this-> _cgroupRootPath = utils::get_cgroup_mount_point (v2);
     }
 
     std::set <Cgroup> CgroupLister::run () const {
@@ -26,6 +28,7 @@ namespace common::cgroup {
 	    // fetch all matching cgroups
 	    for(auto rule: this-> _customCgroups) {
 		glob_t globbuf;
+		std::cout << common::utils::join_path (this-> _cgroupRootPath, rule) << std::endl;
 		int i = glob (common::utils::join_path (this-> _cgroupRootPath, rule).c_str (), GLOB_ONLYDIR, NULL, &globbuf);
 		if (i != GLOB_NOMATCH) {
 		    for(int i = 0; i < globbuf.gl_pathc; i++) {
