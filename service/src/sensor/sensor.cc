@@ -42,6 +42,10 @@ namespace sensor {
 	this-> mainLoop (0);
     }
 
+    void Sensor::forcedIteration () {
+	this-> _computeCore ();	
+    }
+    
     void Sensor::mainLoop (concurrency::thread) {
 	concurrency::timer timer;
 	while (true) {

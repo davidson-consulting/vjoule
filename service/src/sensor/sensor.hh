@@ -73,6 +73,11 @@ namespace sensor {
 	 * Main loop of the sensor, used by runAsync and run
 	 */
 	void mainLoop(common::concurrency::thread th);
+
+	/**
+	 * Force the execution of an iteration
+	 */
+	void forcedIteration ();
 	
     private :
 

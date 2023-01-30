@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 #include <vjoule.hh>
 #include <command.hh>
+#include <profiler.hh>
 
 using namespace tools::vjoule;
 
@@ -16,8 +17,8 @@ int main(int argc, char * argv[]) {
 
     auto cmd = parser.getCommandLine ();
     if (cmd.type == CommandType::PROFILE) {
-	
-	
+	Profiler prf (cmd);
+	prf.run ();
     } else {
 	VJoule vjoule(cmd);
 	vjoule.run();
