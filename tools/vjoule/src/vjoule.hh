@@ -18,13 +18,14 @@ namespace tools::vjoule {
       
       std::string _vjoule_directory;
       std::string _cfg_path;
+      std::string _working_directory;
       std::vector<std::string> subargs;
       common::concurrency::SubProcess _child;
 
       void print_help();
       void create_default_config();
       void create_default_cgroups_list();
-      void create_configuration_if_needed();
+      void create_configuration();
       void create_result_directory();
   };
 }

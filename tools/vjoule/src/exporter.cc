@@ -27,7 +27,11 @@ namespace tools::vjoule {
     if (this-> _ram) ss <<  std::setw(11) <<"RAM" << "|";
     ss << std::endl;
 
-    ss << "|" << std::string(8, '-') << "|" << std::string(12, '-') << "|" << std::string(12, '-') << "|" << std::string(12, '-') << "|" << std::endl;
+    ss << "|" << std::string(8, '-');
+    if (this-> _cpu) ss << "|" << std::string(12, '-'); 
+    if (this-> _gpu) ss << "|" << std::string(12, '-');
+    if (this-> _ram) ss << "|" << std::string(12, '-'); 
+    ss << "|" << std::endl;
     
     ss << "|Global  " << this-> value_stdout(global) << std::endl;
     ss << "|Process " << this-> value_stdout(process) << std::endl;

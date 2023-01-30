@@ -28,7 +28,6 @@ namespace common::cgroup {
 	    // fetch all matching cgroups
 	    for(auto rule: this-> _customCgroups) {
 		glob_t globbuf;
-		std::cout << common::utils::join_path (this-> _cgroupRootPath, rule) << std::endl;
 		int i = glob (common::utils::join_path (this-> _cgroupRootPath, rule).c_str (), GLOB_ONLYDIR, NULL, &globbuf);
 		if (i != GLOB_NOMATCH) {
 		    for(int i = 0; i < globbuf.gl_pathc; i++) {
