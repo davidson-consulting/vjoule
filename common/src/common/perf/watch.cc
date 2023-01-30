@@ -79,13 +79,15 @@ namespace common::perf {
     void PerfEventWatcher::configure (const std::vector <std::string> & eventList) {
 	this-> dispose ();
 
-	bool v2 = false;
-	this-> _cgroupPath = utils::get_cgroup_mount_point (v2);
-	if (!v2) {
-	    LOG_ERROR ("Failed to configure cgroup watcher, only cgroup v2 is supported");
-	    exit (-1);
+	if (this-> _cgroupPath == "") {
+	    bool v2 = false;
+	    this-> _cgroupPath = utils::get_cgroup_mount_point (v2);
+	    if (!v2) {
+		LOG_ERROR ("Failed to configure cgroup watcher, only cgroup v2 is supported");
+		exit (-1);
+	    }
 	}
-		
+	
 	this-> configureCgroupWatch (eventList, get_nprocs ());	
 	this-> _cache.resize (this-> _eventList.size () * sizeof (read_value) + sizeof (uint64_t));
     }
@@ -104,7 +106,7 @@ namespace common::perf {
 	}
 
 	std::vector <perf_event_attr> attrs = this-> findPerfEventAttrs (eventList, this-> _eventList);
-	
+
 	for (int cpuId = 0 ; cpuId < nbCpus; cpuId++) {
 	    int root = -1;
 	    for (auto & pe : attrs) {
