@@ -15,7 +15,10 @@ namespace tools::vjoule {
 	std::string current_path = std::filesystem::current_path().string(); 
 
 	this-> _vjoule_directory = common::utils::join_path(current_path, "__vjoule");
-	this-> _cfg_path = common::utils::join_path(this-> _vjoule_directory, "config.toml");
+	std::filesystem::create_directories (this-> _vjoule_directory);
+
+	this-> _working_directory = common::utils::join_path(this-> _vjoule_directory, "latest");
+	this-> _cfg_path = common::utils::join_path(this-> _working_directory, "config.toml");
 
 	std::vector<std::string> subargs;
 	if (this-> _cmd.subCmd.size () >= 2) {
@@ -55,8 +58,8 @@ namespace tools::vjoule {
 	    exit(3);
 	}
 
-	this-> create_configuration_if_needed();
 	this-> create_result_directory();
+	this-> create_configuration();
     }
 
     void VJoule::create_default_config() {
@@ -66,8 +69,9 @@ namespace tools::vjoule {
 	ofs << "log-lvl = \"info\" # debug < success < info < warn < error < none" << std::endl;
 	ofs << "log-path = \"" << common::utils::join_path(this-> _vjoule_directory, "logs") << "\" # log file (empty means stdout)" << std::endl;
 	ofs << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl;
-	ofs << "output-dir = \"" << common::utils::join_path(this-> _vjoule_directory, "latest") << "\"" <<std::endl;
-	ofs << "cgroups = \"" <<  common::utils::join_path(this-> _vjoule_directory, "cgroups") << "\"" << std::endl;
+	ofs << "output-dir = \"" << this-> _working_directory << "\"" <<std::endl;
+	ofs << "cgroups = \"" <<  common::utils::join_path(this-> _working_directory, "cgroups") << "\"" << std::endl;
+	ofs << "mount-tmpfs = false" << std::endl;
 	ofs << std::endl;
 	if (this-> _cmd.cpu && this-> _cmd.rapl) {
 	    ofs << "[cpu] # configuration to enable CPU energy reading" << std::endl;
@@ -92,28 +96,23 @@ namespace tools::vjoule {
     }
 
     void VJoule::create_default_cgroups_list() {
-	std::ofstream ofs (common::utils::join_path(this-> _vjoule_directory, "cgroups"), std::ofstream::out);
+	std::ofstream ofs (common::utils::join_path(this-> _working_directory, "cgroups"), std::ofstream::out);
 	ofs << "vjoule_xp.slice/*" << std::endl;
     }
 
-    void VJoule::create_configuration_if_needed() {
-	std::filesystem::create_directories (this-> _vjoule_directory);
-
+    void VJoule::create_configuration() {
 	this-> create_default_config();	
-	if (!common::utils::file_exists(common::utils::join_path(this-> _vjoule_directory, "cgroups"))) {
-	    this-> create_default_cgroups_list();
-	}
+	this-> create_default_cgroups_list();
     }
 
     void VJoule::create_result_directory() {
 	std::string result_dir = common::utils::join_path(this-> _vjoule_directory, common::utils::get_time_no_space());
 	std::filesystem::create_directories(result_dir);
     
-	std::string latest_result_dir = common::utils::join_path(this-> _vjoule_directory, "latest");
-	if (common::utils::file_exists(latest_result_dir)) {
-	    std::filesystem::remove(latest_result_dir);
+	if (common::utils::file_exists(this-> _working_directory)) {
+	    std::filesystem::remove(this-> _working_directory);
 	}
-	std::filesystem::create_directory_symlink(result_dir, latest_result_dir);
+	std::filesystem::create_directory_symlink(result_dir, this-> _working_directory);
     }
 
     void VJoule::run() {
@@ -137,11 +136,11 @@ namespace tools::vjoule {
 	    wait(&status);
 
 	    // wait for measurements to finish writing
-	    Watcher w(common::utils::join_path(this-> _vjoule_directory, "latest/vjoule_xp.slice/process"), "cpu");
+	    Watcher w(common::utils::join_path(this-> _working_directory, "vjoule_xp.slice/process"), "cpu");
 	    w.wait();
 
 	    // read and pretty print results
-	    Exporter e(common::utils::join_path(this-> _vjoule_directory, "latest"), this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
+	    Exporter e(this-> _working_directory, this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
 	    e.export_stdout();
 	} else {
 	    // child process
@@ -152,9 +151,8 @@ namespace tools::vjoule {
 		exit(ret);
 	    }
       
-	    std::string latest_dir = common::utils::join_path(this-> _vjoule_directory, "latest");
-	    if(!common::utils::file_exists(common::utils::join_path(latest_dir, "vjoule_xp.slice/process/cpu"))) {
-		Watcher w(latest_dir, "vjoule_xp.slice");
+	    if(!common::utils::file_exists(common::utils::join_path(this-> _working_directory, "vjoule_xp.slice/process/cpu"))) {
+		Watcher w(this-> _working_directory, "vjoule_xp.slice");
 		w.wait();
 	    }
 
