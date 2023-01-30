@@ -1,6 +1,7 @@
 #pragma once
 
 #include <common/concurrency/_.hh>
+#include "command.hh"
 #include <vector>
 #include <string>
 
@@ -8,12 +9,13 @@ namespace tools::vjoule {
   class VJoule {
     
     public:
-      VJoule(int argc, char * argv[]);
+      VJoule(const CommandLine & cmd);
       void run();
 
     private:
-      int _argc;
-      char ** _argv;
+      
+      CommandLine _cmd;
+      
       std::string _vjoule_directory;
       std::string _cfg_path;
       std::vector<std::string> subargs;
