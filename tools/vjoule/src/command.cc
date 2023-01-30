@@ -121,7 +121,6 @@ namespace tools::vjoule {
 	bool no_nvidia = false, no_rapl = false;
 	for (uint64_t i = 2 ; i < this-> _argc ; i++) {
 	    auto flg = this-> isFlag (this-> _argv[i]);
-	    std::cout << " " << this-> _argv[i] << " " << flg << std::endl;
 	    if (flg == HELP_FLAG) {
 		this-> printHelp (CommandType::PROFILE, true);
 		exit (-1);

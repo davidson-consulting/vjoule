@@ -116,8 +116,7 @@ namespace tools::vjoule {
     }
 
     void VJoule::run() {
-
-	char vjoule_exe_name[] =  "vjoule_sensor";
+	char vjoule_exe_name[] =  "vjoule_service";
 	char vjoule_c_flag[] = "-c";
 	char * cfg_path = const_cast<char*>(this-> _cfg_path.c_str());
 	char * args[3] = {vjoule_exe_name, vjoule_c_flag, cfg_path};
