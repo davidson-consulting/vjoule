@@ -85,15 +85,15 @@ namespace tools::vjoule {
   std::string Exporter::value_stdout(Values v){
     std::stringstream ss;
     if (this-> _cpu) {
-      ss << "| " << std::setw(10) << v.cpu << "j";
+      ss << "| " << std::setw(10) << v.cpu << "J";
     }
     
     if (this-> _gpu) {
-      ss << "| " << std::setw(10) << v.gpu << "j";
+      ss << "| " << std::setw(10) << v.gpu << "J";
     }
 
     if (this-> _ram) {
-      ss << "| " << std::setw(10) << v.ram << "j";
+      ss << "| " << std::setw(10) << v.ram << "J";
     }
     
     ss << "|";
@@ -103,15 +103,15 @@ namespace tools::vjoule {
   std::string Exporter::value_csv(Values v){
     std::stringstream ss;
     if (this-> _cpu) {
-      ss << "; " << std::setw(10) << v.cpu << "j";
+      ss << "; " << std::setw(10) << v.cpu << "J";
     }
     
     if (this-> _gpu) {
-      ss << "; " << std::setw(10) << v.gpu << "j";
+      ss << "; " << std::setw(10) << v.gpu << "J";
     }
 
     if (this-> _ram) {
-      ss << "; " << std::setw(10) << v.ram << "j";
+      ss << "; " << std::setw(10) << v.ram << "J";
     }
     
     return ss.str();

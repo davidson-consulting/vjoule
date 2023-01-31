@@ -33,6 +33,9 @@ namespace common::perf {
 	// The path to the cgroup to watch
 	std::string _cgroupPath;
 
+	// The date of the cgroup directory
+	uint64_t _fileDate = 0;
+	
     private :
 
 	PerfEventWatcher (const PerfEventWatcher & other);
@@ -73,6 +76,11 @@ namespace common::perf {
 	 */
 	void configure (const std::vector<std::string>& eventList);
 
+	/**
+	 * Reconfigure the watcher after a possible change of the cgroup directory
+	 */
+	void reconfigure (const std::vector<std::string>& eventList);
+	
 	/**
 	 * ===================================================================================
 	 * ===================================================================================
@@ -157,6 +165,11 @@ namespace common::perf {
 	 * @returns: a perf event that can be opened
 	 */
 	perf_event_attr findPerfEvent (const std::string & name) const;
+
+	/**
+	 * @returns: the date of the file
+	 */
+	uint64_t getCgroupDate () const;
 	
     };
     

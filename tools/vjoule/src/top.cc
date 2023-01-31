@@ -79,47 +79,19 @@ namespace tools::vjoule {
     }
 
     void Top::createAndRegisterCgroup () {
-	if (cgroup_init () != 0) {
-	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return;
-	}
+	cgroup::Cgroup c ("vjoule.slice/top");
+	c.create ();
 	
-	this-> _cg = cgroup_new_cgroup ("vjoule.slice/top");
-	if (this-> _cg == nullptr) {
+	if (!c.attach (getpid ())) {
 	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return;
-	}
-
-	struct cgroup_controller *cgc = cgroup_add_controller(this-> _cg, "cpu");
-	if (cgc == nullptr) {
-	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return ;
-	}
-
-	if (cgroup_create_cgroup (this-> _cg, 0) != 0) {
-	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return ;
-	}
-
-	if (cgroup_attach_task (this-> _cg) != 0) {	    
-	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return ;
+	    exit (-1);
 	}
     }
 
     void Top::dispose () {
-	if (cgroup_change_cgroup_path ("vjoule.slice/vjoule_service.service", getpid (), (const char* const[]) {"cpu"}) != 0) {
-	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return ;
-	}
-
-	if (cgroup_delete_cgroup (this-> _cg, 1) != 0) {
-	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    return ;
-	}
-	
-	cgroup_free (&this-> _cg);
-	this-> _cg = nullptr;
+	cgroup::Cgroup c ("vjoule.slice/top");
+	c.detach (getpid ());
+	c.remove ();	
     }
     
     /**

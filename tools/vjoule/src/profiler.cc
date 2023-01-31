@@ -85,7 +85,7 @@ namespace tools::vjoule {
 	char vjoule_exe_name[] =  "vjoule_service";
 	char vjoule_l_flag[] = "-l", lcontent[] = "";
 	char vjoule_c_flag[] = "-c", *ccontent = cfgPath;
-	char vjoule_v_flag[] = "-v", vcontent[] = "warn";
+	char vjoule_v_flag[] = "-v", *vcontent = const_cast<char*> (this-> _cmd.verbose ? "info" : "warn");
 	char * args[] = {
 	    vjoule_exe_name,
 	    vjoule_c_flag, ccontent,

@@ -1,5 +1,4 @@
 #include <filesystem>
-#include <libcgroup.h>
 #include <sys/wait.h>
 #include <fstream>
 
@@ -9,55 +8,29 @@
 #include <vjoule.hh>
 #include <exporter.hh>
 
+using namespace common;
+
 namespace tools::vjoule {
 
     VJoule::VJoule(const CommandLine & cmd): _cmd (cmd) {
 	std::string current_path = std::filesystem::current_path().string(); 
 
-	this-> _vjoule_directory = common::utils::join_path(current_path, "__vjoule");
+	this-> _vjoule_directory = utils::join_path(current_path, "__vjoule");
 	std::filesystem::create_directories (this-> _vjoule_directory);
 
-	this-> _working_directory = common::utils::join_path(this-> _vjoule_directory, "latest");
-	this-> _cfg_path = common::utils::join_path(this-> _working_directory, "config.toml");
+	this-> _working_directory = utils::join_path(this-> _vjoule_directory, "latest");
+	this-> _cfg_path = utils::join_path(this-> _working_directory, "config.toml");
 
 	std::vector<std::string> subargs;
 	if (this-> _cmd.subCmd.size () >= 2) {
 	    subargs.insert (subargs.end (), this-> _cmd.subCmd.begin () + 1, this-> _cmd.subCmd.end ());
 	}
 	
-	this->_child = common::concurrency::SubProcess(this-> _cmd.subCmd [0], subargs, ".");
+	this->_child = concurrency::SubProcess(this-> _cmd.subCmd [0], subargs, ".");
 
-	// create cgroup for running vjoule_exec
-	int ret = 0;
-	ret = cgroup_init();
-
-	if (ret) {
-	    fprintf(stderr, "cgroup_init failed\n");
-	    exit(1);
-	}
-
-	struct cgroup *cg = NULL;
-	cg = cgroup_new_cgroup("vjoule_xp.slice/process");
-    
-	if (!cg) {
-	    fprintf(stderr, "Failed to allocate cgroup %s\n", "vjoule_xp.slice/process");
-	    exit(1);
-	}
-
-	struct cgroup_controller *cgc;
-	cgc = cgroup_add_controller(cg, "cpu");
-	if (!cgc) {
-	    printf("FAIL: cgroup_add_controller failed\n");
-	    exit(3);
-	}
-
-	ret = cgroup_create_cgroup(cg, 0);
-	if (ret) {
-	    printf("FAIL: cgroup_create_cgroup failed with %s\n",
-		   cgroup_strerror(ret));
-	    exit(3);
-	}
-
+	cgroup::Cgroup c ("vjoule_xp.slice/process");
+	c.create ();
+	
 	this-> create_result_directory();
 	this-> create_configuration();
     }
@@ -67,10 +40,10 @@ namespace tools::vjoule {
 	ofs << "[sensor]" << std::endl;
 	ofs << "freq = 1 # frequency of update in hertz (the higher the faster)" << std::endl;
 	ofs << "log-lvl = \"info\" # debug < success < info < warn < error < none" << std::endl;
-	ofs << "log-path = \"" << common::utils::join_path(this-> _vjoule_directory, "logs") << "\" # log file (empty means stdout)" << std::endl;
+	ofs << "log-path = \"" << utils::join_path(this-> _vjoule_directory, "logs") << "\" # log file (empty means stdout)" << std::endl;
 	ofs << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl;
 	ofs << "output-dir = \"" << this-> _working_directory << "\"" <<std::endl;
-	ofs << "cgroups = \"" <<  common::utils::join_path(this-> _working_directory, "cgroups") << "\"" << std::endl;
+	ofs << "cgroups = \"" <<  utils::join_path(this-> _working_directory, "cgroups") << "\"" << std::endl;
 	ofs << "mount-tmpfs = false" << std::endl;
 	ofs << std::endl;
 	if (this-> _cmd.cpu && this-> _cmd.rapl) {
@@ -96,7 +69,7 @@ namespace tools::vjoule {
     }
 
     void VJoule::create_default_cgroups_list() {
-	std::ofstream ofs (common::utils::join_path(this-> _working_directory, "cgroups"), std::ofstream::out);
+	std::ofstream ofs (utils::join_path(this-> _working_directory, "cgroups"), std::ofstream::out);
 	ofs << "vjoule_xp.slice/*" << std::endl;
     }
 
@@ -106,39 +79,32 @@ namespace tools::vjoule {
     }
 
     void VJoule::create_result_directory() {
-	std::string result_dir = common::utils::join_path(this-> _vjoule_directory, common::utils::get_time_no_space());
+	std::string result_dir = utils::join_path(this-> _vjoule_directory, utils::get_time_no_space());
 	std::filesystem::create_directories(result_dir);
     
-	if (common::utils::file_exists(this-> _working_directory)) {
+	if (utils::file_exists(this-> _working_directory)) {
 	    std::filesystem::remove(this-> _working_directory);
 	}
 	std::filesystem::create_directory_symlink(result_dir, this-> _working_directory);
     }
 
     void VJoule::run() {
-	std::vector<char *> args;
 	char vjoule_exe_name[] =  "vjoule_service";
 	char vjoule_c_flag[] = "-c", *ccontent = const_cast<char*>(this-> _cfg_path.c_str());
-
-	args = {
+	char vjoule_l_flag[] = "-l", lcontent[] = "";
+	char vjoule_v_flag[] = "-v", *vcontent = const_cast<char*> (this-> _cmd.verbose ? "info" : "warn");
+	std::vector<char *> args = {
 	    vjoule_exe_name,
-	    vjoule_c_flag, ccontent
+	    vjoule_c_flag, ccontent,
+	    vjoule_l_flag, lcontent,
+	    vjoule_v_flag, vcontent
 	};
-	
-	if (this-> _cmd.verbose) {
-	    char vjoule_l_flag[] = "-l", lcontent[] = "";
-	    char vjoule_v_flag[] = "-v", vcontent[] = "debug";
-	    args.insert(args.end(), {
-		vjoule_l_flag, lcontent,
-		vjoule_v_flag, vcontent
-	    });
-	}
-	
+		
 	::sensor::Sensor s (args.size(), args.data());
 
 	do {
 	    s.forcedIteration();
-	} while (!common::utils::file_exists(common::utils::join_path(this-> _working_directory, "vjoule_xp.slice/process/cpu")));
+	} while (!utils::file_exists(utils::join_path(this-> _working_directory, "vjoule_xp.slice/process/cpu")));
 	
 	Exporter e(this-> _working_directory, this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
 	pid_t c_pid = fork();
@@ -164,10 +130,11 @@ namespace tools::vjoule {
 	} else {
 	    // child process
 	    // attach itself to cgroup
-	    int ret = cgroup_change_cgroup_path("vjoule_xp.slice/process", getpid(), (const char * const []){"cpu"});
-	    if (ret) {
-		printf("cgroup change of group failed\n");
-		exit(ret);
+
+	    cgroup::Cgroup c ("vjoule_xp.slice/process");
+	    if (!c.attach (getpid ())) {
+		std::cerr << "cgroup change of group failed." << std::endl;
+		exit (-1);
 	    }
       
 	    this-> _child.start();

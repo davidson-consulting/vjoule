@@ -272,6 +272,10 @@ namespace divider {
 	    if (jt != lst.end ()) {
 		rest.push_back (this-> _cgroupList [i]);
 		watchers.push_back (std::move (this-> _cgroupWatchers[i]));
+
+		// We reconfigure it, maybe it changed between to iteration (remove, and recreate in less than 1 iteration)
+		watchers.back ().reconfigure (events);
+		
 		cache.push_back (std::move (this-> _perfEventValues [i]));
 		lst.erase (this-> _cgroupList[i]);
 	    } else {

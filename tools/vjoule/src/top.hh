@@ -2,7 +2,6 @@
 
 #include "command.hh"
 #include <common/_.hh>
-#include <libcgroup.h>
 
 #include "ftxui/component/captured_mouse.hpp"  
 #include "ftxui/component/component.hpp"       
@@ -65,9 +64,6 @@ namespace tools::vjoule {
 
 	// in run loop
 	bool _isRunning = false;
-
-	// The cgroup containing top
-	cgroup* _cg = nullptr;
 	
     private:
 

@@ -264,6 +264,7 @@ namespace dumper {
 	    if (jt != lst.end ()) {
 		rest.push_back (this-> _cgroupList [i]);
 		watchers.push_back (std::move (this-> _cgroupWatchers[i]));
+		watchers.back ().reconfigure (this-> _perfEvents);
 		cache.push_back (std::move (this-> _perfEventValues [i]));
 		lst.erase (this-> _cgroupList[i]);
 	    } else {

@@ -46,7 +46,8 @@ namespace common::perf {
 	_eventList (std::move (other._eventList)),
 	_fds (std::move (other._fds)),
 	_cache (std::move (other._cache)),
-	_toClose (std::move (other._toClose))
+	_toClose (std::move (other._toClose)),
+	_fileDate (std::move (other._fileDate))
     {
 	other._cgroupFd = 0; // make sure that the move other does not close the cgroup file descriptor
     }
@@ -60,6 +61,7 @@ namespace common::perf {
 	this-> _eventList = std::move (other._eventList);
 	this-> _cache = std::move (other._cache);
 	this-> _toClose = std::move (other._toClose);
+	this-> _fileDate = std::move (other._fileDate);
 
 	other._cgroupFd = 0; // make sure that the move other does not close the cgroup file descriptor
     }
@@ -90,8 +92,18 @@ namespace common::perf {
 	
 	this-> configureCgroupWatch (eventList, get_nprocs ());	
 	this-> _cache.resize (this-> _eventList.size () * sizeof (read_value) + sizeof (uint64_t));
+	this-> _fileDate = this-> getCgroupDate ();
     }
-   
+
+
+    void PerfEventWatcher::reconfigure (const std::vector <std::string> & eventList) {
+	auto ndate = this-> getCgroupDate ();
+	if (this-> _fileDate < ndate) {
+	    this-> configure (eventList);
+	    this-> _fileDate = ndate;
+	}
+    }
+    
     void PerfEventWatcher::configureCgroupWatch (const std::vector <std::string> & eventList, int nbCpus) {
 	int perfFlags = 0;
 	if (this-> _cgroupPath != "") {
@@ -130,6 +142,12 @@ namespace common::perf {
 
     }
 
+    uint64_t PerfEventWatcher::getCgroupDate () const {
+	 struct stat t_stat;
+	 stat(this-> _cgroupPath.c_str (), &t_stat);
+	 return t_stat.st_mtime;
+    }
+    
     /**
      * ===================================================================================
      * ===================================================================================
