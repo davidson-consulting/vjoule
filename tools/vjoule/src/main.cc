@@ -4,6 +4,7 @@
 #include <vjoule.hh>
 #include <command.hh>
 #include <profiler.hh>
+#include <top.hh>
 
 using namespace tools::vjoule;
 
@@ -19,6 +20,9 @@ int main(int argc, char * argv[]) {
     if (cmd.type == CommandType::PROFILE) {
 	Profiler prf (cmd);
 	prf.run ();
+    } else if (cmd.type == CommandType::TOP) {
+	Top t (cmd);
+	t.run ();
     } else {
 	VJoule vjoule(cmd);
 	vjoule.run();

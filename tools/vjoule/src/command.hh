@@ -3,13 +3,15 @@
 #include <vector>
 #include <string>
 
+#define __VJOULE_VERSION__ "1.0"
 
 namespace tools::vjoule {
 
     enum class CommandType : int {
 	EXEC = 0,
 	PROFILE = 1,
-	NONE = 2
+	TOP = 2,
+	NONE = 3
     };
 
 #define VERBOSE_FLAG "verbose"
@@ -92,6 +94,11 @@ namespace tools::vjoule {
 	 *    - withKeyword: exec was written down
 	 */
 	void parseExec (bool withKeyword);
+
+	/**
+	 * Parse the top subcommand
+	 */
+	void parseTop ();
 
 	/**
 	 * Parse an output option at index i
