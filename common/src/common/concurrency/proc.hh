@@ -66,7 +66,7 @@ namespace common::concurrency {
 	/**
 	 * Start the sub process for running in the background
 	 */
-	void start ();
+	void start (bool redirect = true);
 
 	/**
 	 * Start the sub process, and attach ptrace to it
@@ -127,7 +127,7 @@ namespace common::concurrency {
 
 	void run ();
 
-	void child ();
+	void child (bool redirect);
 	    
     };	
 	

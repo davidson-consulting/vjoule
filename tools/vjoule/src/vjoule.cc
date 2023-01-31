@@ -145,17 +145,7 @@ namespace tools::vjoule {
 		exit (-1);
 	    }
 	    
-	    this-> _child.start();
-	    while (!this-> _child.isFinished ()) {
-		auto out = this-> _child.stdout ().read ();
-		if (out.length () != 0) std::cout << out << std::endl;		
-		std::cout.flush ();
-	    
-		auto err = this-> _child.stderr ().read ();
-		if (err.length () != 0) std::cout << err << std::endl;
-		std::cerr.flush ();
-	    }
-	    
+	    this-> _child.start (false);	    
 	    auto code = this-> _child.wait();
 
 	    if (code != 0) {

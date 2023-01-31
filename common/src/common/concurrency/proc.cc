@@ -48,10 +48,10 @@ namespace common::concurrency {
      */
 
     
-    void SubProcess::start () {
+    void SubProcess::start (bool redirect) {
 	this-> _pid = ::fork ();
 	if (this-> _pid == 0) {
-	    this-> child ();
+	    this-> child (redirect);
 	}
 
 	this-> _stdin.ipipe ().close ();
@@ -68,7 +68,7 @@ namespace common::concurrency {
 	if (this-> _pid == 0) {	    
 	    personality(ADDR_NO_RANDOMIZE);
 	    ptrace (PTRACE_TRACEME, 0, nullptr, nullptr);
-	    this-> child ();
+	    this-> child (true);
 	}
 
 	this-> _stdin.ipipe ().close ();
@@ -81,17 +81,19 @@ namespace common::concurrency {
 	
     }    
 
-    void SubProcess::child () {
+    void SubProcess::child (bool redirect) {
 	this-> _stderr.opipe ().setNonBlocking ();
 	this-> _stdout.opipe ().setNonBlocking ();
-	
-	::dup2 (this-> _stdin.ipipe ().getHandle (), STDIN_FILENO);
-	::dup2 (this-> _stdout.opipe ().getHandle (), STDOUT_FILENO);
-	::dup2 (this-> _stderr.opipe ().getHandle (), STDERR_FILENO);
 
-	this-> _stdin.close ();
-	this-> _stdout.close ();
-	this-> _stderr.close ();
+	if (redirect) {
+	    ::dup2 (this-> _stdin.ipipe ().getHandle (), STDIN_FILENO);
+	    ::dup2 (this-> _stdout.opipe ().getHandle (), STDOUT_FILENO);
+	    ::dup2 (this-> _stderr.opipe ().getHandle (), STDERR_FILENO);
+
+	    this-> _stdin.close ();
+	    this-> _stdout.close ();
+	    this-> _stderr.close ();
+	}
 
 	std::vector <const char*> alls;
 	alls.push_back (this-> _cmd.c_str ());
@@ -104,7 +106,7 @@ namespace common::concurrency {
 
 	int out = ::execvp (alls [0],  const_cast<char* const *> (alls.data ()));
 	if (out == -1) {
-	    printf ("execvp () failed\n");
+	    std::cerr << "Command not found '" << alls [0] << "'" << std::endl;
 	}
 
 	exit (0);
