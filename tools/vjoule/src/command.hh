@@ -12,6 +12,7 @@ namespace tools::vjoule {
 	NONE = 2
     };
 
+#define VERBOSE_FLAG "verbose"
 #define VERSION_FLAG "version"
 #define VERSION_FLAG_SHORT "v"
 #define HELP_FLAG "help"

@@ -8,6 +8,14 @@ namespace tools::vjoule {
     float cpu;
     float gpu;
     float ram;
+
+    Values operator - (const Values &v) const {
+      return Values(
+          cpu - v.cpu,
+          gpu - v.gpu,
+          ram - v.ram
+        );
+    }
   };
 
   class Exporter {
@@ -23,8 +31,9 @@ namespace tools::vjoule {
       bool _cpu;
       bool _gpu;
       bool _ram;
+      Values _initGlobal;
+      Values _initProcess;
       
-      std::vector<std::string> list_processes();
       Values read_for_process(std::string path);
       std::string value_stdout(Values v);
       std::string value_csv(Values v);

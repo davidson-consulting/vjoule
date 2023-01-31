@@ -116,12 +116,31 @@ namespace tools::vjoule {
     }
 
     void VJoule::run() {
+	std::vector<char *> args;
 	char vjoule_exe_name[] =  "vjoule_service";
-	char vjoule_c_flag[] = "-c";
-	char * cfg_path = const_cast<char*>(this-> _cfg_path.c_str());
-	char * args[3] = {vjoule_exe_name, vjoule_c_flag, cfg_path};
-	::sensor::Sensor s (3, args);
- 
+	char vjoule_c_flag[] = "-c", *ccontent = const_cast<char*>(this-> _cfg_path.c_str());
+
+	args = {
+	    vjoule_exe_name,
+	    vjoule_c_flag, ccontent
+	};
+	
+	if (this-> _cmd.verbose) {
+	    char vjoule_l_flag[] = "-l", lcontent[] = "";
+	    char vjoule_v_flag[] = "-v", vcontent[] = "debug";
+	    args.insert(args.end(), {
+		vjoule_l_flag, lcontent,
+		vjoule_v_flag, vcontent
+	    });
+	}
+	
+	::sensor::Sensor s (args.size(), args.data());
+
+	do {
+	    s.forcedIteration();
+	} while (!common::utils::file_exists(common::utils::join_path(this-> _working_directory, "vjoule_xp.slice/process/cpu")));
+	
+	Exporter e(this-> _working_directory, this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
 	pid_t c_pid = fork();
 
 	if (c_pid == -1) {
@@ -135,12 +154,8 @@ namespace tools::vjoule {
 	    int status;
 	    wait(&status);
 
-	    // wait for measurements to finish writing
-	    Watcher w(common::utils::join_path(this-> _working_directory, "vjoule_xp.slice/process"), "cpu");
-	    w.wait();
+	    s.forcedIteration();
 
-	    // read and pretty print results
-	    Exporter e(this-> _working_directory, this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
 	    if (strcmp(this-> _cmd.output.c_str(), "") == 0) {
 		e.export_stdout();
 	    } else {
@@ -155,11 +170,6 @@ namespace tools::vjoule {
 		exit(ret);
 	    }
       
-	    if(!common::utils::file_exists(common::utils::join_path(this-> _working_directory, "vjoule_xp.slice/process/cpu"))) {
-		Watcher w(this-> _working_directory, "vjoule_xp.slice");
-		w.wait();
-	    }
-
 	    this-> _child.start();
 	    this-> _child.wait();
 	}

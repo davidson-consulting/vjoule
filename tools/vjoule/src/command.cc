@@ -56,7 +56,8 @@ namespace tools::vjoule {
 	    else if (flg == VERSION_FLAG) {
 		this-> printVersion ();
 		exit (-1);
-	    }	    
+	    }
+	    else if (flg == VERBOSE_FLAG) this-> _content.verbose = true;
 	    else if (flg == CPU_FLAG) this-> _content.cpu = false;	    
 	    else if (flg == RAM_FLAG) this-> _content.ram = false;	    
 	    else if (flg == GPU_FLAG) this-> _content.gpu = false;
@@ -128,7 +129,8 @@ namespace tools::vjoule {
 	    else if (flg == VERSION_FLAG) {
 		this-> printVersion ();
 		exit (-1);
-	    }	    
+	    }
+	    else if (flg == VERBOSE_FLAG) this-> _content.verbose = true;
 	    else if (flg == CPU_FLAG) this-> _content.cpu = false;	    
 	    else if (flg == RAM_FLAG) this-> _content.ram = false;	    
 	    else if (flg != "") {

@@ -12,10 +12,13 @@ namespace tools::vjoule {
     _cpu(cpu),
     _gpu(gpu),
     _ram(ram)
-  {}
+  {
+    this-> _initGlobal = this-> read_for_process(this-> _result_dir);
+    this-> _initProcess =  this-> read_for_process(join_path(this-> _result_dir, "vjoule_xp.slice/process"));
+  }
 
   void Exporter::export_stdout() {
-    Values global = this-> read_for_process(this-> _result_dir);
+    Values global = this-> read_for_process(this-> _result_dir) - this-> _initGlobal;
     Values process = this-> read_for_process(join_path(this-> _result_dir, "vjoule_xp.slice/process"));
 
     std::stringstream ss;
