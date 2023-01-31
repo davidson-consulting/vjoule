@@ -20,6 +20,8 @@ namespace tools::vjoule {
 	if (this-> _argc >= 2) {
 	    if (std::string (this-> _argv [1]) == "profile") {
 		this-> parseProfile ();
+	    } else if (std::string (this-> _argv [1]) == "top") {
+		this-> parseTop ();
 	    } else {
 		this-> parseExec (std::string (this-> _argv[1]) == "exec");
 	    }	    
@@ -143,6 +145,45 @@ namespace tools::vjoule {
 	}
 
 	this-> checkConsistency ();
+    }
+
+    void CommandParser::parseTop () {
+	this-> _content = CommandLine {
+	    .type = CommandType::TOP,
+	    .verbose = false,
+	    .cpu = true,
+	    .ram = true,
+	    .gpu = true,
+	    .rapl = true,
+	    .nvidia = true,
+	    .subCmd = {}
+	};
+
+	bool no_nvidia = false, no_rapl = false;
+	for (uint64_t i = 2 ; i < this-> _argc ; i++) {
+	    auto flg = this-> isFlag (this-> _argv[i]);
+	    if (flg == HELP_FLAG) {
+		this-> printHelp (CommandType::PROFILE, true);
+		exit (-1);
+	    }	    
+	    else if (flg == VERSION_FLAG) {
+		this-> printVersion ();
+		exit (-1);
+	    }	    
+	    else if (flg == OUTPUT_FLAG) {
+		this-> _content.output = this-> parseOutput (i);
+		i += 1;
+	    }
+	    else if (flg != "") {
+		this-> printHelp (CommandType::PROFILE, false);
+		this-> printError (CommandType::PROFILE, flg);
+		exit (-1);
+	    } else {
+		this-> printHelp (CommandType::PROFILE, false);
+		this-> printError (CommandType::PROFILE, this-> _argv[i]);
+		exit (-1);
+	    }
+	}
     }
 
     void CommandParser::checkConsistency () const {

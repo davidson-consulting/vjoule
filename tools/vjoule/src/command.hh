@@ -9,7 +9,8 @@ namespace tools::vjoule {
     enum class CommandType : int {
 	EXEC = 0,
 	PROFILE = 1,
-	NONE = 2
+	TOP = 2,
+	NONE = 3
     };
 
 #define VERSION_FLAG "version"
@@ -91,6 +92,11 @@ namespace tools::vjoule {
 	 *    - withKeyword: exec was written down
 	 */
 	void parseExec (bool withKeyword);
+
+	/**
+	 * Parse the top subcommand
+	 */
+	void parseTop ();
 
 	/**
 	 * Parse an output option at index i
