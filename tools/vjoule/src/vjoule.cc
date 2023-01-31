@@ -12,7 +12,9 @@ using namespace common;
 
 namespace tools::vjoule {
 
-    VJoule::VJoule(const CommandLine & cmd): _cmd (cmd) {
+    VJoule::VJoule(const CommandLine & cmd) :
+	_cmd (cmd), _cgroup ("vjoule_xp.slice/process_" + std::to_string (getpid ()))
+    {
 	std::string current_path = std::filesystem::current_path().string(); 
 
 	this-> _vjoule_directory = utils::join_path(current_path, "__vjoule");
@@ -28,8 +30,7 @@ namespace tools::vjoule {
 	
 	this->_child = concurrency::SubProcess(this-> _cmd.subCmd [0], subargs, ".");
 
-	cgroup::Cgroup c ("vjoule_xp.slice/process");
-	c.create ();
+	this-> _cgroup.create ();
 	
 	this-> create_result_directory();
 	this-> create_configuration();
@@ -104,9 +105,9 @@ namespace tools::vjoule {
 
 	do {
 	    s.forcedIteration();
-	} while (!utils::file_exists(utils::join_path(this-> _working_directory, "vjoule_xp.slice/process/cpu")));
+	} while (!utils::file_exists(utils::join_path(this-> _working_directory, this-> _cgroup.getName () + "/cpu")));
 	
-	Exporter e(this-> _working_directory, this->_cmd.cpu, this->_cmd.gpu, this->_cmd.ram);
+	Exporter e (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);
 	pid_t c_pid = fork();
 
 	if (c_pid == -1) {
@@ -118,21 +119,29 @@ namespace tools::vjoule {
 
 	    // wait for child process to finish
 	    int status;
-	    wait(&status);
+	    wait (&status);
 
 	    s.forcedIteration();
 
-	    if (strcmp(this-> _cmd.output.c_str(), "") == 0) {
+	    if (strcmp (this-> _cmd.output.c_str(), "") == 0) {
 		e.export_stdout();
 	    } else {
-		e.export_csv(this-> _cmd.output);
+		e.export_csv (this-> _cmd.output);
 	    }
+
+	    // Clean the cgroup created by the vjoule command line
+	    this-> _cgroup.remove ();
+	    
+	    // if the parent contains no running xp, we remove it to avoid system pollution
+	    cgroup::Cgroup parent ("vjoule_xp.slice");
+	    if (!parent.isSlice ()) { 
+		parent.remove ();
+	    }	    
 	} else {
+	    
 	    // child process
 	    // attach itself to cgroup
-
-	    cgroup::Cgroup c ("vjoule_xp.slice/process");
-	    if (!c.attach (getpid ())) {
+	    if (!this-> _cgroup.attach (getpid ())) {
 		std::cerr << "cgroup change of group failed." << std::endl;
 		exit (-1);
 	    }

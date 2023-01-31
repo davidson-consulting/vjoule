@@ -1,31 +1,67 @@
 #pragma once
 
 #include <common/concurrency/_.hh>
+#include <common/cgroup/_.hh>
 #include "command.hh"
 #include <vector>
 #include <string>
 
 namespace tools::vjoule {
-  class VJoule {
     
+  class VJoule {
+  private :
+
+      // The command line passed by command parser
+      CommandLine _cmd;
+
+      // The directory for output
+      std::string _vjoule_directory;
+
+      // The path of the config file of the service launched
+      std::string _cfg_path;
+
+      // The path of the current directory
+      std::string _working_directory;
+
+      // The sub process launched and watched
+      common::concurrency::SubProcess _child;
+
+      // The cgroup in which the child process will be attached
+      common::cgroup::Cgroup _cgroup;
+      
     public:
+
+      /**
+       * @params:
+       *   - cmd: the command line parsed by the command parser
+       */
       VJoule(const CommandLine & cmd);
+
+      /**
+       * Start the sub process, and watch its consumption
+       */
       void run();
 
     private:
       
-      CommandLine _cmd;
-      
-      std::string _vjoule_directory;
-      std::string _cfg_path;
-      std::string _working_directory;
-      std::vector<std::string> subargs;
-      common::concurrency::SubProcess _child;
-
-      void print_help();
+      /**
+       * Create a default configuration for the sensor
+       */
       void create_default_config();
+
+      /**
+       * Create the cgroups file for the sensor
+       */
       void create_default_cgroups_list();
+
+      /**
+       * Configure the sensor 
+       */
       void create_configuration();
+
+      /**
+       * Create the directory that will store the results
+       */
       void create_result_directory();
   };
 }

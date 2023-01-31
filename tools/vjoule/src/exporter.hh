@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "command.hh"
 
 namespace tools::vjoule {
   struct Values {
@@ -19,22 +20,54 @@ namespace tools::vjoule {
   };
 
   class Exporter {
-    public:
-      Exporter(std::string result_dir, bool cpu, bool gpu, bool ram);
-      // export result summary to stdout
-      void export_stdout();
-      void export_csv(std::string output_file);
+  private :
 
-    private:
       // path to the vjoule result directory
       std::string _result_dir;
-      bool _cpu;
-      bool _gpu;
-      bool _ram;
-      Values _initGlobal;
-      Values _initProcess;
+
+      // The name of the cgroup containing the interesting results
+      std::string _cgroupName;
       
-      Values read_for_process(std::string path);
+      // True if cpu have to be exported
+      bool _cpu;
+
+      // True if gpu have to be exported
+      bool _gpu;
+
+      // True if ram have to be exported
+      bool _ram;
+
+      // Initial result of global (before starting the child process)
+      Values _initGlobal;
+
+      // Initial result of process (before starting the child process)
+      Values _initProcess;
+
+      
+    public:
+
+      /**
+       * @params:
+       *   - resultDir: the directory containing the result
+       *   - cgroupName: the name of the cgroup created by the CLI
+       *   - cmd: the options passed to the CLI 
+       */
+      Exporter(const std::string & resultDir, const std::string & cgroupName, const CommandLine & cmd);
+      
+      /**
+       * export result summary to stdout
+       */
+      void export_stdout();
+
+      /**
+       * export result summary to a csv file
+       */
+      void export_csv(const std::string & output_file);
+
+    private:
+      
+      Values read_for_process(const std::string & path);
+      
       std::string value_stdout(Values v);
       std::string value_csv(Values v);
   };
