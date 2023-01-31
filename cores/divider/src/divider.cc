@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <sys/resource.h>
 #include <sys/mount.h>
-
+#include <cmath>
 #include <mntent.h>
 
 using namespace common;
@@ -232,10 +232,12 @@ namespace divider {
 	    
 	    // LLC_MISSES of the system
 	    auto ident = (float) (this-> _perfEventValues[0][1]);
-	    this-> _results[""].ram += ramEnergy;
-	    for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
-		auto & cgroup = this-> _results[this-> _cgroupList[i].getName ()];
-		cgroup.ram += ramEnergy * ((float) (this-> _perfEventValues[i][1]) / ident);
+	    if (ident != 0.0f) {
+		this-> _results[""].ram += ramEnergy;
+		for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
+		    auto & cgroup = this-> _results[this-> _cgroupList[i].getName ()];
+		    cgroup.ram += ramEnergy * ((float) (this-> _perfEventValues[i][1]) / ident);
+		}
 	    }
 	}
     }
@@ -246,10 +248,12 @@ namespace divider {
 	    
 	    // LLC_MISSES of the system
 	    auto ident = (float) (this-> _perfEventValues[0][0]);
-	    this-> _results[""].cpu += cpuEnergy;
-	    for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
-		auto & cgroup = this-> _results[this-> _cgroupList[i].getName ()];
-		cgroup.cpu += cpuEnergy * ((float) (this-> _perfEventValues[i][0]) / ident);
+	    if (ident != 0.0f) {
+		this-> _results[""].cpu += cpuEnergy;
+		for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
+		    auto & cgroup = this-> _results[this-> _cgroupList[i].getName ()];
+		    cgroup.cpu += cpuEnergy * ((float) (this-> _perfEventValues[i][0]) / ident);
+		}
 	    }
 	}
     }
