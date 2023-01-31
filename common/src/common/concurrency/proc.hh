@@ -22,7 +22,13 @@ namespace common::concurrency {
 
 	/// The pid of the child process
 	int _pid;
-	    
+	
+    private :
+
+	SubProcess (const SubProcess & other);
+	void operator= (const SubProcess & other);
+
+	
     public:
 
 	/**
@@ -39,6 +45,16 @@ namespace common::concurrency {
 	 */
 	SubProcess (const std::string & cmd, const std::vector <std::string> & args, const std::string & cwd);
 
+	/**
+	 * Move ctor
+	 */
+	SubProcess (SubProcess && other);
+
+	/**
+	 * Move aff
+	 */
+	void operator= (SubProcess && other);
+	
 	/**
 	 * ================================================================================
 	 * ================================================================================
@@ -72,6 +88,11 @@ namespace common::concurrency {
 	 * @returns: the pid of the subproc
 	 */
 	int getPid () const;
+
+	/**
+	 * @returns: true if the child is finished
+	 */
+	bool isFinished () const;
 	    
 	/**
 	 * ================================================================================

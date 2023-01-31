@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <fcntl.h>
+#include <iostream>
 
 namespace common::concurrency {
 
@@ -18,7 +19,17 @@ namespace common::concurrency {
 	int err_flags = ::fcntl(this-> _pipe, F_GETFL, 0);
 	::fcntl(this-> _pipe, F_SETFL, err_flags | O_NONBLOCK);
     }
-	
+
+    OPipe::OPipe (OPipe && o) : _pipe (std::move (o._pipe)) {
+	o._pipe = 0;
+    }
+
+    void OPipe::operator= (OPipe && other) {
+	this-> close ();
+	this-> _pipe = other._pipe;
+	other._pipe = 0;
+    }
+    
     void OPipe::write (const std::string & msg) {
 	int n = ::write (this-> _pipe, msg.c_str (), msg.length ());
     }
@@ -30,6 +41,12 @@ namespace common::concurrency {
 	}
     }
 
+    void OPipe::setNonBlocking () {
+	auto old_flg = fcntl (this-> _pipe, F_GETFL, 0);
+	fcntl (this-> _pipe, F_SETFL, old_flg | O_NONBLOCK);
+	
+    }
+    
     int OPipe::getHandle () const {
 	return this-> _pipe;
     }
@@ -51,8 +68,18 @@ namespace common::concurrency {
 	int err_flags = ::fcntl(this-> _pipe, F_GETFL, 0);
 	::fcntl(this-> _pipe, F_SETFL, err_flags | O_NONBLOCK);
     }
-	
+   
+    IPipe::IPipe (IPipe && o) : _pipe (std::move (o._pipe)) {
+	o._pipe = 0;
+    }
 
+
+    void IPipe::operator= (IPipe && other) {
+	this-> close ();
+	this-> _pipe = other._pipe;
+	other._pipe = 0;
+    }
+    
     std::string IPipe::read () {
 	std::ostringstream ss;
 	for (;;) {
@@ -64,6 +91,12 @@ namespace common::concurrency {
 	}
 
 	return ss.str ();
+    }
+    
+    void IPipe::setNonBlocking () {
+	auto old_flg = fcntl (this-> _pipe, F_GETFL, 0);
+	fcntl (this-> _pipe, F_SETFL, old_flg | O_NONBLOCK);
+	
     }
 
     void IPipe::close () {
@@ -78,7 +111,7 @@ namespace common::concurrency {
     }
 	
     IPipe::~IPipe () {
-	this-> close ();
+	//this-> close ();
     }
 
     /**
@@ -108,6 +141,16 @@ namespace common::concurrency {
 	_ipipe (io.i), _opipe (io.o)
     {}
 
+    IOPipe::IOPipe (IOPipe && other) :
+	_ipipe (std::move (other._ipipe)), _opipe (std::move (other._opipe))
+    {}
+
+    void IOPipe::operator= (IOPipe && other) {
+	this-> close ();
+	this-> _ipipe = std::move (other._ipipe);
+	this-> _opipe = std::move (other._opipe);
+    }
+    
     IPipe & IOPipe::ipipe () {
 	return this-> _ipipe;
     }
@@ -122,7 +165,7 @@ namespace common::concurrency {
     }
 	
     IOPipe::~IOPipe () {
-	this-> close ();
+	// this-> close ();
     }
 
 }

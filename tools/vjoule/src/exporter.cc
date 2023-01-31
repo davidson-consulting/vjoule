@@ -24,6 +24,7 @@ namespace tools::vjoule {
 	Values process = this-> read_for_process(join_path(this-> _result_dir, this-> _cgroupName));
 
 	std::stringstream ss;
+		
 	ss << "|CGroup  " << "| ";
 	if (this-> _cpu) ss << std::setw(11) << "CPU" << "| ";
 	if (this-> _gpu) ss <<  std::setw(11) <<"GPU" << "| ";

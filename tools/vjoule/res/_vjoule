@@ -32,6 +32,7 @@ _vjoule() {
     case "${firstword}" in
 	exec)
 	    complete_options="$EXEC_OPTIONS"
+	    complete_words="*"
 	    ;;
 	profile)
 	    complete_options="$PROFILE_OPTIONS"
@@ -51,10 +52,12 @@ _vjoule() {
 
     # Either display words or options, depending on the user input
     if [[ $cur == -* ]]; then
-	COMPREPLY=( $( compgen -W "$complete_options" -- $cur ))
+	COMPREPLY=($( compgen -f -d -W "$complete_options" -- $cur ))
 
+    elif [[ $prev == "vjoule" ]]; then
+    	COMPREPLY=($( compgen -W "$complete_words" -- $cur ))
     else
-	COMPREPLY=( $( compgen -W "$complete_words" -- $cur ))
+	_filedir
     fi
 
     return 0

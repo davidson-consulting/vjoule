@@ -8,6 +8,11 @@
 
 using namespace tools::vjoule;
 
+
+void signal_callback_handler(int signum) {
+    
+}
+
 int main(int argc, char * argv[]) {
     if (getuid()) {
 	std::cerr << "You are not root. This program will only work if run as root." << std::endl;

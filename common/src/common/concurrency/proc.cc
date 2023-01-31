@@ -13,7 +13,31 @@ namespace common::concurrency {
     SubProcess::SubProcess (const std::string & cmd, const std::vector <std::string> & args, const std::string & cwd) :
 	_cmd (cmd), _args (args), _cwd (cwd)
     {}
+
+
+    SubProcess::SubProcess (SubProcess && other) :
+	_stdin (std::move (other._stdin)),
+	_stdout (std::move (other._stdout)),
+	_stderr (std::move (other._stderr)),
+	_cwd (std::move (other._cwd)),
+	_args (std::move (other._args)),
+	_cmd (std::move (other._cmd)),
+	_pid (std::move (other._pid))
+    {}
+
+    void SubProcess::operator= (SubProcess && other) {
+	this-> _stderr.close ();
+	this-> _stdout.close ();
+	this-> _stdin.close ();
 	
+	this-> _stdin = std::move (other._stdin);
+	this-> _stdout = std::move (other._stdout);
+	this-> _stderr = std::move (other._stderr);
+	this-> _cwd = std::move (other._cwd);
+	this-> _args = std::move (other._args);
+	this-> _cmd = std::move (other._cmd);
+	this-> _pid = std::move (other._pid);
+    }    
     
     /**
      * ================================================================================
@@ -30,10 +54,13 @@ namespace common::concurrency {
 	    this-> child ();
 	}
 
-
 	this-> _stdin.ipipe ().close ();
 	this-> _stdout.opipe ().close ();
 	this-> _stderr.opipe ().close ();
+	
+	this-> _stdin.opipe ().setNonBlocking ();
+	this-> _stdout.ipipe ().setNonBlocking ();
+	this-> _stderr.ipipe ().setNonBlocking ();
     }
 
     void SubProcess::startDebug () {
@@ -46,10 +73,18 @@ namespace common::concurrency {
 
 	this-> _stdin.ipipe ().close ();
 	this-> _stdout.opipe ().close ();
-	this-> _stderr.opipe ().close ();	
+	this-> _stderr.opipe ().close ();
+
+	this-> _stdin.opipe ().setNonBlocking ();
+	this-> _stdout.ipipe ().setNonBlocking ();
+	this-> _stderr.ipipe ().setNonBlocking ();
+	
     }    
 
     void SubProcess::child () {
+	this-> _stderr.opipe ().setNonBlocking ();
+	this-> _stdout.opipe ().setNonBlocking ();
+	
 	::dup2 (this-> _stdin.ipipe ().getHandle (), STDIN_FILENO);
 	::dup2 (this-> _stdout.opipe ().getHandle (), STDOUT_FILENO);
 	::dup2 (this-> _stderr.opipe ().getHandle (), STDERR_FILENO);
@@ -79,6 +114,12 @@ namespace common::concurrency {
 	return this-> _pid;
     }
 
+    bool SubProcess::isFinished () const {
+	waitpid (this-> _pid, nullptr, 1);
+	if (::kill (this-> _pid, 0) == -1) return true;
+
+	return false;
+    }
     
     void SubProcess::kill () {
 	this-> _stdin.close ();

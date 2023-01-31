@@ -11,7 +11,7 @@
 using namespace common;
 
 namespace tools::vjoule {
-
+    
     VJoule::VJoule(const CommandLine & cmd) :
 	_cmd (cmd), _cgroup ("vjoule_xp.slice/process_" + std::to_string (getpid ()))
     {
@@ -109,7 +109,7 @@ namespace tools::vjoule {
 	
 	Exporter e (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);
 	pid_t c_pid = fork();
-
+	
 	if (c_pid == -1) {
 	    printf("Could not fork to execute vjoule_exec");
 	    exit(EXIT_FAILURE);
@@ -138,16 +138,31 @@ namespace tools::vjoule {
 		parent.remove ();
 	    }	    
 	} else {
-	    
 	    // child process
 	    // attach itself to cgroup
 	    if (!this-> _cgroup.attach (getpid ())) {
 		std::cerr << "cgroup change of group failed." << std::endl;
 		exit (-1);
 	    }
-      
+	    
 	    this-> _child.start();
-	    this-> _child.wait();
+	    while (!this-> _child.isFinished ()) {
+		auto out = this-> _child.stdout ().read ();
+		if (out.length () != 0) std::cout << out << std::endl;		
+		std::cout.flush ();
+	    
+		auto err = this-> _child.stderr ().read ();
+		if (err.length () != 0) std::cout << err << std::endl;
+		std::cerr.flush ();
+	    }
+	    
+	    auto code = this-> _child.wait();
+
+	    if (code != 0) {
+		std::cerr << "Command exited with non zero status " << code << std::endl;
+	    }
+	    
+	    std::cout << std::endl << std::endl;	   	    
 	}
     }
 }
