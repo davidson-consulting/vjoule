@@ -1,6 +1,7 @@
 #include "command.hh"
 #include <iostream>
 
+#include <common/_.hh>
 
 namespace tools::vjoule {
 
@@ -52,7 +53,7 @@ namespace tools::vjoule {
 	for (; i < this-> _argc ; i++) {
 	    auto flg = this-> isFlag (this-> _argv[i]);
 	    if (flg == HELP_FLAG) {
-		this-> printHelp (CommandType::EXEC, true);
+		this-> printHelp (withKeyword ? CommandType::EXEC : CommandType::NONE, true);
 		exit (-1);
 	    }	    
 	    else if (flg == VERSION_FLAG) {
@@ -163,7 +164,7 @@ namespace tools::vjoule {
 	for (uint64_t i = 2 ; i < this-> _argc ; i++) {
 	    auto flg = this-> isFlag (this-> _argv[i]);
 	    if (flg == HELP_FLAG) {
-		this-> printHelp (CommandType::PROFILE, true);
+		this-> printHelp (CommandType::TOP, true);
 		exit (-1);
 	    }	    
 	    else if (flg == VERSION_FLAG) {
@@ -175,12 +176,12 @@ namespace tools::vjoule {
 		i += 1;
 	    }
 	    else if (flg != "") {
-		this-> printHelp (CommandType::PROFILE, false);
-		this-> printError (CommandType::PROFILE, flg);
+		this-> printHelp (CommandType::TOP, false);
+		this-> printError (CommandType::TOP, flg);
 		exit (-1);
 	    } else {
-		this-> printHelp (CommandType::PROFILE, false);
-		this-> printError (CommandType::PROFILE, this-> _argv[i]);
+		this-> printHelp (CommandType::TOP, false);
+		this-> printError (CommandType::TOP, this-> _argv[i]);
 		exit (-1);
 	    }
 	}
@@ -205,8 +206,10 @@ namespace tools::vjoule {
 	    std::cout << "./vjoule profile" << std::endl;
 	} else if (type == CommandType::EXEC) {
 	    std::cout << "./vjoule (exec?) [-nv] [-nr] [--no-cpu] [--no-gpu] [--no-ram] cmd [cmd options...]" << std::endl;
+	} else if (type == CommandType::TOP) {
+	    std::cout << "./vjoule top" << std::endl;
 	} else {
-	    std::cout << "./vjoule [-h] [-v] (exec | profile)" << std::endl;
+	    std::cout << "./vjoule [-h] [-v] (exec | profile | top)" << std::endl;
 	}
 
 	if (full) {
@@ -217,7 +220,7 @@ namespace tools::vjoule {
 		std::cout << "\t-v,--version   \tprint version information and exit" << std::endl;
 		
 		std::cout << "\t    --no-cpu   \tdon't monitor CPU consumption" << std::endl;
-		std::cout << "\t    --no-ram   \tdon't monitor RAM consumption" << std::endl;
+		std::cout << "\t    --no-ram   \tdon't monitor RAM consumption" << std::endl << std::endl;
 	    }
 
 	    if (type == CommandType::EXEC || type == CommandType::NONE) {
@@ -233,8 +236,14 @@ namespace tools::vjoule {
 		std::cout << "\t-o,--output (file.csv)\tdump the result in a csv file instead of stdout" << std::endl << std::endl;
 
 		std::cout << "positional arguments : " << std::endl;
-		std::cout << "\tcmd [options...] \tthe command to run and monitor" << std::endl;
+		std::cout << "\tcmd [options...] \tthe command to run and monitor" << std::endl << std::endl;
+	    }
 
+	    if (type == CommandType::TOP || type == CommandType::NONE) {
+		std::cout << "== subcommand top : " << std::endl;
+		std::cout << "optional arguments : " << std::endl;
+		std::cout << "\t-h,--help      \tprint this help and exit" << std::endl;
+		std::cout << "\t-v,--version   \tprint version information and exit" << std::endl << std::endl;
 	    }
 	}
 	
@@ -257,7 +266,10 @@ namespace tools::vjoule {
 	return content;
     }
     
-    void CommandParser::printVersion () const {}
+    void CommandParser::printVersion () const {
+	std::cout << "vjoule (" << __VJOULE_VERSION__ << ")" << std::endl;
+	std::cout << __COPYRIGHT__ << std::endl << std::endl;
+    }
     
     void CommandParser::printError (CommandType type, const std::string &flg) const {
 	std::cerr << "Undefined option '" << flg << "'";

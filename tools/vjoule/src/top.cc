@@ -180,9 +180,9 @@ namespace tools::vjoule {
 	    this-> _glob.gpuP = 100;
 
 	    if (this-> _glob.cpuJ != 0) {
-		this-> _glob.cpuW = (cpu - this-> _glob.cpuJ) * time;
-		this-> _glob.ramW = (ram - this-> _glob.ramJ) * time;
-		this-> _glob.gpuW = (gpu - this-> _glob.gpuJ) * time;
+		this-> _glob.cpuW = (cpu - this-> _glob.cpuJ) / time;
+		this-> _glob.ramW = (ram - this-> _glob.ramJ) / time;
+		this-> _glob.gpuW = (gpu - this-> _glob.gpuJ) / time;
 	    }
 	    
 	    this-> _glob.cpuJ = cpu;
@@ -202,9 +202,9 @@ namespace tools::vjoule {
 	    };
 	    
 	    if (it != this-> _results.end ()) {
-		r.cpuW = (cpu - it-> second.cpuJ) * time;
-		r.ramW = (ram - it-> second.ramJ) * time;
-		r.gpuW = (gpu - it-> second.gpuJ) * time;
+		r.cpuW = (cpu - it-> second.cpuJ) / time;
+		r.ramW = (ram - it-> second.ramJ) / time;
+		r.gpuW = (gpu - it-> second.gpuJ) / time;
 	    } 
 
 	    res.emplace (cgroupName, r);	    	    
@@ -224,12 +224,6 @@ namespace tools::vjoule {
     }
 
     void Top::insertHistory () {
-	if (this-> _cpuHist.size () > 1000) {
-	    this-> _cpuHist = std::vector (this-> _cpuHist.begin () + 1, this-> _cpuHist.end ());
-	    this-> _ramHist = std::vector (this-> _ramHist.begin () + 1, this-> _ramHist.end ());
-	    this-> _gpuHist = std::vector (this-> _gpuHist.begin () + 1, this-> _gpuHist.end ());
-	}
-
 	this-> _cpuHist.push_back (this-> _glob.cpuW);
 	this-> _ramHist.push_back (this-> _glob.ramW);
 	this-> _gpuHist.push_back (this-> _glob.gpuW);
@@ -361,26 +355,31 @@ namespace tools::vjoule {
 	return std::move (tab).Render ();
     }
 
-    Element Top::createGraph () const {
+    Element Top::createGraph () {
 	auto cpuGraph = graph ([&](int w,int h) {
 	    std::vector <int> o (w);
-	    int i = 0;
-	    auto scale = (double) h / this-> findMax (this-> _cpuHist);
-	    
-	    if (this-> _cpuHist.size () > w) i = this-> _cpuHist.size () - w;
-	    for (;i < this-> _cpuHist.size () ; i++) {
+	    if (this-> _cpuHist.size () > w) {
+		auto i = this-> _cpuHist.size () - w;
+		this-> _cpuHist = std::vector <double> (this-> _cpuHist.begin () + i, this-> _cpuHist.end ());
+	    }
+		    
+	    auto scale = (double) h / this-> findMax (this-> _cpuHist);	    
+	    for (int i = 0 ; i < this-> _cpuHist.size () ; i++) {
 		o[i] = this-> _cpuHist[i] * scale;
 	    }
+	    
 	    return o;
 	}) | color (Color::BlueLight);
 
 	auto ramGraph = graph ([&](int w,int h) {
 	    std::vector <int> o (w);
-	    int i = 0;
-	    auto scale = (double) h / this-> findMax (this-> _ramHist);
-	    
-	    if (this-> _ramHist.size () > w) i = this-> _ramHist.size () - w;
-	    for (; i < this-> _ramHist.size () ; i++) {
+	    if (this-> _ramHist.size () > w) {
+		auto i = this-> _ramHist.size () - w;
+		this-> _ramHist = std::vector <double> (this-> _ramHist.begin () + i, this-> _ramHist.end ());
+	    }
+
+	    auto scale = (double) h / this-> findMax (this-> _ramHist);	    
+	    for (int i = 0; i < this-> _ramHist.size () ; i++) {
 		o[i] = this-> _ramHist[i] * scale;
 	    }
 	    
@@ -388,12 +387,14 @@ namespace tools::vjoule {
 	}) | color (Color::RedLight);
 
 	auto gpuGraph = graph ([&](int w,int h) {
-	    std::vector <int> o (w);
-	    int i = 0;
-	    auto scale = (double) h / this-> findMax (this-> _gpuHist);
+	    std::vector <int> o (w);	    
+	    if (this-> _gpuHist.size () > w) {
+		auto i = this-> _gpuHist.size () - w;
+		this-> _gpuHist = std::vector <double> (this-> _gpuHist.begin () + i, this-> _gpuHist.end ());
+	    }
 	    
-	    if (this-> _gpuHist.size () > w) i = this-> _gpuHist.size () - w;
-	    for (; i < this-> _gpuHist.size () ; i++) {
+	    auto scale = (double) h / this-> findMax (this-> _gpuHist);
+	    for (int i = 0; i < this-> _gpuHist.size () ; i++) {
 		o[i] = this-> _gpuHist[i] * scale;
 	    }
 	    return o;

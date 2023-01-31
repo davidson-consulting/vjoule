@@ -166,7 +166,7 @@ namespace tools::vjoule {
 	/**
 	 * @returns: the graph showing the dynamic consumption of the system
 	 */
-	ftxui::Element createGraph () const;
+	ftxui::Element createGraph ();
 
 	/**
 	 * @returns: the maximum value of the vector

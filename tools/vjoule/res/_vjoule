@@ -12,7 +12,8 @@ _vjoule() {
 
     GLOBAL_COMMANDS="\
 		exec\
-		profile"
+		profile\
+		top"
 
     GLOBAL_OPTIONS="\
 		-h --help -v --version"
@@ -21,6 +22,9 @@ _vjoule() {
 		-h --help -v --version -nv --no-nvidia -nr --no-rapl --no-cpu --no-ram --no-gpu -o --output"
 
     PROFILE_OPTIONS="\
+		-h --help -v --version"
+
+    TOP_OPTIONS="\
 		-h --help -v --version"
     
     # Un-comment this for debug purposes:
@@ -31,6 +35,9 @@ _vjoule() {
 	    ;;
 	profile)
 	    complete_options="$PROFILE_OPTIONS"
+	    ;;
+	top)
+	    complete_options="$TOP_OPTIONS"
 	    ;;
 	*)
 	    case "${prev}" in
