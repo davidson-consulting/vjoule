@@ -56,7 +56,13 @@ _vjoule() {
 
     elif [[ $prev == "vjoule" ]]; then
     	COMPREPLY=($( compgen -W "$complete_words" -- $cur ))
+    elif [[ "$cur" == *"/"$ ]]; then
+        echo "contain"
+    	_filedir
     else
+        COMPREPLY=( $(compgen -c -W "$complete_words" -- "$cur") )
+    	[[ $COMPREPLY ]] && [[ "$COMPREPLY" != *"/"* ]] && return
+
 	_filedir
     fi
 
