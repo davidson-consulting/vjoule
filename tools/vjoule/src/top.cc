@@ -12,6 +12,10 @@ using namespace ftxui;
 
 namespace tools::vjoule {
 
+    double max (double x, double y) {
+	return x > y ? x : y;
+    }
+    
     Top::Top (const CommandLine & cmd) :
 	_cmd (cmd),
 	_cfgPath (),
@@ -192,9 +196,9 @@ namespace tools::vjoule {
 	    Result r {
 		.cpuJ = cpu, .ramJ = ram, .gpuJ = gpu,
 		.cpuW = 0, .ramW = 0, .gpuW = 0,
-		.cpuP = cpu / this-> _glob.cpuJ * 100,
-		.ramP = ram / this-> _glob.ramJ * 100,
-		.gpuP = gpu / this-> _glob.gpuJ * 100
+		.cpuP = cpu / max (1, this-> _glob.cpuJ) * 100,
+		.ramP = ram / max (1, this-> _glob.ramJ) * 100,
+		.gpuP = gpu / max (1, this-> _glob.gpuJ) * 100
 	    };
 	    
 	    if (it != this-> _results.end ()) {
@@ -220,7 +224,7 @@ namespace tools::vjoule {
     }
 
     void Top::insertHistory () {
-	if (this-> _cpuHist.size () > 100) {
+	if (this-> _cpuHist.size () > 1000) {
 	    this-> _cpuHist = std::vector (this-> _cpuHist.begin () + 1, this-> _cpuHist.end ());
 	    this-> _ramHist = std::vector (this-> _ramHist.begin () + 1, this-> _ramHist.end ());
 	    this-> _gpuHist = std::vector (this-> _gpuHist.begin () + 1, this-> _gpuHist.end ());
@@ -395,7 +399,7 @@ namespace tools::vjoule {
 	    return o;
 	}) | color (Color::YellowLight);
 
-
+	
 	cpuGraph = vbox({text (std::to_string (this-> findMax (this-> _cpuHist))), cpuGraph});
 	gpuGraph = vbox({text (std::to_string (this-> findMax (this-> _gpuHist))), gpuGraph});
 	ramGraph = vbox({text (std::to_string (this-> findMax (this-> _ramHist))), ramGraph});
