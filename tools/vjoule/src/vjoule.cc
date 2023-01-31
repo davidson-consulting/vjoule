@@ -71,7 +71,7 @@ namespace tools::vjoule {
 
     void VJoule::create_default_cgroups_list() {
 	std::ofstream ofs (utils::join_path(this-> _working_directory, "cgroups"), std::ofstream::out);
-	ofs << "vjoule_xp.slice/*" << std::endl;
+	ofs << this-> _cgroup.getName () << std::endl;
     }
 
     void VJoule::create_configuration() {
