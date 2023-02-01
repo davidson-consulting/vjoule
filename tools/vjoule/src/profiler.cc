@@ -9,6 +9,20 @@ using namespace common;
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
 
+#define STRESS_MWC_SEED_Z	(362436069UL)
+#define STRESS_MWC_SEED_W	(521288629UL)
+
+struct stress_mwc_t {
+	uint32_t w;
+	uint32_t z;
+};
+
+uint32_t custom_rand(stress_mwc_t & mwc) {
+    mwc.z = 36969 * (mwc.z & 65535) + (mwc.z >> 16);	      
+    mwc.w = 18000 * (mwc.w & 65535) + (mwc.w >> 16);		
+    return (mwc.z << 16) + mwc.w;
+}
+
 void printProgress(double percentage) {
     int val = (int) (percentage * 100);
     int lpad = (int) (percentage * PBWIDTH);
@@ -101,16 +115,18 @@ namespace tools::vjoule {
 	for (uint64_t i = 0 ; i < get_nprocs () ; i++) {
 	    printProgress ((double) i / (double) get_nprocs ());
 	    s.forcedIteration ();	    
-	    t.reset ();
 	    float ocpu = 0, oram = 0;
 	    this-> readConsumption (ocpu, oram);
-	    
+
+	    t.reset ();
 	    this-> runLoad (i + 1);
+	    auto time = t.time_since_start ();
+	    
 	    s.forcedIteration ();
 	    float cpu = 0, ram = 0;
 	    this-> readConsumption (cpu, ram);
 
-	    auto time = t.time_since_start ();
+	    t.sleep (1);
 	    t.reset ();
 	    results.push_back ({
 		    (cpu - ocpu) / time,
@@ -131,34 +147,10 @@ namespace tools::vjoule {
     }
 
     void Profiler::runLoad (uint64_t nb) {
-	this-> _allRes = 0;
-	std::vector <concurrency::thread> ths;
-	for (uint64_t i = 0 ; i < nb ; i++) {
-	    ths.push_back (concurrency::spawn (this, &Profiler::computePi));
-	}
-
-	for (uint64_t i = 0 ; i < nb ; i++) {
-	    concurrency::join (ths[i]);
-	}
-    }
-
-    void Profiler::computePi (common::concurrency::thread) {
-	double res = 0.0f;
-	for (uint64_t i = 0 ; i < this-> _nbIter ; i++) {
-	    res = res + vjoule::computePi (100000000); 
-	}
-
-	this-> _allRes += res / (double) this-> _nbIter;
-    }    
-
-    double computePi (uint64_t prec) {
-	double res = 0;
-	double prec_d = (double) prec;
-	for (uint64_t i = 0  ; i < prec ; i++) {
-	    res += (4.0 / prec_d) / (1.0 + (((double) (i) - 0.5) * (1.0 / prec_d)) * (((double) (i) - 0.5) * (1.0 / prec_d)));
-	}
-	
-	return res;	
+	std::vector <std::string> args = {"-c", std::to_string (nb), "--timeout", "4s"};
+	auto proc = concurrency::SubProcess ("stress", args, ".");
+	proc.start ();
+	proc.wait ();
     }
     
 }

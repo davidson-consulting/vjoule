@@ -72,7 +72,7 @@ namespace tools::vjoule {
 	/**
 	 * Run the compute pi load
 	 */
-	void computePi (common::concurrency::thread);
+	void stress (common::concurrency::thread);
 	
     };
     
