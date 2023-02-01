@@ -1,4 +1,4 @@
-# Files of interests
+# Files of interest
 
 Once vJoule is installed, you should find a directory located in
 `/etc/vjoule` that contains configurations, logs and results. For

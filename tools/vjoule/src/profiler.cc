@@ -141,7 +141,7 @@ namespace tools::vjoule {
 	printf ("%10s | %8s | %8s |\n", "Nb cores", "CPU", "RAM");
 	printf (" %9c | %8c | %8c |\n", '-', '-', '-');
 	for (uint64_t i = 0 ; i < res.size () ; i++) {
-	    printf ("%10ld | %8.5f | %8.5f |\n", i, res[i].cpu, res[i].ram);
+	    printf ("%10ld | %8.5fW | %8.5fW |\n", i, res[i].cpu, res[i].ram);
 	}	
     }
 
