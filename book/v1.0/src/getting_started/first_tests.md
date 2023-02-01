@@ -17,9 +17,11 @@ $ # Here, ls is not a subcommand of vjoule
 $ # We mesure the energy consummed by the ls command execution
 $ vjoule ls
 
-###
-# RESULT
-###
+# Output 
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.11554J|    0.22155J|     0.2025J|
+|Process |    0.21457J|          0J|   0.048371J|
 ```
 
 You can also use vjoule on a command that needs parameters. In this case, we will estimate the energy consumption of the `stress` command.
@@ -27,9 +29,11 @@ You can also use vjoule on a command that needs parameters. In this case, we wil
 ```bash
 $ vjoule stress --cpu 2 --timeout 2s
 
-###
-# RESULT
-###
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    85.4813J|    10.2509J|    10.4242J|
+|Process |    84.8442J|          0J|   0.820489J|
 ```
 
 Of course, you can use vjoule while executing, let's say, a python script.
@@ -37,9 +41,11 @@ Of course, you can use vjoule while executing, let's say, a python script.
 ```bash
 $ vjoule python myscript.py
 
-###
-# RESULT
-###
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.16052J|   0.312761J|   0.257263J|
+|Process |   0.957794J|          0J|   0.190821J|
 ```
 
 
