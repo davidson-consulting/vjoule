@@ -12,6 +12,10 @@
 	- [The dumper core](./user_guide/dumping_core.md)
 	- [Sensor plugins](./user_guide/sensor_plugins.md)
 	- [Fetching results with pullers](./user_guide/pullers.md)
+- [vjoule CLI](./cli/index.md)
+	- [vjoule exec](./cli/exec.md)
+	- [vjoule profile](./cli/profile.md)
+	- [vjoule top](./cli/top.md)
 - [Tutorials](./tutorial/index.md)
 	- [Measuring a program](./tutorial/mesuring.md)
 
