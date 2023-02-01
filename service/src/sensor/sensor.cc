@@ -121,7 +121,7 @@ namespace sensor {
 	    this-> configureCore (sensorConfig);
 	} else {
 	    LOG_ERROR ("Core is not defined in the configuration.");
-	    exit (-1);
+	    throw 1;
 	}	
     }
 
@@ -152,7 +152,7 @@ namespace sensor {
 	    this-> _computeCore = this-> _core-> getFunction <common::plugin::CoreComputeFunc_t> ("compute");
 	    if (this-> _computeCore == nullptr) {
 		LOG_ERROR ("Core plugin has no 'void compute ()' function");
-		exit (-1);
+		throw 1;
 	    }
 	    return;	    
 	} else {
@@ -161,7 +161,7 @@ namespace sensor {
 	}
 	
 	LOG_ERROR ("Configuration of core failed.");
-	exit (-1);	
+	throw 1;	
     }
 
     void Sensor::configurePlugin (const std::string & kind, const common::utils::config::dict & config) {
@@ -172,7 +172,7 @@ namespace sensor {
 	
 	if (!this-> _factory.configurePlugin (k, config)) {
 	    LOG_ERROR ("Failed to configure plugin of kind '", k, "' : ", config);
-	    exit (-1);
+	    throw 1;
 	}
     }
 

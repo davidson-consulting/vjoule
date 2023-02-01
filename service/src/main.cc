@@ -14,8 +14,12 @@ int main (int argc, char ** argv) {
 	exit (-1);
     }
 
-    ::sensor::Sensor s (argc, argv);
-    s.run ();
+    try {
+	::sensor::Sensor s (argc, argv);
+	s.run ();
+    } catch (...) {
+	return -1;
+    }
     
     return 0;
 }

@@ -23,7 +23,7 @@ void printProgress(double percentage) {
 namespace tools::vjoule {
 
     Profiler::Profiler (const CommandLine & cmd)
-	: _cmd (cmd), _nbIter (50)
+	: _cmd (cmd), _nbIter (5)
     {
 	utils::becomeSudo ();
 	std::string cwd = std::filesystem::current_path().string(); 
@@ -145,7 +145,7 @@ namespace tools::vjoule {
     void Profiler::computePi (common::concurrency::thread) {
 	double res = 0.0f;
 	for (uint64_t i = 0 ; i < this-> _nbIter ; i++) {
-	    res = res + vjoule::computePi (10000000); 
+	    res = res + vjoule::computePi (100000000); 
 	}
 
 	this-> _allRes += res / (double) this-> _nbIter;
