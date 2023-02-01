@@ -3,7 +3,7 @@
 Now that vJoule is installed on your computer, let's try it. Remember that vJoule is available through two interfaces:
 
 - A **command line interface**, useful for simple and quick usage
-- A linux **service**, useful if you need to embeed vJoule in a program
+- A linux **service**, useful if you need to embed vJoule in a program
 
 This section presents just a basic test to make sure vjoule is
 properly installed. A more thorough tutorial is presented in the

@@ -63,16 +63,24 @@ defines the list of perf events to watched for each cgroups monitored
 by vJoule, and defines the values that will be dumped inside the
 *cgroups.csv* file.
 
-## Cgroup files
 
-The dumper core plugin uses another configuration file, in '/etc/vjoule/cgroups', to filter the cgroups that are watched by the sensor, and ignore unwanted cgroups.
-This configuration file is a list of rules, every rules must start with a slice (a cgroup that contains other cgroups).
-For example 'my.slice/*'., will make the sensor watch all the cgroups in the slice 'my.slice', and 'system.slice/docker*' will watch all the cgroups in 'system.slice' that starts with 'docker'.
-Basically, it list all the cgroups that would be found if the command 'ls my_rule' was run in the cgroup mount directory.
-The following presents an example of configuration for cgroup listing that has to be placed in '/etc/vjoule/cgroups'
+## Cgroups file
 
-```
+The dumper core plugin uses another configuration file, in
+`/etc/vjoule/cgroups`, to filter the cgroups that are watched by the
+sensor, and ignore unwanted cgroups.  This configuration file is a
+list of rules, every rules must start with a slice (a cgroup that
+contains other cgroups).  For example `my.slice/*`., will make the
+sensor watch all the cgroups in the slice `my.slice`, and
+`system.slice/docker*` will watch all the cgroups in `system.slice`
+that starts with `docker`.  Basically, it lists all the cgroups that
+would be found if the command `ls my_rule` was run in the cgroup mount
+directory.  The following presents an example of configuration for
+cgroup listing that has to be placed in `/etc/vjoule/cgroups`.
+
+``` 
 vjoule.slice/*
 system.slice/docker*
 my_custom.slice/my_custom_cgroup
 ```
+

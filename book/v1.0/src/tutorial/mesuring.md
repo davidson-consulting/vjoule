@@ -68,4 +68,4 @@ $ sudo cgexec -g cpu:measurements.slice/compute_pi python compute_pi.py
 ### Getting the results
 You should now have a non-zero value in results files. If some are empty, that's because your you did not activated a component or that it was not available.
 
-The value present in the results files are expressed in Joules. It correspond to the amount of energy consummed since vJoule started to monitor the related cgroup.
+The value present in the results files are expressed in Joules. It correspond to the amount of energy consumed since vJoule started to monitor the related cgroup.
