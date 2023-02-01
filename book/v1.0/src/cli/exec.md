@@ -37,4 +37,4 @@ Global  ;    1.16052J;   0.312761J;   0.257263J;
 Process ;   0.957794J;          0J;   0.190821J;
 ```
 
-vJoule CLI will create a result directory every time it is run. Every results directories are stored under the *__vjoule* directory. The *__vjoule/latest* directory is a symbolic link to the latest run.
+vJoule CLI will create a result directory every time it is run. Every result directories are stored under the *__vjoule* directory. The *__vjoule/latest* directory is a symbolic link to the latest run.
