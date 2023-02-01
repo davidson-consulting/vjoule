@@ -6,8 +6,8 @@ namespace common::utils {
 
     concurrency::mutex Logger::__mutex__;
 
-    Logger Logger::__globalInstance__ (LogLevel::SUCCESS);
-	
+    Logger * Logger::__globalInstance__ = nullptr; 
+    
     void content_print () {}
 	    
     std::string get_time () {		
@@ -32,7 +32,7 @@ namespace common::utils {
     Logger::Logger (LogLevel level) :
 	_level (level),
 	_stream (&std::cout)
-    {	
+    {
 	(*this-> _stream) << std::fixed << std::setprecision(8);
     }
 
@@ -45,15 +45,20 @@ namespace common::utils {
 	(*this-> _stream) << std::fixed << std::setprecision(8);
 	this-> _path = logPath;
     }
-
-    void Logger::redirect (const std::string& logPath) {
+    
+    void Logger::redirect (const std::string& logPath, bool erase) {
 	if (logPath != "") {
-	    this-> _file = std::ofstream (logPath, std::ios::out);
+	    if (erase) {
+		this-> _file = std::ofstream (logPath, std::ios::out | std::ios::trunc);
+	    }
+	    
+	    this-> _file = std::ofstream (logPath, std::ios::app);	    
 	    this-> _stream = &this-> _file;
 	    this-> _path = logPath;
 	} else {
 	    this-> _file.close ();
 	    this-> _stream = &std::cout;
+	    this-> _path = "";
 	}
 	
 	(*this-> _stream) << std::fixed << std::setprecision(8);
@@ -91,8 +96,23 @@ namespace common::utils {
 	return this-> _path;
     }
 
+    std::string  Logger::getLogLevel () const {
+	if (this-> _level == LogLevel::NONE) return "none";
+	if (this-> _level == LogLevel::ERROR) return "error";
+	if (this-> _level == LogLevel::WARN) return "warn";
+	if (this-> _level == LogLevel::INFO) return "info";
+	if (this-> _level == LogLevel::SUCCESS) return "success";
+	if (this-> _level == LogLevel::STRANGE) return "strange";
+	if (this-> _level == LogLevel::DEBUG) return "debug";
+	return "all";
+    }
+
     Logger& Logger::globalInstance () {
-	return __globalInstance__;
+	if (__globalInstance__ == nullptr) {
+	    __globalInstance__ = new Logger (LogLevel::SUCCESS);
+	}
+	
+	return *__globalInstance__;
     }	   
 
     void Logger::dispose () {
@@ -101,6 +121,13 @@ namespace common::utils {
 	this-> _path = "";
     }	
 
+    void Logger::clear () {
+	if (__globalInstance__ != nullptr) {
+	    delete __globalInstance__;
+	    __globalInstance__ = nullptr;
+	}
+    }
+    
 
     Logger::~Logger () {}
 }

@@ -2,6 +2,12 @@ $( document ).ready(function() {
     var menu = document.getElementById ("menu-bar");
     var right_buttons = menu.querySelector (".right-buttons");
 
+    var github_url = document.createElement ("a");
+    github_url.setAttribute ("id", "github-url");
+    github_url.classList.add ("fa");
+    github_url.classList.add ("fa-github");
+    github_url.setAttribute ("href", "https://github.com/davidson-consulting/vjoule/");    
+    
     var print_button = right_buttons.firstElementChild;
     var version_button = document.createElement ("i");
     version_button.setAttribute ("id", "version-toggle");
@@ -14,9 +20,11 @@ $( document ).ready(function() {
     
     version_button.setAttribute ("title", "change version");
 
-    right_buttons.removeChild (print_button);
+    right_buttons.textContent = "";
+
     right_buttons.appendChild (version_button);
-    right_buttons.appendChild (print_button);
+    right_buttons.appendChild (github_url);
+
     
     $("#version-toggle").click(function(){
         if($('.version-popup').length) {

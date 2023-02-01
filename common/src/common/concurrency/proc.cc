@@ -13,7 +13,31 @@ namespace common::concurrency {
     SubProcess::SubProcess (const std::string & cmd, const std::vector <std::string> & args, const std::string & cwd) :
 	_cmd (cmd), _args (args), _cwd (cwd)
     {}
+
+
+    SubProcess::SubProcess (SubProcess && other) :
+	_stdin (std::move (other._stdin)),
+	_stdout (std::move (other._stdout)),
+	_stderr (std::move (other._stderr)),
+	_cwd (std::move (other._cwd)),
+	_args (std::move (other._args)),
+	_cmd (std::move (other._cmd)),
+	_pid (std::move (other._pid))
+    {}
+
+    void SubProcess::operator= (SubProcess && other) {
+	this-> _stderr.close ();
+	this-> _stdout.close ();
+	this-> _stdin.close ();
 	
+	this-> _stdin = std::move (other._stdin);
+	this-> _stdout = std::move (other._stdout);
+	this-> _stderr = std::move (other._stderr);
+	this-> _cwd = std::move (other._cwd);
+	this-> _args = std::move (other._args);
+	this-> _cmd = std::move (other._cmd);
+	this-> _pid = std::move (other._pid);
+    }    
     
     /**
      * ================================================================================
@@ -24,16 +48,19 @@ namespace common::concurrency {
      */
 
     
-    void SubProcess::start () {
+    void SubProcess::start (bool redirect) {
 	this-> _pid = ::fork ();
 	if (this-> _pid == 0) {
-	    this-> child ();
+	    this-> child (redirect);
 	}
-
 
 	this-> _stdin.ipipe ().close ();
 	this-> _stdout.opipe ().close ();
 	this-> _stderr.opipe ().close ();
+	
+	this-> _stdin.opipe ().setNonBlocking ();
+	this-> _stdout.ipipe ().setNonBlocking ();
+	this-> _stderr.ipipe ().setNonBlocking ();
     }
 
     void SubProcess::startDebug () {
@@ -41,22 +68,32 @@ namespace common::concurrency {
 	if (this-> _pid == 0) {	    
 	    personality(ADDR_NO_RANDOMIZE);
 	    ptrace (PTRACE_TRACEME, 0, nullptr, nullptr);
-	    this-> child ();
+	    this-> child (true);
 	}
 
 	this-> _stdin.ipipe ().close ();
 	this-> _stdout.opipe ().close ();
-	this-> _stderr.opipe ().close ();	
+	this-> _stderr.opipe ().close ();
+
+	this-> _stdin.opipe ().setNonBlocking ();
+	this-> _stdout.ipipe ().setNonBlocking ();
+	this-> _stderr.ipipe ().setNonBlocking ();
+	
     }    
 
-    void SubProcess::child () {
-	::dup2 (this-> _stdin.ipipe ().getHandle (), STDIN_FILENO);
-	::dup2 (this-> _stdout.opipe ().getHandle (), STDOUT_FILENO);
-	::dup2 (this-> _stderr.opipe ().getHandle (), STDERR_FILENO);
+    void SubProcess::child (bool redirect) {
+	this-> _stderr.opipe ().setNonBlocking ();
+	this-> _stdout.opipe ().setNonBlocking ();
 
-	this-> _stdin.close ();
-	this-> _stdout.close ();
-	this-> _stderr.close ();
+	if (redirect) {
+	    ::dup2 (this-> _stdin.ipipe ().getHandle (), STDIN_FILENO);
+	    ::dup2 (this-> _stdout.opipe ().getHandle (), STDOUT_FILENO);
+	    ::dup2 (this-> _stderr.opipe ().getHandle (), STDERR_FILENO);
+
+	    this-> _stdin.close ();
+	    this-> _stdout.close ();
+	    this-> _stderr.close ();
+	}
 
 	std::vector <const char*> alls;
 	alls.push_back (this-> _cmd.c_str ());
@@ -69,7 +106,7 @@ namespace common::concurrency {
 
 	int out = ::execvp (alls [0],  const_cast<char* const *> (alls.data ()));
 	if (out == -1) {
-	    printf ("execvp () failed\n");
+	    std::cerr << "Command not found '" << alls [0] << "'" << std::endl;
 	}
 
 	exit (0);
@@ -79,6 +116,12 @@ namespace common::concurrency {
 	return this-> _pid;
     }
 
+    bool SubProcess::isFinished () const {
+	waitpid (this-> _pid, nullptr, 1);
+	if (::kill (this-> _pid, 0) == -1) return true;
+
+	return false;
+    }
     
     void SubProcess::kill () {
 	this-> _stdin.close ();

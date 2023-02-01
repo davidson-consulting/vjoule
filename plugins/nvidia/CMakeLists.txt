@@ -1,0 +1,12 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+project(nvidia)
+
+set_directory_properties(PROPERTIES
+  ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/nvidia.so
+  )
+
+add_custom_target(nvidia ALL
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+  )
+
+install (FILES ${CMAKE_CURRENT_BINARY_DIR}/nvidia.so DESTINATION /etc/vjoule/plugins)

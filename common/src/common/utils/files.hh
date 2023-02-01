@@ -1,11 +1,13 @@
 #pragma once
 #include <sys/stat.h>
 #include <common/utils/error.hh>
+#include <vector>
 
 #define VJOULE_DIR "/etc/vjoule/"
 
 namespace common::utils {
 
+       
     class FileError : public utils::CommonError {
     public:
 	FileError(const std::string& msg);
@@ -28,6 +30,11 @@ namespace common::utils {
     std::string parent_directory(const std::string& path);
 
     /**
+     * @returns: true of parent is a parent directory of path
+     */
+    bool is_parent_directory (const std::string & parent, const std::string & path);
+    
+    /**
      * @return: the absolute path of the file
      * @info: the file will be search in INCLUDE_DIR and ADDONS
      * @throw: file_error, if the file does not exists
@@ -46,6 +53,21 @@ namespace common::utils {
      *    - sub_dir: the sub directory in the include_dir
      */
     std::string get_absolute_path_if_exists(const std::string& relative, const std::string& sub_dir = "");
+
+    /**
+     * @returns: the type of mount of a given path
+     */
+    std::string get_mount_type (const std::string & path);
+
+    /**
+     * @returns: the list of path that are mounted with type type
+     */
+    std::vector <std::string> get_mount_loc (const std::string & type);
+
+    /**
+     * @returns: the mount point of cgroup dir
+     */
+    std::string get_cgroup_mount_point (bool &isV2);
     
 }
 

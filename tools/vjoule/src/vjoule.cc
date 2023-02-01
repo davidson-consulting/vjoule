@@ -1,132 +1,209 @@
-#include <common/concurrency/_.hh>
-
-#include <string>
-#include <iostream>
-#include <unistd.h>
-#include <libcgroup.h>
+#include <filesystem>
 #include <sys/wait.h>
+#include <fstream>
 
-#include <rapl.hh>
+#include <sensor/_.hh>
+#include <common/_.hh>
+#include <watcher.hh>
 #include <vjoule.hh>
-#include <watch.hh>
-#include <vjoule_exec.hh>
+#include <exporter.hh>
 
-namespace tools::vjoule
-{
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
 
-	VJoule::VJoule(int argc, char *argv[]) : _argc(argc),
-											 _argv(argv)
-	{
-		if (getuid())
-		{
-			std::cerr << "You are not root. This program will only work if run as root." << std::endl;
-			exit(-1);
-		}
 
-		if (argc < 2)
-		{
-			std::cerr << "Usage: vjoule cmd [options...]" << std::endl;
-			exit(-1);
-		}
+using namespace common;
 
-		if ((strcmp(argv[1], "--help") == 0) || (strcmp(argv[1], "-h") == 0)) {
-			std::cerr << "Usage: vjoule cmd [options...]" << std::endl;
-			exit(-1);
-		}
+namespace tools::vjoule {
+    
+    VJoule::VJoule(const CommandLine & cmd) :
+	_cmd (cmd), _cgroup ("vjoule_xp.slice/process_" + std::to_string (getpid ()))
+    {
+	std::string current_path = std::filesystem::current_path().string(); 
 
-		std::vector<std::string> subargs;
-		for (int i = 2; i < argc; i++)
-		{
-			subargs.push_back(argv[i]);
-		}
+	this-> _vjoule_directory = utils::join_path(current_path, "__vjoule");
+	std::filesystem::create_directories (this-> _vjoule_directory);
 
-		this->_child = common::concurrency::SubProcess(argv[1], subargs, ".");
+	this-> _working_directory = utils::join_path(this-> _vjoule_directory, "latest");
+	this-> _cfg_path = utils::join_path(this-> _working_directory, "config.toml");
 
-		// create cgroup for running vjoule_exec
-		int ret = 0;
-		ret = cgroup_init();
-
-		if (ret)
-		{
-			fprintf(stderr, "cgroup_init failed\n");
-			exit(1);
-		}
-
-		struct cgroup *cg = NULL;
-		cg = cgroup_new_cgroup("vjoule_xp.slice/process");
-		if (!cg)
-		{
-			fprintf(stderr, "Failed to allocate cgroup %s\n", "vjoule_xp.slice/process");
-			exit(1);
-		}
-
-		struct cgroup_controller *cgc;
-		cgc = cgroup_add_controller(cg, "cpu");
-		if (!cgc)
-		{
-			printf("FAIL: cgroup_add_controller failed\n");
-			exit(3);
-		}
-
-		ret = cgroup_create_cgroup(cg, 0);
-		if (ret)
-		{
-			printf("FAIL: cgroup_create_cgroup failed with %s\n",
-				   cgroup_strerror(ret));
-			exit(3);
-		}
+	std::vector<std::string> subargs;
+	if (this-> _cmd.subCmd.size () >= 2) {
+	    subargs.insert (subargs.end (), this-> _cmd.subCmd.begin () + 1, this-> _cmd.subCmd.end ());
 	}
+	
+	this->_child = concurrency::SubProcess(this-> _cmd.subCmd [0], subargs, ".");
+	
+	this-> create_result_directory();
+	this-> create_configuration();
+    }
 
-	void VJoule::run()
-	{
-		pfm_initialize();
-
-		// get perf counters & energy consumption
-		std::vector<std::string> eventList = {"PERF_COUNT_HW_CPU_CYCLES", "LLC_MISSES"};
-
-		PerfEventWatcher systemWatcher = PerfEventWatcher("/sys/fs/cgroup");
-		systemWatcher.configure(eventList);
-		PerfEventWatcher cgWatcher = PerfEventWatcher("/sys/fs/cgroup/vjoule_xp.slice");
-		cgWatcher.configure(eventList);
-
-		RaplReader raplReader = RaplReader();
-		common::net::Packet raplValues;
-
-		// std::cout << cgWatcher.poll() << std::endl;
-		// std::cout << systemWatcher.poll() << std::endl;
-		// std::cout << raplValues << std::endl;
-
-		pid_t c_pid = fork();
-
-		if (c_pid == -1)
-		{
-			printf("Could not fork to execute vjoule_exec");
-			exit(EXIT_FAILURE);
-		}
-		else if (c_pid > 0)
-		{
-			// parent process
-			int status;
-			wait(&status);
-
-			std::vector<long long> perfCountersCG = cgWatcher.poll();
-			std::vector<long long> perfCountersSystem = systemWatcher.poll();
-			raplReader.poll(raplValues);
-
-			std::cout << "== Memory == " << std::endl;
-			float energyDramCG = raplValues.energy_dram * ((double)perfCountersCG[1] / (double)perfCountersSystem[1]);
-			std::cout << "Energy consumed by machine " << raplValues.energy_dram << "j - Energy consummed by process " << energyDramCG << "j (" << energyDramCG / raplValues.energy_dram * 100 << "\% of total)" << std::endl;
-
-			std::cout << "== Package == " << std::endl;
-			float energyPackageCG = raplValues.energy_pkg * ((double)perfCountersCG[0] / (double)perfCountersSystem[0]);
-			std::cout << "Energy consumed by machine " << raplValues.energy_pkg << "j - Energy consummed by process " << energyPackageCG << "j (" << energyPackageCG / raplValues.energy_pkg * 100 << "\% of total)" << std::endl;
-
-			pfm_terminate();
-		}
-		else
-		{
-			// child process
-			vjoule_exec("vjoule_xp.slice/process", this->_child);
-		}
+    void VJoule::create_default_config() {
+	std::ofstream ofs (this-> _cfg_path, std::ofstream::out);
+	ofs << "[sensor]" << std::endl;
+	ofs << "freq = 1 # frequency of update in hertz (the higher the faster)" << std::endl;
+	ofs << "log-lvl = \"info\" # debug < success < info < warn < error < none" << std::endl;
+	ofs << "log-path = \"" << utils::join_path(this-> _vjoule_directory, "logs") << "\" # log file (empty means stdout)" << std::endl;
+	ofs << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl;
+	ofs << "output-dir = \"" << this-> _working_directory << "\"" <<std::endl;
+	ofs << "cgroups = \"" <<  utils::join_path(this-> _working_directory, "cgroups") << "\"" << std::endl;
+	ofs << "mount-tmpfs = false" << std::endl;
+	ofs << std::endl;
+	if (this-> _cmd.cpu && this-> _cmd.rapl) {
+	    ofs << "[cpu] # configuration to enable CPU energy reading" << std::endl;
+	    ofs << "name = \"rapl\" # rapl plugin for compatible intel or amd cpus" << std::endl;
+	    ofs << std::endl;
 	}
+	if (this-> _cmd.ram && this-> _cmd.rapl) {
+	    ofs << "[ram] # configuration to enable RAM energy reading" << std::endl;
+	    ofs << "name = \"rapl\" # rapl plugin for compatible intel or amd cpus" << std::endl;
+	    ofs << std::endl;
+	}
+	if (this-> _cmd.gpu && this-> _cmd.nvidia) {
+	    ofs << "[gpu:0] # configuration to enable GPU energy reading" << std::endl;
+	    ofs << "name = \"nvidia\" # nvidia plugin for nvidia GPUs" << std::endl;
+	    ofs << std::endl;
+	}
+	
+	if (this-> _cmd.gpu && this-> _cmd.rapl) {
+	    ofs << "[gpu:1] # configuration to enable GPU energy " << std::endl;
+	    ofs << "name = \"rapl\" # rapl plugin form compatible intel of amd cpus" << std::endl;
+	}
+    }
+
+    void VJoule::create_default_cgroups_list() {
+	std::ofstream ofs (utils::join_path(this-> _working_directory, "cgroups"), std::ofstream::out);
+	ofs << this-> _cgroup.getName () << std::endl;
+    }
+
+    void VJoule::create_configuration() {
+	this-> create_default_config();	
+	this-> create_default_cgroups_list();
+    }
+
+    void VJoule::create_result_directory() {
+	std::string result_dir = utils::join_path(this-> _vjoule_directory, utils::get_time_no_space());
+	std::filesystem::create_directories(result_dir);
+    
+	if (utils::file_exists(this-> _working_directory)) {
+	    std::filesystem::remove(this-> _working_directory);
+	}
+	std::filesystem::create_directory_symlink(result_dir, this-> _working_directory);
+    }
+
+    void VJoule::run() {		
+	int pipes[2];
+	if (pipe (pipes) == -1) {
+	    std::cout << "Error .." << std::endl;
+	};
+
+	pid_t c_pid = fork();
+	if (c_pid == -1) {
+	    printf("Could not fork to execute vjoule_exec");
+	    exit(EXIT_FAILURE);
+	} else if (c_pid > 0) {
+	    close (pipes[0]);
+	    this-> runParent (c_pid, pipes[1]);
+	} else {
+	    close (pipes[1]);
+	    this-> runChild (pipes[0]);	    
+	}
+    }
+    
+    void VJoule::runParent (uint64_t childPid, int pipe) {
+	try {
+	    this-> _cgroup.create ();
+
+	    if (!this-> _cgroup.attach (childPid)) {
+		std::cerr << "cgroup change of group failed." << std::endl;
+		exit (-1);
+	    }
+
+	    char vjoule_exe_name[] =  "vjoule_service";
+	    char vjoule_c_flag[] = "-c", *ccontent = const_cast<char*>(this-> _cfg_path.c_str());
+	    char vjoule_l_flag[] = "-l", lcontent[] = "";
+	    char vjoule_v_flag[] = "-v", *vcontent = const_cast<char*> (this-> _cmd.verbose ? "info" : "warn");
+	    std::vector<char *> args = {
+		vjoule_exe_name,
+		vjoule_c_flag, ccontent,
+		vjoule_l_flag, lcontent,
+		vjoule_v_flag, vcontent
+	    };
+		
+	    ::sensor::Sensor s (args.size(), args.data());
+	    
+	    do {
+		s.forcedIteration();
+	    } while (!utils::file_exists(utils::join_path(this-> _working_directory, this-> _cgroup.getName () + "/cpu")));
+	    
+	    Exporter e (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);	    
+	    s.runAsync();
+
+	    if (write (pipe, "GO!", strlen ("GO!")) == -1) {
+		std::cerr << "Failed to warn child process" << std::endl;
+		kill (childPid, 9);
+	    }
+	    close (pipe);
+	
+	    // wait for child process to finish
+	    int status;
+	    waitpid (childPid, &status, 0);
+
+	    s.forcedIteration();
+
+	    if (strcmp (this-> _cmd.output.c_str(), "") == 0) {
+		e.export_stdout();
+	    } else {
+		e.export_csv (this-> _cmd.output);
+	    }
+	} catch (...) {
+	    std::cerr << "parent process failed .." << std::endl;
+	    this-> _cgroup.detach (childPid);
+	    kill (childPid, 9);
+	    
+	    int status;
+	    waitpid (childPid, &status, 0);
+	}
+	
+	try {
+	    // Clean the cgroup created by the vjoule command line
+	    this-> _cgroup.remove ();
+	    
+	    // if the parent contains no running xp, we remove it to avoid system pollution
+	    cgroup::Cgroup parent ("vjoule_xp.slice");
+	    if (!parent.isSlice ()) { 
+		parent.remove ();
+	    }
+	} catch (...) {
+	    std::cerr << "Error when cleaning cgroups" << std::endl;		
+	}
+	
+    }
+
+    void VJoule::runChild (int pipe) {
+	int c = 0;
+	char buf;
+	while (c = read (pipe, &buf, 1) > 0) {}
+	close (pipe);
+	
+	// child process
+	// attach itself to cgroup
+
+	std::stringstream ss;
+	for (auto & it : this-> _cmd.subCmd) {
+	    ss << it << " ";
+	}
+	
+	// this-> _child.start (false);	    
+	// auto code = this-> _child.wait();
+
+	auto code = system (ss.str ().c_str ());
+	
+	if (code != 0) {
+	    std::cerr << "Command exited with non zero status " << code << std::endl;
+	}
+	    
+	std::cout << std::endl << std::endl;	   	    
+    }
 }

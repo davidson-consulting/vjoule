@@ -6,6 +6,10 @@
 #include <common/concurrency/mutex.hh>
 #include <fstream>
 
+#ifndef __PROJECT__
+#define __PROJECT__ "COMMON"
+#endif
+
 namespace common::utils {
 
     enum class LogLevel : int {
@@ -60,6 +64,7 @@ namespace common::utils {
 	s << a;
 	content_print (s, b...);
     }
+
     
     class Logger {
     private :
@@ -76,7 +81,8 @@ namespace common::utils {
 	// The ofstream path
 	std::string _path;
 
-	static Logger __globalInstance__;
+	
+	static Logger * __globalInstance__;
 	
 	// The level of logging
 	LogLevel _level = LogLevel::SUCCESS;
@@ -104,11 +110,12 @@ namespace common::utils {
 	 */
 	Logger (LogLevel lvl = LogLevel::SUCCESS);
 
+	
 	/**
 	 * write into logPath from now on
 	 * @warning: clear the file at logPath
 	 */
-	void redirect (const std::string& logPath);
+	void redirect (const std::string& logPath, bool erase = false);
 
 	/**
 	 * Change the lvl of the logger
@@ -121,6 +128,11 @@ namespace common::utils {
 	void changeLevel (const std::string & level);
 	
 	/**
+	 * @returns: the log level of the logger
+	 */
+	std::string getLogLevel () const;
+	
+	/**
 	 * @returns: the path of the log file (might be == "")
 	 */
 	const std::string & getLogFilePath () const;
@@ -129,15 +141,17 @@ namespace common::utils {
 	 * @returns: the global instance of the logger
 	 */
 	static Logger& globalInstance ();
+
+
 	
 	/**
 	 * Info log (LogLevel >= LogLevel::INFO)
 	 */
 	template <typename ... T>
-	void info (T... msg) {
+	void info (const char * file, T... msg) {
 	    if (this-> _level >= LogLevel::INFO) {
 		__mutex__.lock ();
-		(*this-> _stream) << "[" << BLUE << "INFO" << RESET << "][" << get_time () << "] ";
+		(*this-> _stream) << "[" << BLUE << "INFO" << RESET << "][" << file << "][" << get_time ()  << "] ";
 		content_print (*this-> _stream, msg...);		
 		(*this-> _stream) << std::endl;
 		__mutex__.unlock ();
@@ -148,10 +162,10 @@ namespace common::utils {
 	 * Debug log (LogLevel >= LogLevel::DEBUG)
 	 */
 	template <typename ... T>
-	void debug (T... msg) {
+	void debug (const char* file, T... msg) {
 	    if (this-> _level >= LogLevel::DEBUG) {
 		__mutex__.lock ();
-		(*this-> _stream) << "[" << PURPLE << "DEBUG" << RESET << "][" << get_time () << "] ";
+		(*this-> _stream) << "[" << PURPLE << "DEBUG" << RESET << "][" << file << "][" << get_time ()  << "] ";
 		content_print (*this-> _stream, msg...);		
 		(*this-> _stream) << std::endl;
 		__mutex__.unlock ();
@@ -163,12 +177,13 @@ namespace common::utils {
 	 * Info log (LogLevel >= LogLevel::ERROR)
 	 */
 	template <typename ... T>
-	void error (T... msg) {
+	void error (const char* file, T... msg) {
 	    if (this-> _level >= LogLevel::ERROR) {
 		__mutex__.lock ();
-		(*this-> _stream) << "[" << RED << "ERROR" << RESET << "][" << get_time () << "] ";
+		(*this-> _stream) << "[" << RED << "ERROR" << RESET << "][" << file << "][" << get_time () << "] ";
 		content_print (*this-> _stream, msg...);
 		(*this-> _stream) << std::endl;
+		this-> _stream-> flush ();
 		__mutex__.unlock ();
 	    }
 	}
@@ -177,12 +192,13 @@ namespace common::utils {
 	 * Info log (LogLevel >= LogLevel::SUCCESS)
 	 */
 	template <typename ... T>
-	void success (T... msg) {
+	void success (const char* file, T... msg) {
 	    if (this-> _level >= LogLevel::SUCCESS) {
 		__mutex__.lock ();
-		*this-> _stream << "[" << GREEN << "SUCCESS" << RESET << "][" << get_time () << "] ";
+		*this-> _stream << "[" << GREEN << "SUCCESS" << RESET << "][" << file << "][" << get_time ()  << "] ";
 		content_print (*this-> _stream, msg...);
 		*this-> _stream << std::endl;
+		this-> _stream-> flush ();
 		__mutex__.unlock ();
 	    }
 	}
@@ -191,12 +207,13 @@ namespace common::utils {
 	 * Info log (LogLevel >= LogLevel::WARN)
 	 */
 	template <typename ... T>
-	void warn (T... msg) {
+	void warn (const char* file, T... msg) {
 	    if (this-> _level >= LogLevel::WARN) {
 		__mutex__.lock ();
-		*this-> _stream << "[" << YELLOW << "WARNING" << RESET << "][" << get_time () << "] ";
+		*this-> _stream << "[" << YELLOW << "WARNING" << RESET << "][" << file << "][" << get_time ()  << "] ";
 		content_print (*this-> _stream, msg...);
 		*this-> _stream << std::endl;
+		this-> _stream-> flush ();
 		__mutex__.unlock ();
 	    }
 	}
@@ -205,12 +222,13 @@ namespace common::utils {
 	 * Info log (LogLevel >= LogLevel::STRANGE)
 	 */
 	template <typename ... T>
-	void strange (T... msg) {
+	void strange (const char * file, T... msg) {
 	    if (this-> _level >= LogLevel::STRANGE) {
 		__mutex__.lock ();
-		*this-> _stream << "[" << PURPLE << "STRANGE" << RESET << "][ " << get_time () << "] ";
+		*this-> _stream << "[" << PURPLE << "STRANGE" << RESET << "][ " << file << "][" << get_time ()  << "] ";
 		content_print (*this-> _stream, msg...);
 		*this-> _stream << std::endl;
+		this-> _stream-> flush ();
 		__mutex__.unlock ();
 	    }
 	}
@@ -221,6 +239,11 @@ namespace common::utils {
 	void dispose ();
 
 	/**
+	 * Dispose the global logger
+	 */
+	static void clear ();
+	
+	/**
 	 * Call this-> dispose ()
 	 */
 	~Logger ();
@@ -228,3 +251,10 @@ namespace common::utils {
     };
       	
 }    
+
+#define LOG_INFO(...) common::utils::Logger::globalInstance ().info (__PROJECT__, __VA_ARGS__);
+#define LOG_DEBUG(...) common::utils::Logger::globalInstance ().debug (__PROJECT__, __VA_ARGS__);
+#define LOG_ERROR(...) common::utils::Logger::globalInstance ().error (__PROJECT__, __VA_ARGS__);
+#define LOG_SUCCESS(...) common::utils::Logger::globalInstance ().success (__PROJECT__, __VA_ARGS__);
+#define LOG_WARN(...) common::utils::Logger::globalInstance ().warn (__PROJECT__, __VA_ARGS__);
+#define LOG_STRANGE(...) common::utils::Logger::globalInstance ().strange (__PROJECT__, __VA_ARGS__);

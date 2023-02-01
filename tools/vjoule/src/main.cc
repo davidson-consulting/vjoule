@@ -1,13 +1,32 @@
 #include <iostream>
 
+#include <sys/wait.h>
 #include <vjoule.hh>
+#include <command.hh>
+#include <profiler.hh>
+#include <top.hh>
 
-// Ajouter la possibilité de demander au sensor de dumper à la commande
-// On aurait un sensor avec une fréquence de 0 (ne fait rien)
-// On lui demanderait de dumper à la commande
-int main(int argc, char * argv[]) {
-	tools::vjoule::VJoule vjoule(argc, argv);
+using namespace tools::vjoule;
+
+
+void signal_callback_handler(int signum) {
+    
+}
+
+int main(int argc, char * argv[]) {    
+    CommandParser parser (argc, argv);
+    auto cmd = parser.getCommandLine ();
+
+    if (cmd.type == CommandType::PROFILE) {
+	Profiler prf (cmd);
+	prf.run ();
+    } else if (cmd.type == CommandType::TOP) {
+	Top t (cmd);
+	t.run ();
+    } else {
+	VJoule vjoule(cmd);
 	vjoule.run();
-
-	return 0;	
+    }
+    
+    return 0;
 }
