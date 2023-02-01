@@ -8,6 +8,11 @@
 #include <vjoule.hh>
 #include <exporter.hh>
 
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+
+
 using namespace common;
 
 namespace tools::vjoule {
@@ -29,8 +34,6 @@ namespace tools::vjoule {
 	}
 	
 	this->_child = concurrency::SubProcess(this-> _cmd.subCmd [0], subargs, ".");
-
-	this-> _cgroup.create ();
 	
 	this-> create_result_directory();
 	this-> create_configuration();
@@ -89,37 +92,65 @@ namespace tools::vjoule {
 	std::filesystem::create_directory_symlink(result_dir, this-> _working_directory);
     }
 
-    void VJoule::run() {
-	char vjoule_exe_name[] =  "vjoule_service";
-	char vjoule_c_flag[] = "-c", *ccontent = const_cast<char*>(this-> _cfg_path.c_str());
-	char vjoule_l_flag[] = "-l", lcontent[] = "";
-	char vjoule_v_flag[] = "-v", *vcontent = const_cast<char*> (this-> _cmd.verbose ? "info" : "warn");
-	std::vector<char *> args = {
-	    vjoule_exe_name,
-	    vjoule_c_flag, ccontent,
-	    vjoule_l_flag, lcontent,
-	    vjoule_v_flag, vcontent
+    void VJoule::run() {		
+	int pipes[2];
+	if (pipe (pipes) == -1) {
+	    std::cout << "Error .." << std::endl;
 	};
-		
-	::sensor::Sensor s (args.size(), args.data());
 
-	do {
-	    s.forcedIteration();
-	} while (!utils::file_exists(utils::join_path(this-> _working_directory, this-> _cgroup.getName () + "/cpu")));
-	
-	Exporter e (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);
 	pid_t c_pid = fork();
-	
 	if (c_pid == -1) {
 	    printf("Could not fork to execute vjoule_exec");
 	    exit(EXIT_FAILURE);
 	} else if (c_pid > 0) {
-	    // parent process
+	    close (pipes[0]);
+	    this-> runParent (c_pid, pipes[1]);
+	} else {
+	    close (pipes[1]);
+	    this-> runChild (pipes[0]);	    
+	}
+    }
+    
+    void VJoule::runParent (uint64_t childPid, int pipe) {
+	utils::becomeSudo ();
+
+	try {
+	    this-> _cgroup.create ();
+
+	    if (!this-> _cgroup.attach (childPid)) {
+		std::cerr << "cgroup change of group failed." << std::endl;
+		exit (-1);
+	    }
+
+	    char vjoule_exe_name[] =  "vjoule_service";
+	    char vjoule_c_flag[] = "-c", *ccontent = const_cast<char*>(this-> _cfg_path.c_str());
+	    char vjoule_l_flag[] = "-l", lcontent[] = "";
+	    char vjoule_v_flag[] = "-v", *vcontent = const_cast<char*> (this-> _cmd.verbose ? "info" : "warn");
+	    std::vector<char *> args = {
+		vjoule_exe_name,
+		vjoule_c_flag, ccontent,
+		vjoule_l_flag, lcontent,
+		vjoule_v_flag, vcontent
+	    };
+		
+	    ::sensor::Sensor s (args.size(), args.data());
+	    
+	    do {
+		s.forcedIteration();
+	    } while (!utils::file_exists(utils::join_path(this-> _working_directory, this-> _cgroup.getName () + "/cpu")));
+	    
+	    Exporter e (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);	    
 	    s.runAsync();
 
+	    if (write (pipe, "GO!", strlen ("GO!")) == -1) {
+		std::cerr << "Failed to warn child process" << std::endl;
+		kill (childPid, 9);
+	    }
+	    close (pipe);
+	
 	    // wait for child process to finish
 	    int status;
-	    wait (&status);
+	    waitpid (childPid, &status, 0);
 
 	    s.forcedIteration();
 
@@ -136,23 +167,36 @@ namespace tools::vjoule {
 	    cgroup::Cgroup parent ("vjoule_xp.slice");
 	    if (!parent.isSlice ()) { 
 		parent.remove ();
-	    }	    
-	} else {
-	    // child process
-	    // attach itself to cgroup
-	    if (!this-> _cgroup.attach (getpid ())) {
-		std::cerr << "cgroup change of group failed." << std::endl;
-		exit (-1);
 	    }
-	    
-	    this-> _child.start (false);	    
-	    auto code = this-> _child.wait();
-
-	    if (code != 0) {
-		std::cerr << "Command exited with non zero status " << code << std::endl;
-	    }
-	    
-	    std::cout << std::endl << std::endl;	   	    
+	} catch (...) {
+	    std::cerr << "parent process failed .." << std::endl;
+	    kill (childPid, 9);
 	}
+    }
+
+    void VJoule::runChild (int pipe) {
+	int c = 0;
+	char buf;
+	while (c = read (pipe, &buf, 1) > 0) {}
+	close (pipe);
+	
+	// child process
+	// attach itself to cgroup
+
+	std::stringstream ss;
+	for (auto & it : this-> _cmd.subCmd) {
+	    ss << it << " ";
+	}
+	
+	// this-> _child.start (false);	    
+	// auto code = this-> _child.wait();
+
+	auto code = system (ss.str ().c_str ());
+	
+	if (code != 0) {
+	    std::cerr << "Command exited with non zero status " << code << std::endl;
+	}
+	    
+	std::cout << std::endl << std::endl;	   	    
     }
 }

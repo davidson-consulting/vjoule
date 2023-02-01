@@ -13,15 +13,14 @@ void signal_callback_handler(int signum) {
     
 }
 
-int main(int argc, char * argv[]) {
-    if (getuid()) {
-	std::cerr << "You are not root. This program will only work if run as root." << std::endl;
-	exit(-1);
+int main(int argc, char * argv[]) {    
+    CommandParser parser (argc, argv);
+    auto cmd = parser.getCommandLine ();
+
+    if (getuid () != 0) {
+	common::utils::authenticateSudo ();
     }
     
-    CommandParser parser (argc, argv);
-
-    auto cmd = parser.getCommandLine ();
     if (cmd.type == CommandType::PROFILE) {
 	Profiler prf (cmd);
 	prf.run ();

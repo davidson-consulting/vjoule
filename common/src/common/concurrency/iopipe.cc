@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fcntl.h>
 #include <iostream>
+#include <string.h>
 
 namespace common::concurrency {
 
@@ -46,6 +47,11 @@ namespace common::concurrency {
 	fcntl (this-> _pipe, F_SETFL, old_flg | O_NONBLOCK);
 	
     }
+   
+    void OPipe::setBlocking () {
+	// auto old_flg = fcntl (this-> _pipe, F_GETFL, 0);
+	// fcntl (this-> _pipe, F_SETFL, old_flg | O_BLOCK);	
+    }
     
     int OPipe::getHandle () const {
 	return this-> _pipe;
@@ -87,7 +93,10 @@ namespace common::concurrency {
 	    int n = ::read (this-> _pipe, &c, sizeof (char));
 	    if (n != -1 && n != 0) {
 		ss << c;
-	    } else break;
+	    } else {
+		std::cout << n << " " << strerror (errno) << std::endl;
+		break;
+	    }
 	}
 
 	return ss.str ();
@@ -95,8 +104,12 @@ namespace common::concurrency {
     
     void IPipe::setNonBlocking () {
 	auto old_flg = fcntl (this-> _pipe, F_GETFL, 0);
-	fcntl (this-> _pipe, F_SETFL, old_flg | O_NONBLOCK);
-	
+	fcntl (this-> _pipe, F_SETFL, old_flg | O_NONBLOCK);	
+    }
+
+    void IPipe::setBlocking () {
+	// auto old_flg = fcntl (this-> _pipe, F_GETFL, 0);
+	// fcntl (this-> _pipe, F_SETFL, old_flg | O_BLOCK);	
     }
 
     void IPipe::close () {

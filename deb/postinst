@@ -1,2 +1,5 @@
+chown root:root /usr/bin/vjoule
+chmod u+s /usr/bin/vjoule
+
 systemctl daemon-reload
 echo "vjoule_service configured (type systemctl start vjoule_service.service to start it)"

@@ -25,6 +25,7 @@ namespace tools::vjoule {
     Profiler::Profiler (const CommandLine & cmd)
 	: _cmd (cmd), _nbIter (50)
     {
+	utils::becomeSudo ();
 	std::string cwd = std::filesystem::current_path().string(); 
 
 	this-> _vjouleDir =  utils::join_path ("/tmp/vjoule_prof/", utils::get_time_no_space());

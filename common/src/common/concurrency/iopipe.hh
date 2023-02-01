@@ -32,6 +32,8 @@ namespace common::concurrency {
 	void close ();
 
 	void setNonBlocking ();
+
+	void setBlocking ();
 	
 	int getHandle () const;
 	    
@@ -62,6 +64,8 @@ namespace common::concurrency {
 	char readC ();
 	
 	void setNonBlocking ();
+
+	void setBlocking ();
 
 	void close ();
 

@@ -43,7 +43,17 @@ namespace tools::vjoule {
       void run();
 
     private:
-      
+
+      /**
+       * Run the parent process
+       */
+      void runParent (uint64_t childPid, int pipe);
+
+      /**
+       * Run the child process
+       */
+      void runChild (int pipe);
+
       /**
        * Create a default configuration for the sensor
        */

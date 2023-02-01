@@ -22,7 +22,7 @@ namespace tools::vjoule {
     void Exporter::export_stdout() {
 	Values global = this-> read_for_process(this-> _result_dir) - this-> _initGlobal;
 	Values process = this-> read_for_process(join_path(this-> _result_dir, this-> _cgroupName));
-
+	
 	std::stringstream ss;
 		
 	ss << "|CGroup  " << "| ";
@@ -63,24 +63,18 @@ namespace tools::vjoule {
 
 	if (this-> _cpu && file_exists(join_path(path, "cpu"))) {
 	    std::ifstream fCPU(join_path(path, "cpu"));
-	    std::stringstream buffer;
-	    buffer << fCPU.rdbuf();
-	    v.cpu = stof(buffer.str());
-	}
+	    fCPU >> v.cpu;
+	} else v.cpu = 0;
 
 	if (this-> _gpu && file_exists(join_path(path, "gpu"))) {
 	    std::ifstream fCPU(join_path(path, "gpu"));
-	    std::stringstream buffer;
-	    buffer << fCPU.rdbuf();
-	    v.gpu = stof(buffer.str());
-	}
+	    fCPU >> v.gpu;
+	} else v.gpu = 0;
 
 	if (this-> _ram && file_exists(join_path(path, "ram"))) {
 	    std::ifstream fCPU(join_path(path, "ram"));
-	    std::stringstream buffer;
-	    buffer << fCPU.rdbuf();
-	    v.ram = stof(buffer.str());
-	}
+	    fCPU >> v.ram;
+	} else v.ram = 0;
 
 	return v;
     }
