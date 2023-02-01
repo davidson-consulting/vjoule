@@ -1,0 +1,4 @@
+[campaign]
+tests = [
+  "./test1.toml"
+]

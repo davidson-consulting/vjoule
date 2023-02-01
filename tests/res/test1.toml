@@ -1,0 +1,11 @@
+[test]
+host.cmd = "stress -c 10"
+cmd = vjoule -o result.csv stress -c 1 --timeout 10s
+
+
+[output]
+csv = "result.csv"
+
+[compare]
+csv = "expected.csv"
+tolerance = 10
