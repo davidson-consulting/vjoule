@@ -24,6 +24,7 @@ else
     cd ../..
     
     mdbook build    
+
     if [ -d saves ]; then        
 	cp -r saves/* book/
     fi

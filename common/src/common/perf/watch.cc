@@ -117,6 +117,14 @@ namespace common::perf {
 	    this-> _cgroupFd = -1;	    
 	}
 
+	this-> _cgroupFd = open (this-> _cgroupPath.c_str (), O_RDONLY);
+	if (this-> _cgroupFd == -1) {
+	    common::utils::Logger::globalInstance  ().error ("Failed to open cgroup.");
+	    return;
+	}
+	perfFlags = PERF_FLAG_PID_CGROUP;
+
+
 	std::vector <perf_event_attr> attrs = this-> findPerfEventAttrs (eventList, this-> _eventList);
 
 	for (int cpuId = 0 ; cpuId < nbCpus; cpuId++) {
