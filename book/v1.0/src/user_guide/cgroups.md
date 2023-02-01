@@ -1,11 +1,11 @@
 # Cgroups
 
 vJoule monitor the energy consumption of processes through their
-cgroup. In a nutshell, a cgroup if a set of linux processes. Cgroups
+cgroup. In a nutshell, a cgroup is a set of linux processes. Cgroups
 can be used to limit the resources usage of a set of running
 processes. With vJoule, you can estimate the energy consumption of a
 set of processes by putting them in a cgroup and asking vJoule to
-monitor this cgroup.
+monitor it.
 
 For instance, all processes related to vJoule (the vjoule service for
 instance) are by default attached to the `vjoule.slice` cgroup.

@@ -1,5 +1,5 @@
 ## What is vJoule?
-vJoule is a tool that can be used to estimate the energy consumption a
+vJoule is a tool that can be used to estimate the energy consumption of a
 set of running processes. Technically, vJoule is built on a plugin
 system with two different kind of plugins :
 
@@ -11,13 +11,13 @@ system with two different kind of plugins :
    + `ram` plugin that retreives the energy consumption of the RAM of the system  (`rapl`)
    + `gpu` plugin that retreives the energy consumption of the GPUs of the system  (`rapl`, `nvidia`)
    
-   To monitor your processes consumption the `divider` core plugin will come in handy. This documentation will mainly focus on this core plugin. 
+To monitor your processes consumption the `divider` core plugin will come in handy. This documentation will mainly focus on this core plugin. 
 
 
 
 You currently have two ways to interact with vJoule :
 - As a **command line interface** : useful for easy and quick usage
-- As a **linux service** : useful if you want to interact with vJoule in a program 
+- As a **linux service** : useful if you want to interact with vJoule in a program, and monitor more complex applications.
 
 ### Current limitations
 vJoule cannot be used inside a virtual machine as it needs direct access to the hardware.

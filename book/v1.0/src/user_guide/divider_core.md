@@ -79,8 +79,8 @@ list of rules, every rules must start with a slice (a cgroup that
 contains other cgroups).  For example `my.slice/*`., will make the
 sensor watch all the cgroups in the slice `my.slice`, and
 `system.slice/docker*` will watch all the cgroups in `system.slice`
-that starts with `docker`.  Basically, it list all the cgroups that
-would be found if the command 'ls my_rule' was run in the cgroup mount
+that starts with `docker`.  Basically, it lists all the cgroups that
+would be found if the command `ls my_rule` was run in the cgroup mount
 directory.  The following presents an example of configuration for
 cgroup listing that has to be placed in `/etc/vjoule/cgroups`.
 

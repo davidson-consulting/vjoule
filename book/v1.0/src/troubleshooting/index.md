@@ -19,7 +19,7 @@ Here are some common errors with some explanations :
 	 
  - `[Error][NVIDIA] NVML is not available.`
  
-	 If you don't have an nvidia graphics card, the explanation is easy the plugin won't work. You will have to deactivate it in the configuration file. cf. [Sensor plugins](./user_guide/sensor_plugins.html).
+	 If you don't have an nvidia graphic card, the explanation is easy the plugin won't work. You will have to deactivate it in the configuration file. cf. [Sensor plugins](./user_guide/sensor_plugins.html).
 	 
 	 However, if you have a nvidia GPU make sure you have installed the Nvidia management library and that it matches the version of the nvidia drivers (sometimes it does not because.. nvidia). A quick test can be to run the command `nvidia-smi`. [Nvidia NVML](https://developer.nvidia.com/nvidia-management-library-nvml).
 
@@ -30,10 +30,10 @@ Here are some common tracks for explanation :
 
  - First you can check the result files of the whole system
    (`/etc/vjoule/results/cpu` for example). If they increment the
-   sensor plugin and divider core are effectively running and working. 
+   sensor plugin and divider core are effectively running and
+   working. Or run the command `vjoule top` to verify that vjoule is
+   running and working properly.
    
-   If not...
-
  - The service runs at a given speed specified in the configuration file
    by the `freq` parameter. This specifies the number of iteration of the
    service per seconds (default being 1). This is an important
@@ -46,9 +46,7 @@ Here are some common tracks for explanation :
  
 	 2. Watch the file `/etc/vjoule/results/cpu` using iowatch, or inotify and wait for a modification. 
 		 Here you can check wether the directory corresponding to your cgroups are correctly created.
-	
-		If not..
-	
+		
 	 3. Start your application and wait its end, or an event you have defined for your usecase.
  
 	 4. Watch the file `/etc/vjoule/results/cpu` using iowatch or inotify to make sure the service has finished its iteration.
