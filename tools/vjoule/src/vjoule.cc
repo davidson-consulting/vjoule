@@ -159,7 +159,16 @@ namespace tools::vjoule {
 	    } else {
 		e.export_csv (this-> _cmd.output);
 	    }
-
+	} catch (...) {
+	    std::cerr << "parent process failed .." << std::endl;
+	    this-> _cgroup.detach (childPid);
+	    kill (childPid, 9);
+	    
+	    int status;
+	    waitpid (childPid, &status, 0);
+	}
+	
+	try {
 	    // Clean the cgroup created by the vjoule command line
 	    this-> _cgroup.remove ();
 	    
@@ -169,9 +178,9 @@ namespace tools::vjoule {
 		parent.remove ();
 	    }
 	} catch (...) {
-	    std::cerr << "parent process failed .." << std::endl;
-	    kill (childPid, 9);
+	    std::cerr << "Error when cleaning cgroups" << std::endl;		
 	}
+	
     }
 
     void VJoule::runChild (int pipe) {
