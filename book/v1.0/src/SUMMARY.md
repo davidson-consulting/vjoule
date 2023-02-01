@@ -12,6 +12,8 @@
 	- [The dumper core](./user_guide/dumping_core.md)
 	- [Sensor plugins](./user_guide/sensor_plugins.md)
 	- [Fetching results with pullers](./user_guide/pullers.md)
+- [Tutorials](./tutorial/index.md)
+	- [Measuring a program](./tutorial/mesuring.md)
 
 - [Trouble-shooting](./troubleshooting/index.md)
 
