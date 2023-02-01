@@ -42,7 +42,6 @@ namespace tools::vjoule {
 	    exit (-1);
 	}
 
-	utils::becomeSudo ();
 	this-> _cfgPath = utils::join_path (VJOULE_DIR, "config.toml");
 	auto configPath = utils::get_absolute_path_if_exists (this-> _cfgPath);
 	if (configPath == "") {

@@ -112,8 +112,6 @@ namespace tools::vjoule {
     }
     
     void VJoule::runParent (uint64_t childPid, int pipe) {
-	utils::becomeSudo ();
-
 	try {
 	    this-> _cgroup.create ();
 

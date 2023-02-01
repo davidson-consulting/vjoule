@@ -17,10 +17,6 @@ int main(int argc, char * argv[]) {
     CommandParser parser (argc, argv);
     auto cmd = parser.getCommandLine ();
 
-    if (getuid () != 0) {
-	common::utils::authenticateSudo ();
-    }
-    
     if (cmd.type == CommandType::PROFILE) {
 	Profiler prf (cmd);
 	prf.run ();

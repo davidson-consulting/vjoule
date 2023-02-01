@@ -38,8 +38,7 @@ target_link_libraries (vjoule LINK_PUBLIC vjoule_common vjoule_service_lib ${CMA
 target_link_libraries (vjoule PRIVATE ftxui::screen PRIVATE ftxui::dom PRIVATE ftxui::component)
 
 add_custom_command (TARGET vjoule POST_BUILD
-  COMMAND sudo chown root:root ${CMAKE_CURRENT_BINARY_DIR}/vjoule
-  COMMAND sudo chmod u+s ${CMAKE_CURRENT_BINARY_DIR}/vjoule
+  COMMAND sudo setcap "cap_dac_override,cap_sys_admin,cap_sys_rawio+eip" ${CMAKE_CURRENT_BINARY_DIR}/vjoule
   )
 
 install (TARGETS vjoule DESTINATION /usr/bin/)
