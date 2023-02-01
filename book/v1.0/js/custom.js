@@ -24,6 +24,7 @@ $( document ).ready(function() {
 
     right_buttons.appendChild (version_button);
     right_buttons.appendChild (github_url);
+
     
     $("#version-toggle").click(function(){
         if($('.version-popup').length) {
