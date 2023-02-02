@@ -6,9 +6,10 @@ vJoule will estimate the energy consumption of processes running on your compute
 
 ## Installation
 ### From .deb (recommended)
-vJoule can be installed from deb files found in the Github releases. The `vjoule_<VERSION>.deb` package will install three systemd services: `vjoule_sensor` (that will gather the required hardware infos) and `vjoule_simple_formula` (responsible for the actual estimations of the energy consummed by the monitored processes), `vjoule_dumping_formula` (a secondary formula, used for debugging purposes).
+vJoule can be installed from deb files found in the Github releases. The `vjoule-tools_<VERSION>.deb` package will install a systemd services: `vjoule_service` (that will estimate the energy consumption
+of a list of monitored cgroups and the whole computer)
 
-You can install the .deb file (once downloaded) by running `dpkg -i vjoule_<VERSION>.deb`.
+You can install the .deb file (once downloaded) by running `sudo dpkg -i vjoule-tools_<VERSION>.deb`.
 
 ### From sources
 vJoules uses CMake as a build tool.
@@ -23,8 +24,11 @@ sudo snap install mdbook
 
 Then launch the book
 ```
-mdbook serve book
+cd book/v1.0
+mdbook serve
 ```
+
+Or check out the online documentation at https://davidson-consulting.github.io/vjoule/v1.0/
 
 ## Contributing
 If you've found any bug, have any issue using vjoule or would like to propose a new feature, feel free to create a Github issue. 
