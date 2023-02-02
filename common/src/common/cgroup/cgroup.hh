@@ -44,6 +44,11 @@ namespace common::cgroup {
 	bool detach (uint64_t pid);
 
 	/**
+	 * Detach all the pids attached to the cgroup
+	 */
+	void detachAll ();
+	
+	/**
 	 * @returns: true if the cgroup exist
 	 */
 	bool exist () const;
@@ -72,6 +77,11 @@ namespace common::cgroup {
 	 * detach a pid to cgroup in v2
 	 */
 	bool detachV2 (uint64_t pid, const std::string & mntPoint);
+
+	/**
+	 * detach all v2
+	 */
+	void detachAllV2 (const std::string & mntPoint);
 
 	
     };

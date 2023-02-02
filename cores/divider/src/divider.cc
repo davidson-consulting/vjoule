@@ -400,9 +400,22 @@ namespace divider {
 	}
     }
 
-
     void Divider::dispose () {
 	this-> _cgroupWatchers.clear ();
+	for (auto & it : this-> _results) {
+	    fclose (it.second.cpuFd);
+	    fclose (it.second.ramFd);
+	    fclose (it.second.gpuFd);
+	}
+	
+	auto mntType = utils::get_mount_type (this-> _outputDir);
+	LOG_INFO (mntType, " ", this-> _outputDir);
+	if (mntType == "tmpfs") {
+	    umount (this-> _outputDir.c_str ());
+	    std::filesystem::remove (this-> _outputDir);
+	}
+
+	LOG_INFO ("Disposing divider core.");
     }
     
 

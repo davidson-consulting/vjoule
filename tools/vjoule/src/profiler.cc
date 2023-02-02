@@ -9,19 +9,6 @@ using namespace common;
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
 
-#define STRESS_MWC_SEED_Z	(362436069UL)
-#define STRESS_MWC_SEED_W	(521288629UL)
-
-struct stress_mwc_t {
-	uint32_t w;
-	uint32_t z;
-};
-
-uint32_t custom_rand(stress_mwc_t & mwc) {
-    mwc.z = 36969 * (mwc.z & 65535) + (mwc.z >> 16);	      
-    mwc.w = 18000 * (mwc.w & 65535) + (mwc.w >> 16);		
-    return (mwc.z << 16) + mwc.w;
-}
 
 void printProgress(double percentage) {
     int val = (int) (percentage * 100);
@@ -107,7 +94,8 @@ namespace tools::vjoule {
 	    vjoule_v_flag, vcontent
 	};
 	
-	::sensor::Sensor s (7, args);
+	::sensor::Sensor s;
+	s.configure (7, args);
 	
 	std::vector <ResultRow> results;
 	concurrency::timer t;
@@ -133,20 +121,21 @@ namespace tools::vjoule {
 		});
 	}
 
+	printProgress (1);
 	this-> printResult (results);
     }
     
     void Profiler::printResult (const std::vector <ResultRow> & res) const {
 	printf ("\n");
-	printf ("%10s | %8s | %8s |\n", "Nb cores", "CPU", "RAM");
-	printf (" %9c | %8c | %8c |\n", '-', '-', '-');
+	printf ("%10s | %8s  | %8s  |\n", "Nb cores", "CPU", "RAM");
+	printf (" %9c | %8c  | %8c  |\n", '-', '-', '-');
 	for (uint64_t i = 0 ; i < res.size () ; i++) {
-	    printf ("%10ld | %8.5fW | %8.5fW |\n", i, res[i].cpu, res[i].ram);
+	    printf ("%10ld | %8.2fW | %8.2fW |\n", i, res[i].cpu, res[i].ram);
 	}	
     }
 
     void Profiler::runLoad (uint64_t nb) {
-	std::vector <std::string> args = {"-c", std::to_string (nb), "--timeout", "4s"};
+	std::vector <std::string> args = {"-c", std::to_string (nb), "--timeout", "1s"};
 	auto proc = concurrency::SubProcess ("stress", args, ".");
 	proc.start ();
 	proc.wait ();

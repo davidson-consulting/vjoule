@@ -18,6 +18,8 @@
 
 namespace tools::vjoule {
 
+    struct TopError {};
+    
     struct Result {
 	// Joule
 	double cpuJ;
@@ -64,6 +66,9 @@ namespace tools::vjoule {
 
 	// in run loop
 	bool _isRunning = false;
+
+	// The output file
+	FILE * _output = nullptr;
 	
     private:
 
@@ -143,6 +148,11 @@ namespace tools::vjoule {
 	 */
 	void display () ;
 
+	/**
+	 * Export the results into a the output file
+	 */
+	void exportCsv ();
+	
 	/**
 	 * Async loop running in a separate thread 
 	 * This loop render the screen, and is triggered by display method

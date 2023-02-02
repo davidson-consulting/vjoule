@@ -24,6 +24,6 @@ $ ./vjoule profile
 ```
 
 This could be then visualized in a third-party program:
-![Visualization of the given model](../images/profile.png) 
+![Visualization of the given model](images/profile.png) 
 
 Results are presented in watts and correspond to the power used by your computer while stressing a given number of cores. This subcommand can be useful to understand how the energy used by your computer increase as it uses more and more cores.

@@ -8,13 +8,16 @@ using namespace common::utils;
 
 namespace tools::vjoule {
     
-    Exporter::Exporter(const std::string & result_dir, const std::string & cgroupName, const CommandLine & cmd): 
-	_result_dir (result_dir),
-	_cgroupName (cgroupName),
-	_cpu(cmd.cpu),
-	_gpu(cmd.gpu),
-	_ram(cmd.ram)
-    {
+    Exporter::Exporter() {}
+
+
+    void Exporter::configure (const std::string & result_dir, const std::string & cgroupName, const CommandLine & cmd) {
+	this-> _result_dir = result_dir;
+	this-> _cgroupName = cgroupName;
+	this-> _cpu = cmd.cpu;
+	this-> _gpu = cmd.gpu;
+	this-> _ram = cmd.ram;
+	
 	this-> _initGlobal = this-> read_for_process(this-> _result_dir);
 	this-> _initProcess =  this-> read_for_process(join_path(this-> _result_dir, this-> _cgroupName));
     }
@@ -80,17 +83,21 @@ namespace tools::vjoule {
     }
 
     std::string Exporter::value_stdout(Values v){
+	char buffer [255];
 	std::stringstream ss;
 	if (this-> _cpu) {
-	    ss << "| " << std::setw(10) << v.cpu << "J";
+	    snprintf (buffer, 255, "%10.2fJ", v.cpu);
+	    ss << "| " << buffer;
 	}
     
 	if (this-> _gpu) {
-	    ss << "| " << std::setw(10) << v.gpu << "J";
+	    snprintf (buffer, 255, "%10.2fJ", v.gpu);
+	    ss << "| " << buffer;
 	}
 
 	if (this-> _ram) {
-	    ss << "| " << std::setw(10) << v.ram << "J";
+	    snprintf (buffer, 255, "%10.2fJ", v.ram);
+	    ss << "| " << buffer;
 	}
     
 	ss << "|";

@@ -4,7 +4,7 @@
 
 This can just be started using `vjoule top`
 
-![screenshot of vjoule top](../images/vjouletop.png)
+![screenshot of vjoule top](images/vjouletop.png)
 
 The top part present the energy consumption of the whole system and all monitored cgroups. The bottom part present the 
 evolution of the energy consumption of the whole system. Values indicated under CPU/GPU/RAM are the maximum recorded value 

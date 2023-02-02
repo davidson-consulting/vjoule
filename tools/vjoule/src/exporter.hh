@@ -42,9 +42,13 @@ namespace tools::vjoule {
 
       // Initial result of process (before starting the child process)
       Values _initProcess;
-
       
     public:
+
+      /**
+       * Create an empty exporter
+       */
+      Exporter();
 
       /**
        * @params:
@@ -52,7 +56,7 @@ namespace tools::vjoule {
        *   - cgroupName: the name of the cgroup created by the CLI
        *   - cmd: the options passed to the CLI 
        */
-      Exporter(const std::string & resultDir, const std::string & cgroupName, const CommandLine & cmd);
+      void configure (const std::string & resultDir, const std::string & cgroupName, const CommandLine & cmd);
       
       /**
        * export result summary to stdout
