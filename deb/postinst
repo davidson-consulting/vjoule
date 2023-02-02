@@ -1,4 +1,9 @@
-echo "Setting the required capabilities for vjoule CLI"
-sudo setcap "cap_dac_override,cap_sys_admin,cap_sys_rawio+eip" /usr/bin/vjoule
+echo "Setting the required capabilities for vjoule service and CLI"
+setcap "cap_dac_override,cap_sys_admin,cap_sys_rawio+eip" /usr/bin/vjoule_service
+setcap "cap_dac_override,cap_sys_admin,cap_sys_rawio+eip" /usr/bin/vjoule
+
+echo "Create user vjoule"
+adduser --system --no-create-home vjoule
+
 systemctl daemon-reload
 echo "vjoule_service configured (type systemctl start vjoule_service.service to start it)"

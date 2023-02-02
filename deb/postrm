@@ -1,1 +1,2 @@
+userdel vjoule
 systemctl daemon-reload
