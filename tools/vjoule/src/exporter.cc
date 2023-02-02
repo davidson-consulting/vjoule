@@ -80,17 +80,21 @@ namespace tools::vjoule {
     }
 
     std::string Exporter::value_stdout(Values v){
+	char buffer [255];
 	std::stringstream ss;
 	if (this-> _cpu) {
-	    ss << "| " << std::setw(10) << v.cpu << "J";
+	    snprintf (buffer, 255, "%10.2fJ", v.cpu);
+	    ss << "| " << buffer;
 	}
     
 	if (this-> _gpu) {
-	    ss << "| " << std::setw(10) << v.gpu << "J";
+	    snprintf (buffer, 255, "%10.2fJ", v.gpu);
+	    ss << "| " << buffer;
 	}
 
 	if (this-> _ram) {
-	    ss << "| " << std::setw(10) << v.ram << "J";
+	    snprintf (buffer, 255, "%10.2fJ", v.ram);
+	    ss << "| " << buffer;
 	}
     
 	ss << "|";

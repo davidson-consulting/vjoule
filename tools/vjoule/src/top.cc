@@ -302,13 +302,13 @@ namespace tools::vjoule {
 	auto r = this-> sortByCpu ();
 	for (auto & it : r) {
 	    char buf [255];
-	    snprintf (buf, 255, "%.3lfW / %.3lfJ (%.3lf%c)", it.second.cpuW, it.second.cpuJ, it.second.cpuP, '%');
+	    snprintf (buf, 255, "%.2lfW / %.2lfJ (%.1lf%c)", it.second.cpuW, it.second.cpuJ, it.second.cpuP, '%');
 	    std::string cpu (buf);
 
-	    snprintf (buf, 255, "%.3lfW / %.3lfJ (%.3lf%c)", it.second.ramW, it.second.ramJ, it.second.ramP, '%');
+	    snprintf (buf, 255, "%.2lfW / %.2lfJ (%.1lf%c)", it.second.ramW, it.second.ramJ, it.second.ramP, '%');
 	    std::string ram (buf);
 
-	    snprintf (buf, 255, "%.3lfW / %.3lfJ (%.3lf%c)", it.second.gpuW, it.second.gpuJ, it.second.gpuP, '%');
+	    snprintf (buf, 255, "%.2lfW / %.2lfJ (%.1lf%c)", it.second.gpuW, it.second.gpuJ, it.second.gpuP, '%');
 	    std::string gpu (buf);
 
 	    
