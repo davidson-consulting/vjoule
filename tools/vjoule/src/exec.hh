@@ -8,7 +8,7 @@
 
 namespace tools::vjoule {
     
-  class VJoule {
+  class Exec {
   private :
 
       // The command line passed by command parser
@@ -35,7 +35,7 @@ namespace tools::vjoule {
        * @params:
        *   - cmd: the command line parsed by the command parser
        */
-      VJoule(const CommandLine & cmd);
+      Exec(const CommandLine & cmd);
 
       /**
        * Start the sub process, and watch its consumption

@@ -5,7 +5,7 @@
 #include <sensor/_.hh>
 #include <common/_.hh>
 #include <watcher.hh>
-#include <vjoule.hh>
+#include <exec.hh>
 #include <exporter.hh>
 
 #include <unistd.h>
@@ -17,7 +17,7 @@ using namespace common;
 
 namespace tools::vjoule {
     
-    VJoule::VJoule(const CommandLine & cmd) :
+    Exec::Exec(const CommandLine & cmd) :
 	_cmd (cmd), _cgroup ("vjoule_xp.slice/process_" + std::to_string (getpid ()))
     {
 	std::string current_path = std::filesystem::current_path().string(); 
@@ -39,7 +39,7 @@ namespace tools::vjoule {
 	this-> create_configuration();
     }
 
-    void VJoule::create_default_config() {
+    void Exec::create_default_config() {
 	std::ofstream ofs (this-> _cfg_path, std::ofstream::out);
 	ofs << "[sensor]" << std::endl;
 	ofs << "freq = 1 # frequency of update in hertz (the higher the faster)" << std::endl;
@@ -72,17 +72,17 @@ namespace tools::vjoule {
 	}
     }
 
-    void VJoule::create_default_cgroups_list() {
+    void Exec::create_default_cgroups_list() {
 	std::ofstream ofs (utils::join_path(this-> _working_directory, "cgroups"), std::ofstream::out);
 	ofs << this-> _cgroup.getName () << std::endl;
     }
 
-    void VJoule::create_configuration() {
+    void Exec::create_configuration() {
 	this-> create_default_config();	
 	this-> create_default_cgroups_list();
     }
 
-    void VJoule::create_result_directory() {
+    void Exec::create_result_directory() {
 	std::string result_dir = utils::join_path(this-> _vjoule_directory, utils::get_time_no_space());
 	std::filesystem::create_directories(result_dir);
     
@@ -92,7 +92,7 @@ namespace tools::vjoule {
 	std::filesystem::create_directory_symlink(result_dir, this-> _working_directory);
     }
 
-    void VJoule::run() {		
+    void Exec::run() {		
 	int pipes[2];
 	if (pipe (pipes) == -1) {
 	    std::cout << "Error .." << std::endl;
@@ -111,7 +111,7 @@ namespace tools::vjoule {
 	}
     }
     
-    void VJoule::runParent (uint64_t childPid, int pipe) {
+    void Exec::runParent (uint64_t childPid, int pipe) {
 	try {
 	    this-> _cgroup.create ();
 
@@ -192,7 +192,7 @@ namespace tools::vjoule {
 	
     }
 
-    void VJoule::runChild (int pipe) {
+    void Exec::runChild (int pipe) {
 	int c = 0;
 	char buf;
 	while (c = read (pipe, &buf, 1) > 0) {}

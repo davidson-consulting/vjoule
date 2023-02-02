@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <sys/wait.h>
-#include <vjoule.hh>
+#include <exec.hh>
 #include <command.hh>
 #include <profiler.hh>
 #include <top.hh>
@@ -24,8 +24,8 @@ int main(int argc, char * argv[]) {
 	Top t (cmd);
 	t.run ();
     } else {
-	VJoule vjoule(cmd);
-	vjoule.run();
+	Exec e(cmd);
+	e.run();
     }
     
     return 0;
