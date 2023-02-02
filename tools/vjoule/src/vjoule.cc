@@ -101,7 +101,7 @@ namespace tools::vjoule {
 	pid_t c_pid = fork();
 	if (c_pid == -1) {
 	    printf("Could not fork to execute vjoule_exec");
-	    exit(EXIT_FAILURE);
+	    exit (EXIT_FAILURE);
 	} else if (c_pid > 0) {
 	    close (pipes[0]);
 	    this-> runParent (c_pid, pipes[1]);
@@ -116,8 +116,14 @@ namespace tools::vjoule {
 	    this-> _cgroup.create ();
 
 	    if (!this-> _cgroup.attach (childPid)) {
-		std::cerr << "cgroup change of group failed." << std::endl;
+		std::cerr << "error: failed to attach pid of command to monitored cgroup." << std::endl;
 		exit (-1);
+	    }
+
+	    for (auto & pid : this-> _cmd.pids) {
+		if (!this-> _cgroup.attach (pid)) {
+		    std::cerr << "warning: failed to attach pid '" << pid << "' to monitored cgroup." << std::endl;
+		}	       
 	    }
 
 	    char vjoule_exe_name[] =  "vjoule_service";
@@ -141,7 +147,7 @@ namespace tools::vjoule {
 	    s.runAsync();
 
 	    if (write (pipe, "GO!", strlen ("GO!")) == -1) {
-		std::cerr << "Failed to warn child process" << std::endl;
+		std::cerr << "internal error: failed to warn child process to start." << std::endl;
 		kill (childPid, 9);
 	    }
 	    close (pipe);
@@ -158,8 +164,8 @@ namespace tools::vjoule {
 		e.export_csv (this-> _cmd.output);
 	    }
 	} catch (...) {
-	    std::cerr << "parent process failed .." << std::endl;
-	    this-> _cgroup.detach (childPid);
+	    std::cerr << "error: failed to configure vjoule execution." << std::endl;
+	    this-> _cgroup.detach (childPid);	    
 	    kill (childPid, 9);
 	    
 	    int status;
@@ -167,6 +173,11 @@ namespace tools::vjoule {
 	}
 	
 	try {
+	    
+	    for (auto & pid : this-> _cmd.pids) {
+		this-> _cgroup.detach (pid);
+	    }
+
 	    // Clean the cgroup created by the vjoule command line
 	    this-> _cgroup.remove ();
 	    

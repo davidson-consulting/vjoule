@@ -20,6 +20,7 @@ namespace tools::vjoule {
 #define HELP_FLAG "help"
 #define HELP_FLAG_SHORT "h"
 
+#define PID_FLAG "pid"    
 #define CPU_FLAG "no-cpu"
 #define RAM_FLAG "no-ram"
 #define GPU_FLAG "no-gpu"
@@ -43,6 +44,7 @@ namespace tools::vjoule {
 	bool nvidia;
 	std::string output;
 	std::vector <std::string> subCmd;
+	std::vector <uint64_t> pids;
     };
 
 
@@ -102,9 +104,19 @@ namespace tools::vjoule {
 
 	/**
 	 * Parse an output option at index i
-	 * @returns: the content of the output option
+	 * @returns: 
+	 *    - the number of arguments that were read
+	 *    - res: the content of the output option
 	 */
-	std::string parseOutput (uint64_t i) const;
+	uint64_t parseOutput (uint64_t i, std::string & res) const;
+
+	/**
+	 * Parse a list of pid at index i
+	 * @returns: 
+	 *    - the number of arguments that were read
+	 *    - res: the list of pids that were read
+	 */
+	uint64_t parsePidList (uint64_t i, std::vector <uint64_t> & pids) const;
 	
 	/**
 	 * Print help command
