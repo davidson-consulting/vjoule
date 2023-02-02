@@ -65,7 +65,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html" class="active"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>4.</strong> Trouble-shooting</a></li></ul>
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html" class="active"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/profile.html"><strong>4.2.</strong> vjoule profile</a></li><li><a href="./cli/top.html"><strong>4.3.</strong> vjoule top</a></li></ul></li><li><a href="./tutorial/index.html"><strong>5.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>5.1.</strong> Measuring a program</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>6.</strong> Trouble-shooting</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -92,7 +92,7 @@
 <p>Now that vJoule is installed on your computer, let's try it. Remember that vJoule is available through two interfaces:</p>
 <ul>
 <li>A <strong>command line interface</strong>, useful for simple and quick usage</li>
-<li>A linux <strong>service</strong>, useful if you need to embeed vJoule in a program</li>
+<li>A linux <strong>service</strong>, useful if you need to embed vJoule in a program</li>
 </ul>
 <p>This section presents just a basic test to make sure vjoule is
 properly installed. A more thorough tutorial is presented in the
@@ -103,23 +103,29 @@ section <a href="./user_guide/divider_core.html">Divider core</a>.</p>
 $ # We mesure the energy consummed by the ls command execution
 $ vjoule ls
 
-###
-# RESULT
-###
+# Output 
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.11554J|    0.22155J|     0.2025J|
+|Process |    0.21457J|          0J|   0.048371J|
 </code></pre>
 <p>You can also use vjoule on a command that needs parameters. In this case, we will estimate the energy consumption of the <code>stress</code> command.</p>
 <pre><code class="language-bash">$ vjoule stress --cpu 2 --timeout 2s
 
-###
-# RESULT
-###
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    85.4813J|    10.2509J|    10.4242J|
+|Process |    84.8442J|          0J|   0.820489J|
 </code></pre>
 <p>Of course, you can use vjoule while executing, let's say, a python script.</p>
 <pre><code class="language-bash">$ vjoule python myscript.py
 
-###
-# RESULT
-###
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.16052J|   0.312761J|   0.257263J|
+|Process |   0.957794J|          0J|   0.190821J|
 </code></pre>
 <a class="header" href="./getting_started/first_tests.html#vjoule-through-the-service" id="vjoule-through-the-service"><h2>vJoule, through the service</h2></a>
 <p>As the CLI can be a bit limited for embedding vJoule in a program, vJoule is available through a linux systemd service.</p>

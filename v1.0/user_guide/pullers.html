@@ -65,7 +65,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html" class="active"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>4.</strong> Trouble-shooting</a></li></ul>
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html" class="active"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/profile.html"><strong>4.2.</strong> vjoule profile</a></li><li><a href="./cli/top.html"><strong>4.3.</strong> vjoule top</a></li></ul></li><li><a href="./tutorial/index.html"><strong>5.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>5.1.</strong> Measuring a program</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>6.</strong> Trouble-shooting</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -89,7 +89,17 @@
 
                 <div id="content" class="content">
                     <a class="header" href="./user_guide/pullers.html#pullers" id="pullers"><h1>Pullers</h1></a>
-<p>We have implemented several <code>pullers</code> programs that will fetch the results. Feel free to use them (see the dedicated section in the documentation). </p>
+<p>We have implemented several example of <code>pullers</code> program that fetch
+the results. The idea of the pullers directory in the github
+repository is to provide basic examples of how to retreive the results
+of vjoule service from a program.</p>
+<p>There are four examples in the repository :</p>
+<ul>
+<li>a bash example, that simply prints the cpu consumption of the System and of the vjoule service.</li>
+<li>a c++ example, that prints the consumption of the different components (cpu, ram and gpu) of the system and all the cgroup watched by the service.</li>
+<li>a rust example, that prints the consumption of the different components (cpu, ram and gpu) of the system and all the cgroup watched by the service.</li>
+<li>a python example, that retreives the consumption of the different components (cpu, ram and gpu) of the system and all the cgroup watched by the service and plot them to a image file when Ctrl-C is pressed.</li>
+</ul>
 
                 </div>
 
@@ -101,7 +111,7 @@
                 
 
                 
-                    <a rel="next" href="./troubleshooting/index.html" class="mobile-nav-chapters next" title="Next chapter">
+                    <a rel="next" href="./cli/index.html" class="mobile-nav-chapters next" title="Next chapter">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -115,7 +125,7 @@
             
 
             
-                <a href="./troubleshooting/index.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                <a href="./cli/index.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-right"></i>
                 </a>
             

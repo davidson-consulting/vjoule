@@ -65,7 +65,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>4.</strong> Trouble-shooting</a></li></ul>
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/profile.html"><strong>4.2.</strong> vjoule profile</a></li><li><a href="./cli/top.html"><strong>4.3.</strong> vjoule top</a></li></ul></li><li><a href="./tutorial/index.html"><strong>5.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>5.1.</strong> Measuring a program</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>6.</strong> Trouble-shooting</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -110,48 +110,57 @@ other tools like PowerAPI.</p>
 <p>This section will help you get started with vJoule.</p>
 <p>You'll learn how vJoules works, how to install it and how to test it.</p>
 <a class="header" href="print.html#what-is-vjoule" id="what-is-vjoule"><h2>What is vJoule?</h2></a>
-<p>vJoule is a tool that can be used to estimate the energy consumption a
+<p>vJoule is a tool that can be used to estimate the energy consumption of a
 set of running processes. Technically, vJoule is built on a plugin
 system with two different kind of plugins :</p>
 <ul>
-<li>
-<p><code>core</code>, this kind of plugin will define the behavior of vJoule and perform the information gathering from sensor plugins and the effective result computation. In this vJoule version two core plugins are implemented :</p>
+<li><code>core</code>, this kind of plugin will define the behavior of vJoule and perform the information gathering from sensor plugins and the effective result computation. In this vJoule version two core plugins are implemented :
 <ul>
 <li><code>divider</code> splits the consumption acquired by sensor plugins, and divides them between the running processes based on their relative system usage (%CPU, %GPU, etc.).</li>
 <li><code>dumper</code> retreives the consumption acquired by sensor plugins, and system usage of running processes and dump those metrics in csv files for cold analysis.</li>
 </ul>
 </li>
-<li>
-<p><code>sensor</code>, this kind of plugin are used to retreive system information usefull for the core plugin. There are different kind of sensor plugin, in this vJoule version three plugin types are implemented :</p>
+<li><code>sensor</code>, this kind of plugin are used to retreive system information usefull for the core plugin. There are different kind of sensor plugin, in this vJoule version three plugin types are implemented :
 <ul>
 <li><code>cpu</code> plugin that retreives the energy consumption of the CPU of the system, (<code>rapl</code>)</li>
 <li><code>ram</code> plugin that retreives the energy consumption of the RAM of the system  (<code>rapl</code>)</li>
 <li><code>gpu</code> plugin that retreives the energy consumption of the GPUs of the system  (<code>rapl</code>, <code>nvidia</code>)</li>
 </ul>
-<p>To monitor your processes consumption the <code>divider</code> core plugin will come in handy. This documentation will mainly focus on this core plugin.</p>
 </li>
 </ul>
+<p>To monitor your processes consumption the <code>divider</code> core plugin will come in handy. This documentation will mainly focus on this core plugin.</p>
 <p>You currently have two ways to interact with vJoule :</p>
 <ul>
 <li>As a <strong>command line interface</strong> : useful for easy and quick usage</li>
-<li>As a <strong>linux service</strong> : useful if you want to interact with vJoule in a program</li>
+<li>As a <strong>linux service</strong> : useful if you want to interact with vJoule in a program, and monitor more complex applications.</li>
 </ul>
 <a class="header" href="print.html#current-limitations" id="current-limitations"><h3>Current limitations</h3></a>
 <p>vJoule cannot be used inside a virtual machine as it needs direct access to the hardware.</p>
 <a class="header" href="print.html#installation" id="installation"><h2>Installation</h2></a>
-<a class="header" href="print.html#from-deb-recommended" id="from-deb-recommended"><h3>From .deb (recommended)</h3></a>
+<a class="header" href="print.html#from-deb-package-recommended" id="from-deb-package-recommended"><h3>From deb package (recommended)</h3></a>
 <p>vJoule can be installed from deb files found in the Github
-releases. The <code>vjoule_&lt;VERSION&gt;.deb</code> package will install a systemd
-service: <code>vjoule_service</code> and a client program simply named <code>vjoule</code>.</p>
-<p>You can install the .deb file (once downloaded) by running <code>dpkg -i vjoule_&lt;VERSION&gt;.deb</code>.</p>
+releases. The <code>vjoule-tools_&lt;VERSION&gt;.deb</code> package will install a
+systemd service: <code>vjoule_service</code> and a client program simply named
+<code>vjoule</code>.</p>
+<p>You can install the <code>.deb</code> file (once downloaded) by running <code>dpkg -i vjoule-tools_&lt;VERSION&gt;.deb</code>.</p>
 <a class="header" href="print.html#from-sources" id="from-sources"><h3>From sources</h3></a>
 <p>vJoules uses CMake as a build tool.</p>
 <p>You will need to have installed cmake, g++, git and nvidia-ml.</p>
+<pre><code class="language-bash">git clone https://github.com/davidson-consulting/vjoule.git
+
+cd vjoule
+mkdir .build
+cd .build 
+cmake ..
+make -j8
+
+sudo make install
+</code></pre>
 <a class="header" href="print.html#first-tests" id="first-tests"><h1>First tests</h1></a>
 <p>Now that vJoule is installed on your computer, let's try it. Remember that vJoule is available through two interfaces:</p>
 <ul>
 <li>A <strong>command line interface</strong>, useful for simple and quick usage</li>
-<li>A linux <strong>service</strong>, useful if you need to embeed vJoule in a program</li>
+<li>A linux <strong>service</strong>, useful if you need to embed vJoule in a program</li>
 </ul>
 <p>This section presents just a basic test to make sure vjoule is
 properly installed. A more thorough tutorial is presented in the
@@ -162,23 +171,29 @@ section <a href="./user_guide/divider_core.html">Divider core</a>.</p>
 $ # We mesure the energy consummed by the ls command execution
 $ vjoule ls
 
-###
-# RESULT
-###
+# Output 
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.11554J|    0.22155J|     0.2025J|
+|Process |    0.21457J|          0J|   0.048371J|
 </code></pre>
 <p>You can also use vjoule on a command that needs parameters. In this case, we will estimate the energy consumption of the <code>stress</code> command.</p>
 <pre><code class="language-bash">$ vjoule stress --cpu 2 --timeout 2s
 
-###
-# RESULT
-###
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    85.4813J|    10.2509J|    10.4242J|
+|Process |    84.8442J|          0J|   0.820489J|
 </code></pre>
 <p>Of course, you can use vjoule while executing, let's say, a python script.</p>
 <pre><code class="language-bash">$ vjoule python myscript.py
 
-###
-# RESULT
-###
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.16052J|   0.312761J|   0.257263J|
+|Process |   0.957794J|          0J|   0.190821J|
 </code></pre>
 <a class="header" href="print.html#vjoule-through-the-service" id="vjoule-through-the-service"><h2>vJoule, through the service</h2></a>
 <p>As the CLI can be a bit limited for embedding vJoule in a program, vJoule is available through a linux systemd service.</p>
@@ -201,11 +216,11 @@ $ vjoule ls
 </ul>
 <a class="header" href="print.html#cgroups" id="cgroups"><h1>Cgroups</h1></a>
 <p>vJoule monitor the energy consumption of processes through their
-cgroup. In a nutshell, a cgroup if a set of linux processes. Cgroups
+cgroup. In a nutshell, a cgroup is a set of linux processes. Cgroups
 can be used to limit the resources usage of a set of running
 processes. With vJoule, you can estimate the energy consumption of a
 set of processes by putting them in a cgroup and asking vJoule to
-monitor this cgroup.</p>
+monitor it.</p>
 <p>For instance, all processes related to vJoule (the vjoule service for
 instance) are by default attached to the <code>vjoule.slice</code> cgroup.</p>
 <p>If you want to monitor the energy consumption of a given process, you
@@ -267,7 +282,7 @@ $ sudo cgclassify -g cpu:measurements.slice/api `pidof apache2`
 </code></pre>
 <p>Should you use <code>cgexec</code> or <code>cgclassify</code>? It depends on your context. If you want to monitor a running process like a webserver, use <code>cgclassify</code> with the webserver's pid. If you want to run a command and see how much energy it consummed during its execution, use <code>cgexec</code>.</p>
 <p>You don't want to use those linux commands directly ? There is chances you can find librairies to manage cgroups in your favorite programming language.</p>
-<a class="header" href="print.html#files-of-interests" id="files-of-interests"><h1>Files of interests</h1></a>
+<a class="header" href="print.html#files-of-interest" id="files-of-interest"><h1>Files of interest</h1></a>
 <p>Once vJoule is installed, you should find a directory located in
 <code>/etc/vjoule</code> that contains configurations, logs and results. For
 example, the service configuration is located in
@@ -367,8 +382,8 @@ list of rules, every rules must start with a slice (a cgroup that
 contains other cgroups).  For example <code>my.slice/*</code>., will make the
 sensor watch all the cgroups in the slice <code>my.slice</code>, and
 <code>system.slice/docker*</code> will watch all the cgroups in <code>system.slice</code>
-that starts with <code>docker</code>.  Basically, it list all the cgroups that
-would be found if the command 'ls my_rule' was run in the cgroup mount
+that starts with <code>docker</code>.  Basically, it lists all the cgroups that
+would be found if the command <code>ls my_rule</code> was run in the cgroup mount
 directory.  The following presents an example of configuration for
 cgroup listing that has to be placed in <code>/etc/vjoule/cgroups</code>.</p>
 <pre><code>vjoule.slice/*
@@ -430,12 +445,18 @@ name = &quot;rapl&quot; # rapl plugin form compatible intel of amd cpus
 defines the list of perf events to watched for each cgroups monitored
 by vJoule, and defines the values that will be dumped inside the
 <em>cgroups.csv</em> file.</p>
-<a class="header" href="print.html#cgroup-files" id="cgroup-files"><h2>Cgroup files</h2></a>
-<p>The dumper core plugin uses another configuration file, in '/etc/vjoule/cgroups', to filter the cgroups that are watched by the sensor, and ignore unwanted cgroups.
-This configuration file is a list of rules, every rules must start with a slice (a cgroup that contains other cgroups).
-For example 'my.slice/<em>'., will make the sensor watch all the cgroups in the slice 'my.slice', and 'system.slice/docker</em>' will watch all the cgroups in 'system.slice' that starts with 'docker'.
-Basically, it list all the cgroups that would be found if the command 'ls my_rule' was run in the cgroup mount directory.
-The following presents an example of configuration for cgroup listing that has to be placed in '/etc/vjoule/cgroups'</p>
+<a class="header" href="print.html#cgroups-file-1" id="cgroups-file-1"><h2>Cgroups file</h2></a>
+<p>The dumper core plugin uses another configuration file, in
+<code>/etc/vjoule/cgroups</code>, to filter the cgroups that are watched by the
+sensor, and ignore unwanted cgroups.  This configuration file is a
+list of rules, every rules must start with a slice (a cgroup that
+contains other cgroups).  For example <code>my.slice/*</code>., will make the
+sensor watch all the cgroups in the slice <code>my.slice</code>, and
+<code>system.slice/docker*</code> will watch all the cgroups in <code>system.slice</code>
+that starts with <code>docker</code>.  Basically, it lists all the cgroups that
+would be found if the command <code>ls my_rule</code> was run in the cgroup mount
+directory.  The following presents an example of configuration for
+cgroup listing that has to be placed in <code>/etc/vjoule/cgroups</code>.</p>
 <pre><code>vjoule.slice/*
 system.slice/docker*
 my_custom.slice/my_custom_cgroup
@@ -490,7 +511,137 @@ name = &quot;nvidia&quot;
 plugins, but only one <code>cpu</code> and one <code>ram</code> plugin can be used at the
 same time.</p>
 <a class="header" href="print.html#pullers" id="pullers"><h1>Pullers</h1></a>
-<p>We have implemented several <code>pullers</code> programs that will fetch the results. Feel free to use them (see the dedicated section in the documentation). </p>
+<p>We have implemented several example of <code>pullers</code> program that fetch
+the results. The idea of the pullers directory in the github
+repository is to provide basic examples of how to retreive the results
+of vjoule service from a program.</p>
+<p>There are four examples in the repository :</p>
+<ul>
+<li>a bash example, that simply prints the cpu consumption of the System and of the vjoule service.</li>
+<li>a c++ example, that prints the consumption of the different components (cpu, ram and gpu) of the system and all the cgroup watched by the service.</li>
+<li>a rust example, that prints the consumption of the different components (cpu, ram and gpu) of the system and all the cgroup watched by the service.</li>
+<li>a python example, that retreives the consumption of the different components (cpu, ram and gpu) of the system and all the cgroup watched by the service and plot them to a image file when Ctrl-C is pressed.</li>
+</ul>
+<a class="header" href="print.html#vjoule-cli" id="vjoule-cli"><h1>vjoule CLI</h1></a>
+<p>This section details how to use the three commands in the vjoule command line interface:</p>
+<ul>
+<li><strong>vjoule exec</strong> - used to estimate the energy consumption of a given command</li>
+<li><strong>vjoule profile</strong> - used to create a profile of the energy consumption of your computer</li>
+<li><strong>vjoule top</strong> - used to visualize the energy consumption of your computer and the cgroups monitored by <em>vjoule service</em></li>
+</ul>
+<a class="header" href="print.html#vjoule-exec" id="vjoule-exec"><h1>vjoule exec</h1></a>
+<p>The <em>vjoule exec</em> command can be used to estimate the energy consumption of a given command.</p>
+<p>You can use it as follows:</p>
+<pre><code class="language-bash">$ vjoule exec python myscript.py
+
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.16052J|   0.312761J|   0.257263J|
+|Process |   0.957794J|          0J|   0.190821J|
+</code></pre>
+<p><strong>Note:</strong> this is the default command in vJoule CLI, you can omit the <em>exec</em> subcommand and just use <em>vJoule</em>, as follows:</p>
+<pre><code class="language-bash">$ vjoule python myscript.py
+
+# Output
+|CGroup  |         CPU|         GPU|         RAM|
+|--------|------------|------------|------------|
+|Global  |    1.16052J|   0.312761J|   0.257263J|
+|Process |   0.957794J|          0J|   0.190821J|
+</code></pre>
+<p>If you prefer to store the result output in a csv file, you can use the -o flag, as follows:</p>
+<pre><code class="language-bash">$ vjoule -o output.csv python myscript.py
+
+# Output
+$ cat output.csv 
+CGroup  ;         CPU;         GPU;         RAM
+Global  ;    1.16052J;   0.312761J;   0.257263J;
+Process ;   0.957794J;          0J;   0.190821J;
+</code></pre>
+<p>vJoule CLI will create a result directory every time it is run. Every result directories are stored under the <em>__vjoule</em> directory. The <em>__vjoule/latest</em> directory is a symbolic link to the latest run.</p>
+<a class="header" href="print.html#vjoule-profile" id="vjoule-profile"><h1>vjoule profile</h1></a>
+<p><em>vjoule profile</em> is a command that run a series of stress on your system and output a model of the energy consumption of your computer depending on its cpu load.</p>
+<p>For example, running <em>vjoule profile</em> may output a result like this:</p>
+<pre><code class="language-bash">$ ./vjoule profile
+ 91% [|||||||||||||||||||||||||||||||||||||||||||||||||||||||     ]
+  Nb cores |      CPU |      RAM |
+         - |        - |        - |
+         0 | 34.66421 |  5.13352 |
+         1 | 42.96116 |  5.13747 |
+         2 | 50.93322 |  5.14628 |
+         3 | 59.46340 |  5.16990 |
+         4 | 67.55849 |  5.17482 |
+         5 | 75.57416 |  5.17621 |
+         6 | 77.31018 |  5.17343 |
+         7 | 79.34835 |  5.17292 |
+         8 | 81.33730 |  5.17994 |
+         9 | 83.20559 |  5.18949 |
+        10 | 84.86211 |  5.18985 |
+        11 | 86.52374 |  5.17757 |
+</code></pre>
+<p>This could be then visualized in a third-party program:
+<img src="../images/profile.png" alt="Visualization of the given model" /></p>
+<p>Results are presented in watts and correspond to the power used by your computer while stressing a given number of cores. This subcommand can be useful to understand how the energy used by your computer increase as it uses more and more cores.</p>
+<a class="header" href="print.html#vjoule-top" id="vjoule-top"><h1>vjoule top</h1></a>
+<p><em>vjoule top</em> is a command that will start a terminal-based visualization of the current energy consumption of your computer and cgroups monitored by the vjoule service.</p>
+<p>This can just be started using <code>vjoule top</code></p>
+<p><img src="../images/vjouletop.png" alt="screenshot of vjoule top" /></p>
+<p>The top part present the energy consumption of the whole system and all monitored cgroups. The bottom part present the
+evolution of the energy consumption of the whole system. Values indicated under CPU/GPU/RAM are the maximum recorded value
+in watts, to have an idea of the scale of the graph. </p>
+<a class="header" href="print.html#tutorial" id="tutorial"><h1>Tutorial</h1></a>
+<p>This section aims to provide practical tutorials to learn to use vJoule for your experiments.</p>
+<a class="header" href="print.html#measuring-the-energy-consumption-of-your-program" id="measuring-the-energy-consumption-of-your-program"><h1>Measuring the energy consumption of your program</h1></a>
+<p>In this tutorial, we will learn to use vJoule to measure the energy consumption of a simple python script. Please make sure that vJoule is already installed on your computer.</p>
+<a class="header" href="print.html#your-program-to-evaluate" id="your-program-to-evaluate"><h2>Your program to evaluate</h2></a>
+<p>Let's say you want to measure the energy consumption of the following python script.</p>
+<pre><code class="language-python">import sys
+
+# Compute the value of Pi. 
+# A higher value of prec will lead to a higher precision.
+def computePi(prec):
+    res = 0
+    for i in range(prec):
+        res += (4.0 / prec) / (1.0 + ((i - 0.5) * (1.0 / prec)) * ((i - 0.5) * (1.0 / prec)))
+    return res
+
+if __name__ == &quot;__main__&quot;:
+    if len(sys.argv) &lt; 2:
+        print(&quot;Usage: python compute_pi.py precision&quot;)
+    else:
+        print(computePi(int(sys.argv[1])))
+</code></pre>
+<a class="header" href="print.html#using-vjoule-cli" id="using-vjoule-cli"><h2>Using vJoule CLI</h2></a>
+<p>Using vJoule CLI is pretty straightforward, just run python with vJoule:</p>
+<pre><code>$ vjoule python compute_pi.py 1000  
+</code></pre>
+<a class="header" href="print.html#using-vjoule-linux-service" id="using-vjoule-linux-service"><h2>Using vJoule linux service</h2></a>
+<p>vJoule linux service offers a more flexible solution.</p>
+<a class="header" href="print.html#making-sure-that-vjoule-services-are-up" id="making-sure-that-vjoule-services-are-up"><h3>Making sure that vJoule services are up</h3></a>
+<p>We will first make sure everything is running with the following commands:</p>
+<pre><code>$ sudo systemctl status vjoule_service
+</code></pre>
+<p>If vjoule service is not running, start it with:</p>
+<pre><code>$ sudo systemctl start vjoule_service
+</code></pre>
+<a class="header" href="print.html#creating-a-cgroup-for-our-process" id="creating-a-cgroup-for-our-process"><h3>Creating a cgroup for our process</h3></a>
+<p>Remember that vJoule uses cgroups to know which processes to monitor. For a quick introduction to cgroups, refer to the <a href="../user_guide/cgroups.md">dedicated section</a> in the user guide.</p>
+<p>vJoule needs at least a two level cgroup hierarchy. We can organize it as follows:</p>
+<ul>
+<li>A cgroup named <code>measurements.slice</code> for our test,</li>
+<li>Inside <code>measurements.slice</code>, a cgroup named <code>compute_pi</code> in which we will attach our python script.</li>
+</ul>
+<p>This can be done with <code>cgcreate</code>:</p>
+<pre><code>$ sudo cgcreate -g cpu:measurements.slice/compute_pi
+</code></pre>
+<p>We will configure vJoule to monitor the energy consumption of each cgroups present in <code>measurements.slice</code>. To do so, we will edit our service's list of monitored cgroups (present in <code>/etc/vjoule/cgroups</code>) by adding <code>measurements.slice</code> to the list of cgroups.</p>
+<p>vJoule will now reload itself and create a result directory for our cgroups, in <code>/etc/vjoule/results/measurements.slice</code>. Inside, you should have a <code>compute_pi</code> directory with a file for every monitored component (CPU, GPU, RAM).</p>
+<p>Now, we can run our python script inside our <code>compute_pi</code> cgroup. This can be done with <code>cgexec</code>:</p>
+<pre><code>$ sudo cgexec -g cpu:measurements.slice/compute_pi python compute_pi.py
+</code></pre>
+<a class="header" href="print.html#getting-the-results" id="getting-the-results"><h3>Getting the results</h3></a>
+<p>You should now have a non-zero value in results files. If some are empty, that's because your you did not activated a component or that it was not available.</p>
+<p>The value present in the results files are expressed in Joules. It correspond to the amount of energy consumed since vJoule started to monitor the related cgroup.</p>
 <a class="header" href="print.html#trouble-shooting" id="trouble-shooting"><h1>Trouble-shooting</h1></a>
 <a class="header" href="print.html#a-vjoule-does-not-seem-to-start" id="a-vjoule-does-not-seem-to-start"><h2>A. vJoule does not seem to start...</h2></a>
 <p>The log file <code>/etc/vjoule/service.log</code> is very useful to determine the reason of the error.</p>
@@ -509,7 +660,7 @@ same time.</p>
 <ul>
 <li>
 <p><code>[Error][NVIDIA] NVML is not available.</code></p>
-<p>If you don't have an nvidia graphics card, the explanation is easy the plugin won't work. You will have to deactivate it in the configuration file. cf. <a href="./user_guide/sensor_plugins.html">Sensor plugins</a>.</p>
+<p>If you don't have an nvidia graphic card, the explanation is easy the plugin won't work. You will have to deactivate it in the configuration file. cf. <a href="./user_guide/sensor_plugins.html">Sensor plugins</a>.</p>
 <p>However, if you have a nvidia GPU make sure you have installed the Nvidia management library and that it matches the version of the nvidia drivers (sometimes it does not because.. nvidia). A quick test can be to run the command <code>nvidia-smi</code>. <a href="https://developer.nvidia.com/nvidia-management-library-nvml">Nvidia NVML</a>.</p>
 </li>
 </ul>
@@ -519,8 +670,9 @@ same time.</p>
 <li>
 <p>First you can check the result files of the whole system
 (<code>/etc/vjoule/results/cpu</code> for example). If they increment the
-sensor plugin and divider core are effectively running and working.</p>
-<p>If not...</p>
+sensor plugin and divider core are effectively running and
+working. Or run the command <code>vjoule top</code> to verify that vjoule is
+running and working properly.</p>
 </li>
 <li>
 <p>The service runs at a given speed specified in the configuration file
@@ -537,7 +689,6 @@ procedure to follow.</p>
 <li>
 <p>Watch the file <code>/etc/vjoule/results/cpu</code> using iowatch, or inotify and wait for a modification.
 Here you can check wether the directory corresponding to your cgroups are correctly created.</p>
-<p>If not..</p>
 </li>
 <li>
 <p>Start your application and wait its end, or an event you have defined for your usecase.</p>
