@@ -322,6 +322,13 @@ namespace dumper {
 
     void Dumper::dispose () {
 	this-> _cgroupWatchers.clear ();
+	auto mntType = utils::get_mount_type (this-> _outputDir);
+	if (mntType == "tmpfs") {
+	    umount (this-> _outputDir.c_str ());
+	    std::filesystem::remove (this-> _outputDir);
+	}
+	
+	LOG_INFO ("Disposing dumper core.");
     }
     
 
