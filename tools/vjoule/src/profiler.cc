@@ -94,7 +94,8 @@ namespace tools::vjoule {
 	    vjoule_v_flag, vcontent
 	};
 	
-	::sensor::Sensor s (7, args);
+	::sensor::Sensor s;
+	s.configure (7, args);
 	
 	std::vector <ResultRow> results;
 	concurrency::timer t;

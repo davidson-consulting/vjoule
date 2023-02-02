@@ -28,7 +28,7 @@ namespace tools::vjoule {
 	    }	    
 	} else {
 	    this-> printHelp (CommandType::NONE, false);
-	    exit (-1);
+	    throw CommandError ();
 	}
     }
 
@@ -63,11 +63,11 @@ namespace tools::vjoule {
 	    auto flg = this-> isFlag (this-> _argv[i]);
 	    if (flg == HELP_FLAG) {
 		this-> printHelp (withKeyword ? CommandType::EXEC : CommandType::NONE, true);
-		exit (-1);
+		throw CommandError ();
 	    }	    
 	    else if (flg == VERSION_FLAG) {
 		this-> printVersion ();
-		exit (-1);
+		throw CommandError ();
 	    }
 	    else if (flg == VERBOSE_FLAG) this-> _content.verbose = true;
 	    else if (flg == CPU_FLAG) this-> _content.cpu = false;	    
@@ -83,7 +83,7 @@ namespace tools::vjoule {
 	    } else if (flg != "") {
 		this-> printHelp (CommandType::EXEC, false);
 		this-> printError (CommandType::EXEC, flg);
-		exit (-1);
+		throw CommandError ();
 	    } else {
 		break;
 	    }
@@ -98,7 +98,7 @@ namespace tools::vjoule {
 	if (this-> _content.subCmd.size () == 0) {
 	    this-> printHelp (CommandType::EXEC, false);
 	    std::cerr << "Need a subcommand to execute" << std::endl;
-	    exit (-1);	    
+	    throw CommandError ();	    
 	}
 
 	this-> checkConsistency ();	
@@ -121,11 +121,11 @@ namespace tools::vjoule {
 	    auto flg = this-> isFlag (this-> _argv[i]);
 	    if (flg == HELP_FLAG) {
 		this-> printHelp (CommandType::PROFILE, true);
-		exit (-1);
+		throw CommandError ();
 	    }	    
 	    else if (flg == VERSION_FLAG) {
 		this-> printVersion ();
-		exit (-1);
+		throw CommandError ();
 	    }
 	    else if (flg == VERBOSE_FLAG) this-> _content.verbose = true;
 	    else if (flg == CPU_FLAG) this-> _content.cpu = false;	    
@@ -133,11 +133,11 @@ namespace tools::vjoule {
 	    else if (flg != "") {
 		this-> printHelp (CommandType::PROFILE, false);
 		this-> printError (CommandType::PROFILE, flg);
-		exit (-1);
+		throw CommandError ();
 	    } else {
 		this-> printHelp (CommandType::PROFILE, false);
 		this-> printError (CommandType::PROFILE, this-> _argv[i]);
-		exit (-1);
+		throw CommandError ();
 	    }
 	}
 
@@ -161,11 +161,11 @@ namespace tools::vjoule {
 	    auto flg = this-> isFlag (this-> _argv[i]);
 	    if (flg == HELP_FLAG) {
 		this-> printHelp (CommandType::TOP, true);
-		exit (-1);
+		throw CommandError ();
 	    }	    
 	    else if (flg == VERSION_FLAG) {
 		this-> printVersion ();
-		exit (-1);
+		throw CommandError ();
 	    }	    
 	    else if (flg == OUTPUT_FLAG) {
 		i += this-> parseOutput (i, this-> _content.output);
@@ -173,11 +173,11 @@ namespace tools::vjoule {
 	    else if (flg != "") {
 		this-> printHelp (CommandType::TOP, false);
 		this-> printError (CommandType::TOP, flg);
-		exit (-1);
+		throw CommandError ();
 	    } else {
 		this-> printHelp (CommandType::TOP, false);
 		this-> printError (CommandType::TOP, this-> _argv[i]);
-		exit (-1);
+		throw CommandError ();
 	    }
 	}
     }
@@ -194,14 +194,14 @@ namespace tools::vjoule {
 	if (i + 1 >= this-> _argc) {
 	    this-> printHelp (CommandType::EXEC, false);
 	    std::cerr << "Need string parameter for option '--" << OUTPUT_FLAG << "'" << std::endl;
-	    exit (-1);
+	    throw CommandError ();
 	}
 
 	auto flg = this-> isFlag (this-> _argv[i + 1]);
 	if (flg != "") {
 	    this-> printHelp (CommandType::EXEC, false);
 	    std::cerr << "Need string parameter for option '--" << OUTPUT_FLAG << "'" << std::endl;
-	    exit (-1);
+	    throw CommandError ();
 	}
 
 	res = this-> _argv[i+1];
@@ -212,7 +212,7 @@ namespace tools::vjoule {
 	if (i + 1 >= this-> _argc) {
 	    this-> printHelp (CommandType::EXEC, false);
 	    std::cerr << "Need a list of pids for option '--" << PID_FLAG << "'" << std::endl;
-	    exit (-1);
+	    throw CommandError ();
 	}
 	
 	if (this-> _argv[i + 1][0] == '[') {
@@ -236,7 +236,7 @@ namespace tools::vjoule {
 		    } else if (current != "") {		    
 			this-> printHelp (CommandType::EXEC, false);
 			std::cerr << "Malformed pid '" << current << "'" << std::endl;
-			exit (-1);
+			throw CommandError ();
 		    }
 		}
 
@@ -250,7 +250,7 @@ namespace tools::vjoule {
 	    if (!finished) {
 		this-> printHelp (CommandType::EXEC, false);
 		std::cerr << "Missing ']' at end of pid list" << std::endl;
-		exit (-1);
+		throw CommandError ();
 	    }
 
 	    return j - (i + 1);
@@ -260,7 +260,7 @@ namespace tools::vjoule {
 	    } catch (...) {
 		this-> printHelp (CommandType::EXEC, false);
 		std::cerr << "Malformed pid '" << this-> _argv[i + 1] << "'" << std::endl;
-		exit (-1);
+		throw CommandError ();
 	    }
 
 	    return 1;
@@ -279,13 +279,13 @@ namespace tools::vjoule {
 	if (!this-> _content.rapl && !this-> _content.nvidia) {
 	    this-> printHelp (this-> _content.type, false);
 	    std::cerr << "No plugin activated, at least rapl or nvidia should be used." << std::endl;
-	    exit (-1);
+	    throw CommandError ();
 	}
 
 	if (!this-> _content.gpu && !this-> _content.cpu && !this-> _content.ram) {
 	    this-> printHelp (this-> _content.type, false);
 	    std::cerr << "No device is monitored, at least cpu, ram of gpu should be used." << std::endl;
-	    exit (-1);
+	    throw CommandError ();
 	}
     }
 

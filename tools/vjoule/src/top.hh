@@ -18,6 +18,8 @@
 
 namespace tools::vjoule {
 
+    struct TopError {};
+    
     struct Result {
 	// Joule
 	double cpuJ;

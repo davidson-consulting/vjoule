@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <sys/inotify.h>
 
+#include <exiting.hh>
 
 using namespace common;
 using namespace ftxui;
@@ -37,9 +38,11 @@ namespace tools::vjoule {
 	auto check = concurrency::SubProcess ("systemctl", {"is-active","--quiet", "vjoule_service.service"}, ".");
 	check.start ();
 
+	exitSignal.connect (this, &Top::dispose);
+	
 	if (check.wait () != 0) {
 	    std::cout << "vJoule service is not running." << std::endl;
-	    exit (-1);
+	    throw TopError ();
 	}
 
 	this-> _cfgPath = utils::join_path (VJOULE_DIR, "config.toml");
@@ -61,7 +64,7 @@ namespace tools::vjoule {
 	    this-> _output = fopen (this-> _cmd.output.c_str (), "w");
 	    if (this-> _output == nullptr) {
 		std::cerr << "error: failed to open output file." << std::endl;
-		exit (-1);
+		throw TopError ();
 	    }
 	    
 	    fprintf (this-> _output, "%17s ; %55s ; %8s ; %8s ; %8s\n", "TIMESTAMP", "CGROUP", "CPU", "RAM", "GPU");
@@ -94,14 +97,18 @@ namespace tools::vjoule {
 	
 	if (!c.attach (getpid ())) {
 	    std::cerr << "vJoule failed to create cgroup" << std::endl;
-	    exit (-1);
+	    throw TopError ();
 	}
     }
 
     void Top::dispose () {
 	cgroup::Cgroup c ("vjoule.slice/top");
-	c.detach (getpid ());
-	c.remove ();	
+	c.detachAll ();
+	c.remove ();
+
+	if (this-> _output != nullptr) {
+	    fclose (this-> _output);
+	}
     }
     
     /**

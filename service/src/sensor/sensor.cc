@@ -8,11 +8,12 @@ using namespace common;
 
 namespace sensor {
 
+    Sensor::Sensor () {}
 
-    Sensor::Sensor (int argc, char ** argv) :
-	_argc (argc),
-	_argv (argv)
-    {
+    void Sensor::configure (int argc, char ** argv) {
+	this-> _argc = argc;
+	this-> _argv = argv;
+    
 	this-> initAppOptions ();
 	if (this-> _pluginHOpt-> count () > 0) {
 	    this-> displayPluginHelp ();
@@ -34,7 +35,7 @@ namespace sensor {
 
     void Sensor::runAsync () {
 	LOG_DEBUG ("Starting sensor async");
-	concurrency::spawn (this, &Sensor::mainLoop);
+	this-> _th = concurrency::spawn (this, &Sensor::mainLoop);
     }
     
     void Sensor::run () {	
@@ -42,15 +43,27 @@ namespace sensor {
 	this-> mainLoop (0);
     }
 
+    void Sensor::stop () {
+	this-> _isRunning = false;
+	if (this-> _th != 0) {
+	    concurrency::join (this-> _th);
+	}
+    }
+    
     void Sensor::forcedIteration () {
-	this-> _computeCore ();	
+	this-> _mt.lock ();
+	this-> _computeCore ();
+	this-> _mt.unlock ();
     }
     
     void Sensor::mainLoop (concurrency::thread) {
 	concurrency::timer timer;
-	while (true) {
+	this-> _isRunning = true;
+	while (this-> _isRunning) {
 	    timer.reset ();
+	    this-> _mt.lock ();
 	    this-> _computeCore ();
+	    this-> _mt.unlock ();
 
 	    auto took = timer.time_since_start ();
 	    float toSleep = this-> _freq - took - 0.001;

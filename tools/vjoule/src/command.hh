@@ -7,6 +7,8 @@
 
 namespace tools::vjoule {
 
+    struct CommandError {};
+    
     enum class CommandType : int {
 	EXEC = 0,
 	PROFILE = 1,

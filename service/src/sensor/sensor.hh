@@ -15,7 +15,16 @@ namespace sensor {
 
 	// The time to wait between to dumping/core
 	float _freq;
-	
+
+	// True while is running
+	bool _isRunning = false;
+
+	// The mutex of the sensor service
+	common::concurrency::mutex _mt;
+
+	// The thread running in async
+	common::concurrency::thread _th = 0;
+
     private :
 	
 	// The factory of plugins
@@ -53,12 +62,17 @@ namespace sensor {
     public:
 
 	/**
+	 * Create an empty sensor
+	 */
+	Sensor ();
+
+	/**
 	 * @params: 
 	 *    - argc: command line option size
 	 *    - argv: command line option content
 	 */
-	Sensor (int argc, char ** argv);
-
+	void configure (int argc, char ** argv);
+	
 	/**
 	 * Run the sensor in a new thread
 	 */
@@ -70,10 +84,10 @@ namespace sensor {
 	void run () ;
 
 	/**
-	 * Main loop of the sensor, used by runAsync and run
+	 * Stop the service
 	 */
-	void mainLoop(common::concurrency::thread th);
-
+	void stop ();
+	
 	/**
 	 * Force the execution of an iteration
 	 */
@@ -81,6 +95,11 @@ namespace sensor {
 	
     private :
 
+	/**
+	 * Main loop of the sensor, used by runAsync and run
+	 */
+	void mainLoop(common::concurrency::thread th);
+	
 	/**
 	 * Init the option of the app (command line)
 	 */

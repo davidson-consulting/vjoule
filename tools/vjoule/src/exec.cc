@@ -2,11 +2,9 @@
 #include <sys/wait.h>
 #include <fstream>
 
-#include <sensor/_.hh>
-#include <common/_.hh>
 #include <watcher.hh>
 #include <exec.hh>
-#include <exporter.hh>
+#include <exiting.hh>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -92,6 +90,51 @@ namespace tools::vjoule {
 	std::filesystem::create_directory_symlink(result_dir, this-> _working_directory);
     }
 
+    void Exec::dispose () {
+	try {	    
+	    if (this-> _started) {
+		if (!this-> _exported) {
+		    this-> exportResults ();
+		}
+		
+		this-> _sensor.stop ();
+	    }
+	    
+	    if (this-> _childPid != 0) {
+		kill (9, this-> _childPid);
+		
+		int status;
+		waitpid (this-> _childPid, &status, 0);
+	    }
+	    
+	    // Detach all the pids attached to the cgroup 
+	    this-> _cgroup.detachAll ();
+	    
+	    // Clean the cgroup created by the vjoule command line
+	    this-> _cgroup.remove ();
+	    
+	    // if the parent contains no running xp, we remove it to avoid system pollution
+	    cgroup::Cgroup parent ("vjoule_xp.slice");
+	    if (!parent.isSlice ()) { 
+		parent.remove ();
+	    }
+	} catch (...) {
+	    std::cerr << "Error when cleaning cgroups" << std::endl;		
+	}
+    }
+
+    void Exec::exportResults () {
+	this-> _sensor.forcedIteration();
+
+	if (strcmp (this-> _cmd.output.c_str(), "") == 0) {
+	    this-> _exporter.export_stdout();
+	} else {
+	    this-> _exporter.export_csv (this-> _cmd.output);
+	}
+
+	this-> _exported = true;
+    }
+    
     void Exec::run() {		
 	int pipes[2];
 	if (pipe (pipes) == -1) {
@@ -101,7 +144,7 @@ namespace tools::vjoule {
 	pid_t c_pid = fork();
 	if (c_pid == -1) {
 	    printf("Could not fork to execute vjoule_exec");
-	    exit (EXIT_FAILURE);
+	    throw ExecError ();
 	} else if (c_pid > 0) {
 	    close (pipes[0]);
 	    this-> runParent (c_pid, pipes[1]);
@@ -113,11 +156,14 @@ namespace tools::vjoule {
     
     void Exec::runParent (uint64_t childPid, int pipe) {
 	try {
+	    this-> _childPid = childPid;
 	    this-> _cgroup.create ();
 
+	    exitSignal.connect (this, &Exec::dispose);
+	    
 	    if (!this-> _cgroup.attach (childPid)) {
 		std::cerr << "error: failed to attach pid of command to monitored cgroup." << std::endl;
-		exit (-1);
+		throw ExecError ();
 	    }
 
 	    for (auto & pid : this-> _cmd.pids) {
@@ -137,14 +183,15 @@ namespace tools::vjoule {
 		vjoule_v_flag, vcontent
 	    };
 		
-	    ::sensor::Sensor s (args.size(), args.data());
+	    this-> _sensor.configure (args.size(), args.data());
+	    this-> _started = true;
 	    
 	    do {
-		s.forcedIteration();
+		this-> _sensor.forcedIteration();
 	    } while (!utils::file_exists(utils::join_path(this-> _working_directory, this-> _cgroup.getName () + "/cpu")));
 	    
-	    Exporter e (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);	    
-	    s.runAsync();
+	    this-> _exporter.configure (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);	    
+	    this-> _sensor.runAsync();
 
 	    if (write (pipe, "GO!", strlen ("GO!")) == -1) {
 		std::cerr << "internal error: failed to warn child process to start." << std::endl;
@@ -155,41 +202,20 @@ namespace tools::vjoule {
 	    // wait for child process to finish
 	    int status;
 	    waitpid (childPid, &status, 0);
-
-	    s.forcedIteration();
-
-	    if (strcmp (this-> _cmd.output.c_str(), "") == 0) {
-		e.export_stdout();
-	    } else {
-		e.export_csv (this-> _cmd.output);
-	    }
+	    this-> exportResults ();
+	    
+	    this-> _sensor.stop ();
+	    this-> _started = false;
 	} catch (...) {
 	    std::cerr << "error: failed to configure vjoule execution." << std::endl;
-	    this-> _cgroup.detach (childPid);	    
+	    this-> _cgroup.detachAll ();	    
 	    kill (childPid, 9);
 	    
 	    int status;
 	    waitpid (childPid, &status, 0);
 	}
-	
-	try {
-	    
-	    for (auto & pid : this-> _cmd.pids) {
-		this-> _cgroup.detach (pid);
-	    }
 
-	    // Clean the cgroup created by the vjoule command line
-	    this-> _cgroup.remove ();
-	    
-	    // if the parent contains no running xp, we remove it to avoid system pollution
-	    cgroup::Cgroup parent ("vjoule_xp.slice");
-	    if (!parent.isSlice ()) { 
-		parent.remove ();
-	    }
-	} catch (...) {
-	    std::cerr << "Error when cleaning cgroups" << std::endl;		
-	}
-	
+	this-> dispose ();		
     }
 
     void Exec::runChild (int pipe) {
