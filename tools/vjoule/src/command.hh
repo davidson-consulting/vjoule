@@ -20,7 +20,7 @@ namespace tools::vjoule {
 #define HELP_FLAG "help"
 #define HELP_FLAG_SHORT "h"
 
-#define PID_FLAG "pid"    
+#define PID_FLAG "pids"    
 #define CPU_FLAG "no-cpu"
 #define RAM_FLAG "no-ram"
 #define GPU_FLAG "no-gpu"

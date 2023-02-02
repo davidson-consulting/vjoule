@@ -167,9 +167,9 @@ namespace tools::vjoule {
 		this-> printVersion ();
 		exit (-1);
 	    }	    
-	    // else if (flg == OUTPUT_FLAG) {
-	    // 	i += this-> parseOutput (i, this-> _content.output);
-	    // }
+	    else if (flg == OUTPUT_FLAG) {
+		i += this-> parseOutput (i, this-> _content.output);
+	    }
 	    else if (flg != "") {
 		this-> printHelp (CommandType::TOP, false);
 		this-> printError (CommandType::TOP, flg);
@@ -320,9 +320,9 @@ namespace tools::vjoule {
 	if (type == CommandType::PROFILE) {
 	    std::cout << "./vjoule profile" << std::endl;
 	} else if (type == CommandType::EXEC) {
-	    std::cout << "./vjoule (exec?) [-nv] [-nr] [--no-cpu] [--no-gpu] [--no-ram] cmd [cmd options...]" << std::endl;
+	    std::cout << "./vjoule (exec?) [-nv] [-nr] [--no-cpu] [--no-gpu] [--no-ram] [--output file] [--verbose] [--pids [pid*]] cmd [cmd options...]" << std::endl;
 	} else if (type == CommandType::TOP) {
-	    std::cout << "./vjoule top" << std::endl;
+	    std::cout << "./vjoule top [--output file]" << std::endl;
 	} else {
 	    std::cout << "./vjoule [-h] [-v] (exec | profile | top)" << std::endl;
 	}
@@ -349,7 +349,7 @@ namespace tools::vjoule {
 		std::cout << "\t    --no-ram            \tdon't monitor RAM consumption" << std::endl;
 		std::cout << "\t    --no-gpu            \tdon't monitor GPU consumption" << std::endl;
 		std::cout << "\t-o,--output (file.csv)  \tdump the result in a csv file instead of stdout" << std::endl << std::endl;
-		std::cout << "\t   --pids (pid | [pids])\tAttach the pids to the monitoring" << std::endl << std::endl;
+		std::cout << "\t   --pids (pid | [pid*])\tAttach the pids to the monitoring" << std::endl << std::endl;
 
 		std::cout << "positional arguments : " << std::endl;
 		std::cout << "\tcmd [options...] \tthe command to run and monitor" << std::endl << std::endl;
@@ -358,8 +358,9 @@ namespace tools::vjoule {
 	    if (type == CommandType::TOP || type == CommandType::NONE) {
 		std::cout << "== subcommand top : " << std::endl;
 		std::cout << "optional arguments : " << std::endl;
-		std::cout << "\t-h,--help      \tprint this help and exit" << std::endl;
-		std::cout << "\t-v,--version   \tprint version information and exit" << std::endl << std::endl;
+		std::cout << "\t-h,--help               \tprint this help and exit" << std::endl;
+		std::cout << "\t-v,--version            \tprint version information and exit" << std::endl << std::endl;
+		std::cout << "\t-o,--output (file.csv)  \tdump the result in a csv file instead of stdout" << std::endl << std::endl;
 	    }
 	}
 	
@@ -373,7 +374,9 @@ namespace tools::vjoule {
     void CommandParser::printError (CommandType type, const std::string &flg) const {
 	std::cerr << "Undefined option '" << flg << "'";
 	if (type == CommandType::PROFILE) std::cerr << " for command 'profile'" << std::endl;
-	if (type == CommandType::EXEC) std::cerr << " for command 'exec'" << std::endl;
+	else if (type == CommandType::EXEC) std::cerr << " for command 'exec'" << std::endl;
+	else if (type == CommandType::TOP) std::cerr << " for command 'top'" << std::endl;
+	else std::cerr << std::endl;
     }
     
     

@@ -56,7 +56,17 @@ namespace tools::vjoule {
 	this-> _freq = sensor.getOr <int> ("freq", 1);
 	this-> _summary = this-> createSummary ();
 
-	this-> createAndRegisterCgroup ();	
+	this-> createAndRegisterCgroup ();
+	if (this-> _cmd.output != "") {
+	    this-> _output = fopen (this-> _cmd.output.c_str (), "w");
+	    if (this-> _output == nullptr) {
+		std::cerr << "error: failed to open output file." << std::endl;
+		exit (-1);
+	    }
+	    
+	    fprintf (this-> _output, "%17s ; %55s ; %8s ; %8s ; %8s\n", "TIMESTAMP", "CGROUP", "CPU", "RAM", "GPU");
+	    fflush (this-> _output);
+	}
     }
 
     void Top::listPlugins () {
@@ -103,10 +113,12 @@ namespace tools::vjoule {
      */    
 
     
-    void Top::run () {	
-	concurrency::spawn (this, &Top::asyncDisplay);
+    void Top::run () {
 	concurrency::timer t;
-	t.sleep (0.2);
+	if (this-> _cmd.output == "") {
+	    concurrency::spawn (this, &Top::asyncDisplay);
+	    t.sleep (0.2);
+	}
 
 	this-> _isRunning = true;
 	while (this-> _isRunning) {
@@ -235,10 +247,14 @@ namespace tools::vjoule {
      * ===================================================================================
      */    
 
-    void Top::display () {	
-	this-> _content = this-> createTable ();
-	if (this-> _isRunning) {
-	    this-> _screen.PostEvent (Event::Custom);
+    void Top::display () {
+	if (this-> _cmd.output == "") {
+	    this-> _content = this-> createTable ();
+	    if (this-> _isRunning) {
+		this-> _screen.PostEvent (Event::Custom);
+	    }
+	} else {
+	    this-> exportCsv ();
 	}
     }
 
@@ -294,6 +310,26 @@ namespace tools::vjoule {
 	return res;
     }
     
+    void Top::exportCsv () {
+	static int i = 0;
+	struct timeval start;
+	gettimeofday(&start, NULL);
+	auto r = this-> sortByCpu ();
+	for (auto & it : r) {
+	    fprintf (this-> _output, "%ld.%ld ; %55s ; %8.2lf ; %8.2lf ; %8.2lf\n", start.tv_sec, start.tv_usec, it.first.c_str (), it.second.cpuJ, it.second.ramJ, it.second.gpuJ);
+	}
+	fflush (this-> _output);
+
+	
+	std::cout << ".";
+	std::cout.flush ();
+	i += 1;
+	if (i > 20) {
+	    std::cout << std::endl;
+	    i = 0;
+	}
+    }
+
     Element Top::createTable () const {
 	std::vector <std::vector <std::string> > rows;
 	std::vector <std::string> head {"Cgroup", "CPU", "RAM", "GPU"};
