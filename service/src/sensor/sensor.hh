@@ -6,6 +6,8 @@
 #include <common/foreign/CL11.hpp>
 
 namespace sensor {
+
+    extern common::concurrency::signal<> exitSignal;
     
     class Sensor {
     private:

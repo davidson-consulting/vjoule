@@ -8,6 +8,8 @@ using namespace common;
 
 namespace sensor {
 
+    common::concurrency::signal <> exitSignal;
+    
     Sensor::Sensor () {}
 
     void Sensor::configure (int argc, char ** argv) {
@@ -76,13 +78,14 @@ namespace sensor {
     }
 
     void Sensor::dispose () {
+	LOG_INFO ("Disposing service.");
 	this-> _factory.dispose ();
 	this-> _core-> dispose ();
 	utils::Logger::clear ();
 	
 	pfm_terminate ();	
-    }
-
+    }    
+    
     /**
      * ===================================================================================
      * ===================================================================================
@@ -135,7 +138,9 @@ namespace sensor {
 	} else {
 	    LOG_ERROR ("Core is not defined in the configuration.");
 	    throw 1;
-	}	
+	}
+
+	exitSignal.connect (this, &Sensor::dispose);
     }
 
     void Sensor::configureOptions () {
