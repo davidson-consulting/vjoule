@@ -124,9 +124,9 @@ namespace tools::vjoule {
 	concurrency::timer t;
 	if (this-> _cmd.output == "") {
 	    concurrency::spawn (this, &Top::asyncDisplay);
-	    t.sleep (0.2);
-	}
+	} else this-> _isReady = true;
 
+	this-> waitServiceIteration ();
 	this-> _isRunning = true;
 	while (this-> _isRunning) {
 	    this-> fetch ();
@@ -258,6 +258,11 @@ namespace tools::vjoule {
 	if (this-> _cmd.output == "") {
 	    this-> _content = this-> createTable ();
 	    if (this-> _isRunning) {
+		concurrency::timer t;
+		while (!this-> _isReady) {
+		    t.sleep (0.05);
+		}
+		
 		this-> _screen.PostEvent (Event::Custom);
 	    }
 	} else {
@@ -272,7 +277,8 @@ namespace tools::vjoule {
 	    auto graph = this-> createGraph ();
 	    return window (text(L" Consumption "), vbox ({tab, graph}) | flex) | flex;
 	});
-	
+
+	this-> _isReady = true;
 	this-> _screen.Loop (Container::Vertical ({sumR, tableR}));
 	this-> _isRunning = false;
     }

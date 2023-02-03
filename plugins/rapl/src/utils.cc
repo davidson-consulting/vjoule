@@ -30,7 +30,20 @@ namespace rapl {
 	return fd;
     }
 
-    long long read_msr(int fd, int which) {
+    uint64_t read_msr_no_cache (int fd, int which) {
+
+	uint64_t data;
+
+	if ( pread(fd, &data, sizeof data, which) != sizeof data ) {
+	    LOG_ERROR ("rdmsr:Failed to read msr data");
+	    throw std::runtime_error ("");
+	}
+	
+	return data;
+    }
+
+    
+    uint64_t read_msr(int fd, int which, uint64_t & old) {
 
 	uint64_t data;
 
@@ -39,7 +52,18 @@ namespace rapl {
 	    throw std::runtime_error ("");
 	}
 
-	return (long long)data;
+	if (old != 0 && old > data) {
+	    auto n_data = (4294967295 - old) + data;
+	    old = data;
+	    return n_data;
+	} else if (old == 0) {
+	    old = data;
+	    return 0;
+	} else {
+	    auto n_data = data - old;
+	    old = data;
+	    return n_data;
+	}
     }
 
 
@@ -191,7 +215,7 @@ namespace rapl {
     }
 
     PackageUnits read_package_unit (int fd, EventAvail avail) {
-	auto result = read_msr(fd, MSR_RAPL_POWER_UNIT);
+	auto result = read_msr_no_cache (fd, MSR_RAPL_POWER_UNIT);
 
 	PackageUnits pack;
 	pack.powerUnits = pow(0.5,(double)(result&0xf));
@@ -206,7 +230,7 @@ namespace rapl {
 	    }
 	}
 	
-	result = read_msr (fd, MSR_PKG_POWER_INFO);
+	result = read_msr_no_cache (fd, MSR_PKG_POWER_INFO);
 	pack.thermalSpecPower = pack.powerUnits * (double)(result & 0x7fff);
 	pack.minimumPower = pack.powerUnits * (double)((result >> 16) & 0x7fff);
 	pack.maximumPower = pack.powerUnits * (double) ((result >> 32) & 0x7fff);
@@ -216,28 +240,28 @@ namespace rapl {
     }
 
 
-    PackageContent read_package_values (int fd, EventAvail avail, PackageUnits unit) {
+    PackageContent read_package_values (int fd, EventAvail avail, PackageUnits unit, PackageCache & cache) {
 	PackageContent pack;
-	auto result = read_msr (fd, MSR_PKG_ENERGY_STATUS);
+	auto result = read_msr (fd, MSR_PKG_ENERGY_STATUS, cache.package);	
 	pack.package = ((double)result) * unit.cpuEnergyUnits;
 
 	if (avail.pp0) {
-	    result = read_msr (fd, MSR_PP0_ENERGY_STATUS);
+	    result = read_msr (fd, MSR_PP0_ENERGY_STATUS, cache.pp0);
 	    pack.pp0 = ((double)result) * unit.cpuEnergyUnits;
 	}
 
 	if (avail.pp1) {
-	    result = read_msr (fd, MSR_PP1_ENERGY_STATUS);
+	    result = read_msr (fd, MSR_PP1_ENERGY_STATUS, cache.pp1);
 	    pack.pp1 = ((double)result) * unit.cpuEnergyUnits;
 	}
 
 	if (avail.dram) {
-	    result = read_msr (fd, MSR_DRAM_ENERGY_STATUS);
+	    result = read_msr (fd, MSR_DRAM_ENERGY_STATUS, cache.dram);
 	    pack.dram = ((double)result) * unit.dramEnergyUnits;
 	}
 	
 	if (avail.psys) {
-	    result = read_msr (fd, MSR_PLATFORM_ENERGY_STATUS);
+	    result = read_msr (fd, MSR_PLATFORM_ENERGY_STATUS, cache.psys);
 	    pack.psys = ((double)result) * unit.cpuEnergyUnits;
 	}
 

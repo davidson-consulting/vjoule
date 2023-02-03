@@ -17,8 +17,8 @@ namespace rapl {
      */
     class RaplReader {
 	
-	// The content of the last read
-	std::vector<rapl::PackageContent> _lastValues;
+	// The cache of rapl values for read_package_values
+	std::vector<rapl::PackageCache> _cache;
 	    
 	// The package units
 	std::vector <rapl::PackageUnits> _packageUnits;
@@ -51,11 +51,11 @@ namespace rapl {
 	bool _gpuAvail = false;
 	
 
-	float _energy_pp0;
-	float _energy_pp1;
-	float _energy_pkg;
-	float _energy_psys;
-	float _energy_dram;
+	double _energy_pp0;
+	double _energy_pp1;
+	double _energy_pkg;
+	double _energy_psys;
+	double _energy_dram;
 	
     private :
 
