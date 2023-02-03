@@ -46,6 +46,7 @@ namespace tools::vjoule {
 	ofs << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl;
 	ofs << "output-dir = \"" << this-> _working_directory << "\"" <<std::endl;
 	ofs << "cgroups = \"" <<  utils::join_path(this-> _working_directory, "cgroups") << "\"" << std::endl;
+	ofs << "signal-path = \"" <<  utils::join_path(this-> _working_directory, "signal") << "\"" << std::endl;
 	ofs << "mount-tmpfs = false" << std::endl;
 	ofs << std::endl;
 	if (this-> _cmd.cpu && this-> _cmd.rapl) {
