@@ -67,6 +67,9 @@ namespace tools::vjoule {
 	// in run loop
 	bool _isRunning = false;
 
+	// Screen is ready to receive message
+	bool _isReady = false;
+	
 	// The output file
 	FILE * _output = nullptr;
 	

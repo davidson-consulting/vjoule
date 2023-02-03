@@ -74,7 +74,9 @@ namespace rapl {
 /**
  * Read the value of the msr file descriptor
  */
-    long long read_msr(int fd, int which);
+    uint64_t read_msr(int fd, int which, uint64_t & old);
+
+    uint64_t read_msr_no_cache(int fd, int which);
 
 
 #define CPU_SANDYBRIDGE		42
@@ -137,6 +139,14 @@ namespace rapl {
 	bool different_units;
     };
 
+    struct PackageCache {
+	uint64_t package;
+	uint64_t pp0;
+	uint64_t pp1;
+	uint64_t dram;
+	uint64_t psys;
+    };
+    
     struct PackageUnits {
 	// The unit of measurement of power
 	double powerUnits;
@@ -185,7 +195,7 @@ namespace rapl {
     /**
      * Read the content of a msr package
      */
-    PackageContent read_package_values (int fd, EventAvail avail, PackageUnits units);
+    PackageContent read_package_values (int fd, EventAvail avail, PackageUnits units, PackageCache & cache);
 
     
 }

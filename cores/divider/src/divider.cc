@@ -229,7 +229,6 @@ namespace divider {
     void Divider::computeRamEnergy () {
 	if (this-> _ramGet != nullptr) {
 	    float ramEnergy = this-> _ramGet ();
-	    
 	    // LLC_MISSES of the system
 	    auto ident = (float) (this-> _perfEventValues[0][1]);
 	    if (ident != 0.0f) {

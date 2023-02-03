@@ -42,7 +42,9 @@ namespace rapl {
 		LOG_INFO ("CPU energy units[", it, "] = ",  packageUnit.cpuEnergyUnits, "J");
 		LOG_INFO ("DRAM energy units[", it, "] = ", packageUnit.dramEnergyUnits, "J");
 		LOG_INFO ("Time units[", it, "] = ", packageUnit.timeUnits, "s");
-		this-> _lastValues.push_back (read_package_values (this-> _fds.back (), this-> _raplAvail, packageUnit));
+		
+		this-> _cache.push_back (PackageCache ());
+		read_package_values (this-> _fds.back (), this-> _raplAvail, packageUnit, this-> _cache.back ());
 	    }
 
 	    LOG_INFO ("RaplReader : bare metal mode is available.");
@@ -82,14 +84,12 @@ namespace rapl {
 	this-> _energy_psys = 0;
 	
 	for (size_t i = 0 ; i < this-> _fds.size () ; i++) {
-	    auto values = read_package_values (this-> _fds[i], this-> _raplAvail, this-> _packageUnits[i]);
-	    this-> _energy_pp0 += (values.pp0 - this-> _lastValues[i].pp0);
-	    this-> _energy_pp1 += (values.pp1 - this-> _lastValues[i].pp1);
-	    this-> _energy_dram += (values.dram - this-> _lastValues[i].dram);
-	    this-> _energy_pkg += (values.package - this-> _lastValues[i].package);
-	    this-> _energy_psys += (values.psys - this-> _lastValues[i].psys);
-	    
-	    this-> _lastValues [i] = values;
+	    auto values = read_package_values (this-> _fds[i], this-> _raplAvail, this-> _packageUnits[i], this-> _cache[i]);
+	    this-> _energy_pp0 += values.pp0;
+	    this-> _energy_pp1 += values.pp1;
+	    this-> _energy_dram += values.dram;
+	    this-> _energy_pkg += values.package;
+	    this-> _energy_psys += values.psys;	    
 	}       
     }
 
