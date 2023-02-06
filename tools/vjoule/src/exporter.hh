@@ -27,6 +27,9 @@ namespace tools::vjoule {
 
       // The name of the cgroup containing the interesting results
       std::string _cgroupName;
+
+      // time to write in csv file (time of the experiment)
+      std::string _time;
       
       // True if cpu have to be exported
       bool _cpu;
@@ -56,7 +59,7 @@ namespace tools::vjoule {
        *   - cgroupName: the name of the cgroup created by the CLI
        *   - cmd: the options passed to the CLI 
        */
-      void configure (const std::string & resultDir, const std::string & cgroupName, const CommandLine & cmd);
+      void configure (const std::string & resultDir, const std::string & cgroupName, const CommandLine & cmd, std::string time);
       
       /**
        * export result summary to stdout

@@ -28,6 +28,9 @@ namespace tools::vjoule {
 	// The path of the current directory
 	std::string _working_directory;
 
+	// Time at the beginning of the experiment
+	std::string _timeStart;
+
 	// The sub process launched and watched
 	common::concurrency::SubProcess _child;
 
