@@ -138,12 +138,17 @@ namespace vjoule {
 	/**
 	 * Force an iteration of the vjoule service
 	 */
-	void forceSig () const;
+	void force_sig () const;
 
 	/**
 	 * Wait for the service to finish computing an iteration
 	 */
-	void waitIteration () const;
+	void wait_iteration () const;
+
+	/**
+	 * When sig handler is triggered
+	 */
+	void on_exit ();
 	
     };
     

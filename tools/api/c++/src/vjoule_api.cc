@@ -1,6 +1,8 @@
 #include "vjoule_api.hh"
 #include "intern/cgroup.hh"
 #include "intern/files.hh"
+#include "intern/signal.hh"
+
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +17,13 @@ using namespace common;
 #define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 
 
+concurrency::signal<> __exit_signal__;
+
 namespace vjoule {
       
-    vjoule_api::vjoule_api () {
+    vjoule_api::vjoule_api () {	
+	__exit_signal__.connect (this, &vjoule_api::on_exit);	
+	
 	auto sys = system ("systemctl is-active --quiet vjoule_service.service");
 	if (sys != 0) {
 	    throw vjoule::vjoule_error ("vJoule service is not started. sudo systemctl start vjoule_service.service");
@@ -39,12 +45,25 @@ namespace vjoule {
 
 	this-> _groups.emplace ("this", process_group (*this, "this_" + std::to_string (getpid ())));
 	this-> _groups.emplace ("this_" + std::to_string (getpid ()), process_group (*this, "this_" + std::to_string (getpid ())));
-	
-	std::ofstream f (utils::join_path (VJOULE_DIR, "cgroups"), std::ios::app);
-	f << "vjoule_api.slice/*" << std::endl;
-	f.close ();
 
-	this-> forceSig ();
+	std::ifstream i (utils::join_path (VJOULE_DIR, "cgroups"), std::ios::app);
+
+	bool found = false;
+	std::string line;
+	while (std::getline(i, line)) {
+	    if (line == "vjoule_api.slice/*") {
+		found = true;
+		break;
+	    }
+	}
+
+	if (!found) {
+	    std::ofstream f (utils::join_path (VJOULE_DIR, "cgroups"), std::ios::app);
+	    f << "vjoule_api.slice/*" << std::endl;
+	    f.close ();
+	}
+
+	this-> force_sig ();
 	
     }
 
@@ -71,7 +90,7 @@ namespace vjoule {
     }
     
     consumption_stamp_t vjoule_api::get_machine_current_consumption () const {
-	this-> forceSig ();
+	this-> force_sig ();
 	consumption_stamp_t t (std::chrono::system_clock::now (), 0, 0, 0);
 	auto cpu = utils::join_path (VJOULE_DIR, "results/cpu");
 	auto gpu = utils::join_path (VJOULE_DIR, "results/gpu");
@@ -100,7 +119,7 @@ namespace vjoule {
 	return t;	
     }
 
-    void vjoule_api::forceSig () const {
+    void vjoule_api::force_sig () const {
 	for (uint64_t i = 0 ; i < 2 ; i++) {
 	    FILE * f = fopen (utils::join_path (VJOULE_DIR, "signal").c_str (), "w");
 	    fprintf (f, "%d\n", 1);
@@ -108,11 +127,11 @@ namespace vjoule {
 	    fclose (f);
 	    
 	    usleep (10000);
-	    this-> waitIteration ();
+	    this-> wait_iteration ();
 	}
     }
 
-    void vjoule_api::waitIteration () const {
+    void vjoule_api::wait_iteration () const {
 	char buffer[EVENT_BUF_LEN];
 	while (true) {
 	    auto len = read (this-> _inotifFd, buffer, EVENT_BUF_LEN);
@@ -132,8 +151,8 @@ namespace vjoule {
 	    }
 	}   
     }
-    
-    vjoule_api::~vjoule_api () {
+
+    void vjoule_api::on_exit () {
 	for (auto & it : this-> _groups) {
 	    it.second.close ();
 	}
@@ -144,10 +163,13 @@ namespace vjoule {
 	    close (this-> _inotifFd);
 	    this-> _inotifFd = 0;
 	    this-> _inotifFdW = 0;
-	}	
+	}
+    }
+    
+    
+    vjoule_api::~vjoule_api () {
+	this-> on_exit ();
     }    
-
-
 
     
     process_group::process_group (vjoule_api & api, const std::string & name) :
@@ -165,7 +187,7 @@ namespace vjoule {
     }
 
     consumption_stamp_t process_group::get_current_consumption () const {
-	this-> _context.forceSig ();
+	this-> _context.force_sig ();
 	
 	consumption_stamp_t t (std::chrono::system_clock::now (), 0, 0, 0);	
 	auto cpu = utils::join_path (utils::join_path (utils::join_path (VJOULE_DIR, "results/vjoule_api.slice/"), this-> _name), "cpu");
@@ -207,19 +229,39 @@ namespace vjoule {
 
 
 std::ostream & operator << (std::ostream & o, const vjoule::consumption_stamp_t & c) {
-    o << "stamp (" << c.timestamp.time_since_epoch ().count () << ", cpu: " << c.cpu << "J, ram: " << c.ram << "J, gpu: " << c.gpu << "J)";
-
+    char buffer[255];
+    snprintf (buffer, 255, "stamp (%ld, cpu: %.2fJ, ram: %.2fJ, gpu: %.2fJ)",
+	      c.timestamp.time_since_epoch ().count (),
+	      c.cpu, 
+	      c.ram,
+	      c.gpu);
+    
+    o << buffer;
     return o;
 }
 
 std::ostream & operator << (std::ostream & o, const vjoule::consumption_diff_t & c) {
-    o << "diff (time: " << c.duration << "s, cpu: " << c.cpu << "J, ram: " << c.ram << "J, gpu: " << c.gpu << "J)";
+    char buffer[255];
+    snprintf (buffer, 255, "diff (time: %.2fs, cpu: %.2fJ, ram: %.2fJ, gpu: %.2fJ)",
+	      c.duration,
+	      c.cpu, 
+	      c.ram,
+	      c.gpu);
+    
+    o << buffer;
 
     return o;
 }
 
 std::ostream & operator << (std::ostream & o, const vjoule::consumption_perc_t & c) {
-    o << "perc (time: " << c.duration << "%, cpu: " << c.cpu << "%, ram: " << c.ram << "%, gpu: " << c.gpu << "%)";
+    char buffer[255];
+    snprintf (buffer, 255, "perc (time: %.2f%c, cpu: %.2f%c, ram: %.2f%c, gpu: %.2f%c)",
+	      c.duration, '%',
+	      c.cpu, '%',
+	      c.ram, '%',
+	      c.gpu, '%');
+    
+    o << buffer;
 
     return o;
 }
