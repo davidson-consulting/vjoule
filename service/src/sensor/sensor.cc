@@ -204,7 +204,7 @@ namespace sensor {
 	}
     }
     
-    void Sensor::configure (const common::utils::config::dict & config) {
+    void Sensor::configure (const common::utils::config::dict & config) {	
 	auto sensorConfig = config.getOr <utils::config::dict> ("sensor", {});
 
 	this-> _freq = 1.0f / sensorConfig.getOr <float> ("freq", 1.0f);
