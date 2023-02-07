@@ -1,6 +1,10 @@
 #include <common/utils/files.hh>
 #include <unistd.h>
-
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <unistd.h>
+#include <grp.h>
 #include <mntent.h>
 
 namespace common::utils {
@@ -46,6 +50,15 @@ namespace common::utils {
 	}
     }
 
+    void own_file (const std::string & file, const std::string & groupName) {
+	struct group* g = getgrnam (groupName.c_str ());
+	auto paw = getpwnam (groupName.c_str ());
+	::chown (file.c_str (), paw-> pw_uid, g-> gr_gid);
+	::chown (file.c_str (), -1, g-> gr_gid);
+	::chmod (file.c_str (), 0666);
+	
+    }
+    
     bool is_parent_directory (const std::string & parent, const std::string & path) {
 	if (path.length () > parent.length ()) return false;
 	for (uint64_t i = 0 ; i < parent.length () ; i++) {

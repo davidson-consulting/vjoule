@@ -1,8 +1,8 @@
 #include "vjoule_api.hh"
-#include "intern/cgroup.hh"
 #include "intern/files.hh"
 #include "intern/signal.hh"
 
+#include <sstream>
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,15 +32,14 @@ namespace vjoule {
 	this-> _inotifFd = inotify_init ();
 	this-> _inotifFdW = inotify_add_watch (this-> _inotifFd, utils::join_path (VJOULE_DIR, "results").c_str (), IN_MODIFY | IN_CREATE);	
 	
-	cgroup::Cgroup c ("vjoule_api.slice/this_" + std::to_string (getpid ()));
-	try {
-	    c.create ();
-	} catch (...) {
-	    throw vjoule::vjoule_error ("failed to create cgroup, check program capabilities ? \n $ 'sudo setcap \"cap_dac_override,cap_sys_rawio+eip\"' ./usage");
+	auto create = system (("vjoule_cgutils add vjoule_api.slice/this_" + std::to_string (getpid ())).c_str ());
+	if (create != 0) {
+	    throw vjoule::vjoule_error ("failed to create cgroup. make sure the current user is in group 'vjoule'.");
 	}
 
-	if (!c.attach (getpid ())) {
-	    throw vjoule::vjoule_error ("failed to create and attach process to control group.");
+	auto attach = system (("vjoule_cgutils attach vjoule_api.slice/this_" + std::to_string (getpid ()) + " " + std::to_string (getpid ())).c_str ());
+	if (attach != 0) {
+	    throw vjoule::vjoule_error ("failed to attach pid to cgroup. make sure the current user is in group 'vjoule'.");
 	}
 
 	this-> _groups.emplace ("this", process_group (*this, "this_" + std::to_string (getpid ())));
@@ -68,17 +67,18 @@ namespace vjoule {
     }
 
     process_group vjoule_api::create_group (const std::string & name, const std::vector <uint64_t> & pidList) {
-	cgroup::Cgroup c ("vjoule_api.slice/" + name);
-	c.create ();
-
+	std::stringstream ss;
+	ss << "vjoule_cgutils attach " << name << " ";
 	for (auto & p : pidList) {
-	    if (!c.attach (p)) {
-		throw vjoule::vjoule_error ("failed to create and attach process to control group.");
-	    }
+	    ss << p << " " ;
 	}
 
-	this-> _groups.emplace (name, process_group (*this, name));
+	auto attach = system (ss.str ().c_str ());
+	if (attach != 0) {
+	    throw vjoule::vjoule_error ("failed to attach pid to cgroup. make sure the current user is in group 'vjoule'.");
+	}
 	
+	this-> _groups.emplace (name, process_group (*this, name));	
 	return process_group (*this, name);
     }    
 
@@ -122,6 +122,7 @@ namespace vjoule {
     void vjoule_api::force_sig () const {
 	for (uint64_t i = 0 ; i < 2 ; i++) {
 	    FILE * f = fopen (utils::join_path (VJOULE_DIR, "signal").c_str (), "w");
+	    if (f == nullptr) throw vjoule::vjoule_error ("failed to signal service.");
 	    fprintf (f, "%d\n", 1);
 	    fflush (f);
 	    fclose (f);
@@ -220,9 +221,10 @@ namespace vjoule {
 
     
     void process_group::close () {
-	cgroup::Cgroup c ("vjoule_api.slice/" + this-> _name);
-	c.detachAll ();
-	c.remove ();
+	auto del = system (("vjoule_cgutils del vjoule_api.slice/" + this-> _name).c_str ());
+	if (del != 0) {
+	    throw vjoule::vjoule_error ("failed to delete cgroup. make sure the current user is in group 'vjoule'.");
+	}
     }
     
 }

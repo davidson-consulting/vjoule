@@ -23,6 +23,11 @@ namespace common::utils {
      */
     std::string join_path(const std::string& begin, const std::string& end);
 
+    /**
+     * Change the ownership of a file, and permission to 0666
+     */
+    void own_file (const std::string & filepath, const std::string & group);
+
     
     /**
      * @returns: the parent directory of the path

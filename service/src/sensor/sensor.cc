@@ -124,7 +124,7 @@ namespace sensor {
 	    fwrite (&i, sizeof (int), 1, this-> _signalFD);
 	    fflush (this-> _signalFD);
 	    this-> _mt.unlock ();
-	    
+
 	    auto took = timer.time_since_start ();
 	    float toSleep = this-> _freq - took - 0.001;
 	    if (toSleep > 0.0f) {
@@ -225,6 +225,9 @@ namespace sensor {
 	}
 	
 	this-> _signalFD = fopen (signalFile.c_str (), "w");
+	utils::own_file (signalFile, "vjoule");
+	
+	
 	if (this-> _signalFD == nullptr) {
 	    LOG_ERROR ("Failed to open ", signalFile, " permission denied");
 	    throw std::runtime_error ("service.");
@@ -249,6 +252,9 @@ namespace sensor {
 	    LOG_ERROR ("Core is not defined in the configuration.");
 	    throw std::runtime_error ("service.");
 	}
+
+	cgroup::Cgroup c ("vjoule_api.slice");
+	c.create ();	
 
 	exitSignal.connect (this, &Sensor::dispose);
     }
