@@ -15,7 +15,7 @@ def evalPi () :
     m_beg = api.getCurrentMachineConsumption ()
     p_beg = pg.getCurrentConsumption ()
 
-    computePi (10000000)
+    pi = computePi (10000000)
 
     m_end = api.getCurrentMachineConsumption ()
     p_end = pg.getCurrentConsumption ()
@@ -23,6 +23,7 @@ def evalPi () :
     m_diff = m_end - m_beg
     p_diff = p_end - p_beg
 
+    print ("PI : ", pi)
     print (p_diff)
     print (m_diff)
     print (p_diff % m_diff)
@@ -55,6 +56,6 @@ def evalExtern (pids):
 
 
 if __name__ == "__main__":
-    #evalPi ()
+    evalPi ()
     print ("===")
     evalExtern ([281717, 281718])

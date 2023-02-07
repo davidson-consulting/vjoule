@@ -51,6 +51,7 @@ class VJouleAPI:
 
 
     def getCurrentMachineConsumption (self) :
+        self.__forceSig ()
         ret = VJouleConsumptionStamp (time.time ())
         if (os.path.isfile (self._VJOULE_DIR + "results/cpu")) :
             i = open (self._VJOULE_DIR + "results/cpu", "r")
@@ -126,6 +127,7 @@ class VJouleProcessGroup:
         return self._name
     
     def getCurrentConsumption (self) :
+        self._context._VJouleAPI__forceSig ()
         ret = VJouleConsumptionStamp (time.time ())
         if (os.path.isfile (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/cpu")) :
             i = open (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/cpu", "r")
