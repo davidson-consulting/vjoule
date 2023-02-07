@@ -11,9 +11,10 @@ namespace tools::vjoule {
     Exporter::Exporter() {}
 
 
-    void Exporter::configure (const std::string & result_dir, const std::string & cgroupName, const CommandLine & cmd) {
+    void Exporter::configure (const std::string & result_dir, const std::string & cgroupName, const CommandLine & cmd, std::string time) {
 	this-> _result_dir = result_dir;
 	this-> _cgroupName = cgroupName;
+	this-> _time = time;
 	this-> _cpu = cmd.cpu;
 	this-> _gpu = cmd.gpu;
 	this-> _ram = cmd.ram;
@@ -50,15 +51,17 @@ namespace tools::vjoule {
 	Values global = this-> read_for_process(this-> _result_dir);
 	Values process = this-> read_for_process(join_path(this-> _result_dir, this-> _cgroupName));
 
-	std::ofstream ofs(output_file);
-	ofs << "CGroup  ";
-	if (this-> _cpu) ofs << "; " << std::setw(11) << "CPU";
-	if (this-> _gpu) ofs << "; " <<  std::setw(11) <<"GPU";
-	if (this-> _ram) ofs << "; " <<  std::setw(11) <<"RAM";
-	ofs << std::endl;
-
-	ofs << "Global  " << this-> value_csv(global) << std::endl;
-	ofs << "Process " << this-> value_csv(process) << std::endl;
+	std::ofstream ofs(output_file, std::ofstream::app);
+	if (! common::utils::file_exists(output_file)) {
+	    ofs << "time; CGroup  ";
+	    if (this-> _cpu) ofs << "; " << std::setw(11) << "CPU";
+	    if (this-> _gpu) ofs << "; " <<  std::setw(11) <<"GPU";
+	    if (this-> _ram) ofs << "; " <<  std::setw(11) <<"RAM";
+	    ofs << std::endl;
+	}
+	
+	ofs << this-> _time << "; Global  " << this-> value_csv(global) << std::endl;
+	ofs << this-> _time << "; Process " << this-> value_csv(process) << std::endl;
     }
 
     Values Exporter::read_for_process(const std::string & path) {
