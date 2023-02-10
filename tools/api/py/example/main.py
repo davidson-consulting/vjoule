@@ -54,8 +54,31 @@ def evalExtern (pids):
     api.dispose ()    
 
 
+def evalExisting (name):
+    api = VJouleAPI ()
+    pg = api.getGroup (name)
 
+    m_beg = api.getCurrentMachineConsumption ()
+    p_beg = pg.getCurrentConsumption ()
+
+    time.sleep (5)
+
+    m_end = api.getCurrentMachineConsumption ()
+    p_end = pg.getCurrentConsumption ()
+
+    m_diff = m_end - m_beg
+    p_diff = p_end - p_beg
+
+    print (p_diff)
+    print (m_diff)
+    print (p_diff % m_diff)
+
+    api.dispose ()    
+
+    
 if __name__ == "__main__":
     evalPi ()
     print ("===")
-    evalExtern ([281717, 281718])
+    # evalExtern ([281717, 281718])
+    # print ("===")
+    evalExisting ("stress.slice/stress")

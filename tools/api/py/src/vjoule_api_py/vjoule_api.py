@@ -39,13 +39,14 @@ class VJouleAPI:
         i = open(self._VJOULE_DIR + "cgroups", 'r')
         found = False
         for l in i.readlines () :
-            if (l == "vjoule_api.slice/*") :
+            if (l == "vjoule_api.slice/*\n") :
                 found = True
                 break
 
         if not found :
             o = open (self._VJOULE_DIR + "cgroups", "a+")
             o.write ("vjoule_api.slice/*\n")
+            o.close ()
 
         self.__forceSig ()
 
@@ -75,6 +76,27 @@ class VJouleAPI:
         if (name in self._groups) :
             return self._groups[name]
         else :
+            i = open (self._VJOULE_DIR + "cgroups", 'r')
+            found = False
+            for l in i.readlines ():
+                if (l == name + "\n") :
+                    found = True
+                    break
+            
+            if not found :
+                o = open (self._VJOULE_DIR + "cgroups", 'a+')
+                o.write (name + "\n")
+                o.close ()
+                
+            self.__forceSig ()
+            
+            for i in range (2) :
+                if (os.path.isfile (self._VJOULE_DIR + "results/" + name + "/cpu")) :
+                    ret = VJouleProcessGroup (self, name, noSlice = True, didAdd = not found)
+                    self._groups[name] = ret
+                    return ret
+                time.sleep (0.01)
+            
             raise VJouleError ("no process group named '" + name + "' is monitored.")
 
 
@@ -116,9 +138,13 @@ class VJouleAPI:
 
 class VJouleProcessGroup:
 
-    def __init__ (self, context, name) :
+    def __init__ (self, context, name, noSlice = False, didAdd = False) :
+        self._VJOULE_DIR = "/etc/vjoule/"
         self._context = context
         self._name = name
+        self._noSlice = noSlice
+        self._didAdd = didAdd
+        self._resultLoc = ("results/" + self._name) if (self._noSlice) else ("results/vjoule_api.slice/" + self._name)
 
     def isMonitored (self):
         return os.path.isfile (self._context._VJOULE_DIR + "results/" + self._name + "/cpu")
@@ -129,27 +155,38 @@ class VJouleProcessGroup:
     def getCurrentConsumption (self) :
         self._context._VJouleAPI__forceSig ()
         ret = VJouleConsumptionStamp (time.time ())
-        if (os.path.isfile (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/cpu")) :
-            i = open (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/cpu", "r")
+        if (os.path.isfile (self._context._VJOULE_DIR + self._resultLoc + "/cpu")) :
+            i = open (self._context._VJOULE_DIR + self._resultLoc + "/cpu", "r")
             ret.cpu = float (i.read ())
             i.close ()
 
-        if (os.path.isfile (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/ram")) :
-            i = open (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/ram", "r")
+        if (os.path.isfile (self._context._VJOULE_DIR + self._resultLoc + "/ram")) :
+            i = open (self._context._VJOULE_DIR + self._resultLoc + "/ram", "r")
             ret.ram = float (i.read ())
             i.close ()
 
-        if (os.path.isfile (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/gpu")) :
-            i = open (self._context._VJOULE_DIR + "results/vjoule_api.slice/" + self._name + "/gpu", "r")
+        if (os.path.isfile (self._context._VJOULE_DIR + self._resultLoc + "/gpu")) :
+            i = open (self._context._VJOULE_DIR + self._resultLoc + "/gpu", "r")
             ret.gpu = float (i.read ())
             i.close ()
             
         return ret
     
     def dispose (self) :
-        ret = subprocess.run (["vjoule_cgutils", "del", ("vjoule_api.slice/" + self._name)])
-        if (ret.returncode != 0) :
-            raise VJouleError ("failed to delete cgroup. make sure the current user is in group 'vjoule'.")
+        if (not self._noSlice) : 
+            ret = subprocess.run (["vjoule_cgutils", "del", ("vjoule_api.slice/" + self._name)])
+            if (ret.returncode != 0) :
+                raise VJouleError ("failed to delete cgroup. make sure the current user is in group 'vjoule'.")
+        elif self._didAdd:
+            i = open (self._VJOULE_DIR + "cgroups", 'r')
+            add = ""
+            for l in i.readlines ():
+                if (l != (self._name + "\n")) :                    
+                    add = add + l
+
+            o = open (self._VJOULE_DIR + "cgroups", "w")
+            o.write (add)
+            o.close ()
 
 class VJouleConsumptionStamp :
 
