@@ -22,11 +22,18 @@ void evaluateAttach (const std::string & cgroup_name, const std::vector <uint64_
     }    
 }
 
+void evaluateDetach (const std::vector <uint64_t> & pids) {
+    for (auto & pid : pids) {
+	common::cgroup::Cgroup::detach (pid);
+    }
+}
+
 int main (int argc, char ** argv) {
     CLI::App app {"vjoule_cgutils"};
     CLI::App * create = app.add_subcommand ("add", "create a cgroup");
     CLI::App * remove = app.add_subcommand ("del", "delete a cgroup");
-    CLI::App * attach = app.add_subcommand ("attach", "delete a cgroup");
+    CLI::App * attach = app.add_subcommand ("attach", "attach processes to a cgroup");
+    CLI::App * detach = app.add_subcommand ("detach", "detach processes from their cgroups");
 
     std::string cgroup_name;
     create-> add_option ("cgroup", cgroup_name, "name of the cgroup to create")-> required ();
@@ -35,6 +42,7 @@ int main (int argc, char ** argv) {
 
     std::vector <uint64_t> pids;
     attach-> add_option ("pids", pids, "pids to attach to the cgroup")-> required ();
+    detach-> add_option ("pids", pids, "pids to attach to the cgroup")-> required ();
     
     CLI11_PARSE(app, argc, argv);
     
@@ -44,6 +52,8 @@ int main (int argc, char ** argv) {
 	evaluateRemove (cgroup_name);
     } else if (attach-> parsed ()) {
 	evaluateAttach (cgroup_name, pids);
+    } else if (detach-> parsed ()) {
+	evaluateDetach (pids);
     } else {
 	std::cerr << "vjoule_cgutils (add | del | attach)" << std::endl;
     }    
