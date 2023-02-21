@@ -1,0 +1,18 @@
+[package]
+name = "vjoule_api"
+version = "1.1.1"
+edition = "2021"
+authors = ["Emile Cadorel", "Dimitri Saingre"]
+description = "API for vjoule"
+license = "GPL-3.0"
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+inotify = "0.10"
+chrono = "0.4"
+subprocess = "0.2.9"

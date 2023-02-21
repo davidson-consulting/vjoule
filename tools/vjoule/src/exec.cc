@@ -25,6 +25,7 @@ namespace tools::vjoule {
 
 	this-> _working_directory = utils::join_path(this-> _vjoule_directory, "latest");
 	this-> _cfg_path = utils::join_path(this-> _working_directory, "config.toml");
+	this-> _timeStart = utils::get_time_no_space();
 
 	std::vector<std::string> subargs;
 	if (this-> _cmd.subCmd.size () >= 2) {
@@ -46,6 +47,7 @@ namespace tools::vjoule {
 	ofs << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl;
 	ofs << "output-dir = \"" << this-> _working_directory << "\"" <<std::endl;
 	ofs << "cgroups = \"" <<  utils::join_path(this-> _working_directory, "cgroups") << "\"" << std::endl;
+	ofs << "signal-path = \"" <<  utils::join_path(this-> _working_directory, "signal") << "\"" << std::endl;
 	ofs << "mount-tmpfs = false" << std::endl;
 	ofs << std::endl;
 	if (this-> _cmd.cpu && this-> _cmd.rapl) {
@@ -81,7 +83,7 @@ namespace tools::vjoule {
     }
 
     void Exec::create_result_directory() {
-	std::string result_dir = utils::join_path(this-> _vjoule_directory, utils::get_time_no_space());
+	std::string result_dir = utils::join_path(this-> _vjoule_directory, this-> _timeStart);
 	std::filesystem::create_directories(result_dir);
     
 	if (utils::file_exists(this-> _working_directory)) {
@@ -190,7 +192,7 @@ namespace tools::vjoule {
 		this-> _sensor.forcedIteration();
 	    } while (!utils::file_exists(utils::join_path(this-> _working_directory, this-> _cgroup.getName () + "/cpu")));
 	    
-	    this-> _exporter.configure (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd);	    
+	    this-> _exporter.configure (this-> _working_directory, this-> _cgroup.getName (), this-> _cmd, this-> _timeStart);	    
 	    this-> _sensor.runAsync();
 
 	    if (write (pipe, "GO!", strlen ("GO!")) == -1) {

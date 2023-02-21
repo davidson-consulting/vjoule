@@ -41,7 +41,7 @@ namespace common::cgroup {
 	 * Detach the pid from the cgroup
 	 * @returns: true if succeded (false means the process is attached to the cgroup)
 	 */
-	bool detach (uint64_t pid);
+	static bool detach (uint64_t pid);
 
 	/**
 	 * Detach all the pids attached to the cgroup
@@ -76,7 +76,7 @@ namespace common::cgroup {
 	/**
 	 * detach a pid to cgroup in v2
 	 */
-	bool detachV2 (uint64_t pid, const std::string & mntPoint);
+	static bool detachV2 (uint64_t pid, const std::string & mntPoint);
 
 	/**
 	 * detach all v2

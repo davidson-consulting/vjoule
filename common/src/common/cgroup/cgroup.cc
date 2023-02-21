@@ -95,12 +95,11 @@ namespace common::cgroup {
 	auto mntPoint = utils::get_cgroup_mount_point (isV2);
 	if (isV2) this-> detachAllV2 (mntPoint);
     }
-
-    
+       
     bool Cgroup::detach (uint64_t pid) {
 	bool isV2 = false;
 	auto mntPoint = utils::get_cgroup_mount_point (isV2);
-	if (isV2) return this-> detachV2 (pid, mntPoint);
+	if (isV2) return Cgroup::detachV2 (pid, mntPoint);
 	
 	return false;	
     }

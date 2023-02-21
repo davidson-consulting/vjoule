@@ -3,8 +3,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
+#include <sys/inotify.h>
 
 using namespace common;
+
+
+#define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 
 namespace sensor {
 
@@ -38,16 +43,26 @@ namespace sensor {
     void Sensor::runAsync () {
 	LOG_DEBUG ("Starting sensor async");
 	this-> _th = concurrency::spawn (this, &Sensor::mainLoop);
+	this-> _ph = concurrency::spawn (this, &Sensor::pingNotification);
     }
     
     void Sensor::run () {	
 	LOG_DEBUG ("Starting main loop");
+	this-> _ph = concurrency::spawn (this, &Sensor::pingNotification);
 	this-> mainLoop (0);
     }
 
     void Sensor::stop () {
 	this-> _isRunning = false;
 	if (this-> _th != 0) {
+	    
+	    this-> _mt.lock ();
+	    fseek (this-> _signalFD, 0, SEEK_SET);
+	    int i = 1;
+	    fwrite (&i, sizeof (int), 1, this-> _signalFD);
+	    fflush (this-> _signalFD);
+	    this-> _mt.unlock ();
+	    
 	    concurrency::join (this-> _th);
 	}
     }
@@ -62,9 +77,52 @@ namespace sensor {
 	concurrency::timer timer;
 	this-> _isRunning = true;
 	while (this-> _isRunning) {
+	    this-> waitSignal ();
+	    
 	    timer.reset ();
+	    this-> forcedIteration ();
+
+	    auto took = timer.time_since_start ();	    
+	    LOG_DEBUG ("Main loop iteration : ", took, "s");	    
+	}
+    }
+
+    void Sensor::configureSignal () {
+	this-> _inotifFd = inotify_init ();
+	this-> _inotifFdW = inotify_add_watch (this-> _inotifFd, this-> _signalPath.c_str (), IN_MODIFY | IN_CREATE);
+    }
+    
+    void Sensor::waitSignal () {
+	char buffer[EVENT_BUF_LEN];
+	while (true) {
+	    auto len = read (this-> _inotifFd, buffer, EVENT_BUF_LEN);
+	    if (len == 0) {
+		throw std::runtime_error ("reading cgroup notif");
+	    }
+
+	    int i = 0;
+	    while (i < len) {
+		struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];      
+		if (event-> len != 0) { // there is an event to read
+		    if (event-> mask & IN_CREATE || event-> mask & IN_DELETE | event-> mask & IN_MODIFY) {
+			if (this-> _signalName == event-> name) return;
+		    }
+		}
+		i += EVENT_SIZE + event->len;
+	    }
+	}
+    }    
+
+    void Sensor::pingNotification (concurrency::thread) {
+	concurrency::timer timer;
+	while (this-> _isRunning) {
+	    timer.reset ();
+
 	    this-> _mt.lock ();
-	    this-> _computeCore ();
+	    fseek (this-> _signalFD, 0, SEEK_SET);
+	    int i = 1;
+	    fwrite (&i, sizeof (int), 1, this-> _signalFD);
+	    fflush (this-> _signalFD);
 	    this-> _mt.unlock ();
 
 	    auto took = timer.time_since_start ();
@@ -72,13 +130,44 @@ namespace sensor {
 	    if (toSleep > 0.0f) {
 		timer.sleep (toSleep);
 	    }
-	    
-	    LOG_DEBUG ("Main loop iteration : ", took, "s");	    
+	    	    
 	}
     }
-
+    
     void Sensor::dispose () {
 	LOG_INFO ("Disposing service.");
+
+	if (this-> _ph != 0) {
+	    this-> _isRunning = false;
+
+	    this-> _mt.lock ();
+	    fseek (this-> _signalFD, 0, SEEK_SET);
+	    int i = 1;
+	    fwrite (&i, sizeof (int), 1, this-> _signalFD);
+	    fflush (this-> _signalFD);
+	    this-> _mt.unlock ();
+
+	    if (this-> _th != 0) {
+		concurrency::join (this-> _th);
+		this-> _th = 0;
+	    }
+	    
+	    concurrency::join (this-> _ph);	    
+	    this-> _ph = 0;
+	}
+
+	if (this-> _inotifFdW != 0) {
+	    inotify_rm_watch (this-> _inotifFd, this-> _inotifFdW);
+	    close (this-> _inotifFd);
+	    this-> _inotifFd = 0;
+	    this-> _inotifFdW = 0;
+	}
+	
+	if (this-> _signalFD != nullptr) {
+	    fclose (this-> _signalFD);
+	    this-> _signalFD = nullptr;
+	}
+
 	this-> _factory.dispose ();
 	this-> _core-> dispose ();
 	utils::Logger::clear ();
@@ -115,15 +204,39 @@ namespace sensor {
 	}
     }
     
-    void Sensor::configure (const common::utils::config::dict & config) {
+    void Sensor::configure (const common::utils::config::dict & config) {	
 	auto sensorConfig = config.getOr <utils::config::dict> ("sensor", {});
 
 	this-> _freq = 1.0f / sensorConfig.getOr <float> ("freq", 1.0f);
 
 	auto newLogFile = sensorConfig.getOr <std::string> ("log-path", "");
+	if (utils::parent_directory (newLogFile) == "" || utils::parent_directory (newLogFile) == "/") {
+	    LOG_ERROR ("Cannot put log file in root directory.");
+	    throw std::runtime_error ("service.");
+	}
+	
 	utils::Logger::globalInstance ().redirect (newLogFile, true);
 	utils::Logger::globalInstance ().changeLevel (sensorConfig.getOr<std::string> ("log-lvl", "SUCCESS"));
+
+	auto signalFile = sensorConfig.getOr <std::string> ("signal-path", utils::join_path (VJOULE_DIR, "signal"));
+	if (utils::parent_directory (signalFile) == "" || utils::parent_directory (signalFile) == "/") {
+	    LOG_ERROR ("Cannot put signal file in root directory.");
+	    throw std::runtime_error ("service.");
+	}
 	
+	this-> _signalFD = fopen (signalFile.c_str (), "w");
+	utils::own_file (signalFile, "vjoule");
+	
+	
+	if (this-> _signalFD == nullptr) {
+	    LOG_ERROR ("Failed to open ", signalFile, " permission denied");
+	    throw std::runtime_error ("service.");
+	}
+
+	this-> _signalPath = utils::parent_directory (signalFile);
+	this-> _signalName = signalFile.substr (this-> _signalPath.length () + 1);	
+	
+	this-> configureSignal ();
 	this-> configureOptions ();
 	
 	for (auto it : config.keys ()) {
@@ -137,8 +250,11 @@ namespace sensor {
 	    this-> configureCore (sensorConfig);
 	} else {
 	    LOG_ERROR ("Core is not defined in the configuration.");
-	    throw 1;
+	    throw std::runtime_error ("service.");
 	}
+
+	cgroup::Cgroup c ("vjoule_api.slice");
+	c.create ();	
 
 	exitSignal.connect (this, &Sensor::dispose);
     }
@@ -170,7 +286,7 @@ namespace sensor {
 	    this-> _computeCore = this-> _core-> getFunction <common::plugin::CoreComputeFunc_t> ("compute");
 	    if (this-> _computeCore == nullptr) {
 		LOG_ERROR ("Core plugin has no 'void compute ()' function");
-		throw 1;
+		throw std::runtime_error ("service.");
 	    }
 	    return;	    
 	} else {
@@ -179,7 +295,7 @@ namespace sensor {
 	}
 	
 	LOG_ERROR ("Configuration of core failed.");
-	throw 1;	
+	throw std::runtime_error ("service.");	
     }
 
     void Sensor::configurePlugin (const std::string & kind, const common::utils::config::dict & config) {
@@ -190,7 +306,7 @@ namespace sensor {
 	
 	if (!this-> _factory.configurePlugin (k, config)) {
 	    LOG_ERROR ("Failed to configure plugin of kind '", k, "' : ", config);
-	    throw 1;
+	    throw std::runtime_error ("service.");
 	}
     }
 

@@ -27,6 +27,26 @@ namespace sensor {
 	// The thread running in async
 	common::concurrency::thread _th = 0;
 
+    private:
+		
+	// The thread triggering the computation
+	common::concurrency::thread _ph = 0;
+
+	// The file for signal writting 
+	FILE * _signalFD = nullptr;
+
+	// The inotify handle
+	int _inotifFd = 0;
+
+	// The watch handle
+	int _inotifFdW = 0;
+
+	// The directory containing the signal file
+	std::string _signalPath;
+
+	// The name of the signal file 
+	std::string _signalName;
+	
     private :
 	
 	// The factory of plugins
@@ -101,6 +121,16 @@ namespace sensor {
 	 * Main loop of the sensor, used by runAsync and run
 	 */
 	void mainLoop(common::concurrency::thread th);
+
+	/**
+	 * Thread running at a given frequency triggering a new computation
+	 */
+	void pingNotification (common::concurrency::thread th);
+
+	/**
+	 * Wait for the signal file writting
+	 */
+	void waitSignal ();
 	
 	/**
 	 * Init the option of the app (command line)
@@ -111,7 +141,6 @@ namespace sensor {
 	 * Display the help for a plugin
 	 */
 	void displayPluginHelp ();
-
 	
 	/**
 	 * Configure the sensor from a configuration file
@@ -119,10 +148,15 @@ namespace sensor {
 	void configure (const common::utils::config::dict & config);	
 
 	/**
+	 * Configure the inotify watcher for the signal file
+	 */
+	void configureSignal ();
+	
+	/**
 	 * Configure the core of the sensor
 	 */
 	void configureCore (const common::utils::config::dict & config);
-
+	
 	/**
 	 * Configure the options of the command line
 	 */
