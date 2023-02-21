@@ -12,7 +12,7 @@ using namespace common;
 void ctrlCHandler (int signum) {
     ::sensor::exitSignal.emit ();
     
-    exit (-1);
+    exit (0);
 }
 
 int main (int argc, char ** argv) {    
