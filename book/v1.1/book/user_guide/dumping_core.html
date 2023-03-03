@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>The dumper core - vJoule doc</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Documentation for vJoule.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+        <link rel="stylesheet" href="custom.css">
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html" class="active"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/profile.html"><strong>4.2.</strong> vjoule profile</a></li><li><a href="./cli/top.html"><strong>4.3.</strong> vjoule top</a></li></ul></li><li><a href="./api/index.html"><strong>5.</strong> API</a></li><li><ul class="section"><li><a href="./api/rust.html"><strong>5.1.</strong> rust</a></li><li><a href="./api/py.html"><strong>5.2.</strong> python</a></li></ul></li><li><a href="./tutorial/index.html"><strong>6.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>6.1.</strong> Measuring a program</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>7.</strong> Trouble-shooting</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars" title="Toggle sidebar"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush" title="Change theme"></i>
+                    </div>
+
+                    <h1 class="menu-title">vJoule doc</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./user_guide/dumping_core.html#the-dumper-core" id="the-dumper-core"><h1>The dumper core</h1></a>
+<p>The <code>dumper</code> is a core plugin that can be used to dump the metrics of
+the system, and the different plugin sensors. It can monitor three
+different kind of sensor plugins <code>cpu</code>, <code>gpu</code> and <code>ram</code>, and be
+attached to different perf events for the cgroups that are determined
+by the configuration file.</p>
+<p>Unlike the <code>divider</code> plugin, the <code>dumper</code> does not write the result in
+different directories for each cgroup, but write only two files :</p>
+<ul>
+<li>/etc/vjoule/results/cgroups.csv - this file contains the perf events watched by the plugin, for each of the watched cgroups</li>
+<li>/etc/vjoule/results/energy.csv - this file contains the energy consumptions returned by the different connected plugins</li>
+</ul>
+<a class="header" href="./user_guide/dumping_core.html#usage" id="usage"><h2>Usage</h2></a>
+<p>As any plugin, a default configuration and explanation of the <code>dumper</code>
+plugin can be acquired by running the command <code>vjoule_service --ph dumper</code>.</p>
+<a class="header" href="./user_guide/dumping_core.html#default-configuration" id="default-configuration"><h2>Default configuration</h2></a>
+<p>Here is an explanation of configuration that can be used by the <code>dumper</code> plugin :</p>
+<pre><code class="language-toml">[sensor]
+freq = 1 # frequency of update in hertz (the higher the faster)
+log-lvl = &quot;info&quot; # debug &lt; success &lt; info &lt; warn &lt; error &lt; none
+log-path = &quot;/etc/vjoule/log&quot; # log file (empty means stdout)
+core = &quot;dumper&quot; # the name of the core plugin to use for the sensor
+# the directory in which result will be written
+output-dir = &quot;/etc/vjoule/results&quot;
+
+# delete cgroup result directories when the cgroup no longer exists
+delete-res = true
+
+# if true mount the result directory in tmpfs (less i/o generated by vjoule)
+mount-tmpfs = true
+
+perf-counters = [&quot;LLC_MISSES&quot;, &quot;PERF_COUNT_HW_CPU_CYCLES&quot;] # The list of performances counters to monitor
+
+# following configuration is optional
+# It activates some part of the dumper
+
+[cpu] # configuration to enable CPU energy reading
+name = &quot;rapl&quot; # rapl plugin for compatible intel or amd cpus
+
+[ram] # configuration to enable RAM energy reading
+name = &quot;rapl&quot; # rapl plugin for compatible intel or amd cpus
+
+[gpu:0] # configuration to enable GPU energy reading
+name = &quot;nvidia&quot; # nvidia plugin for nvidia GPUs
+
+# A machine can have different GPU from different constructors
+# For example a integrated GPU, and an nvidia GPU card
+[gpu:1] # configuration to enable GPU energy 
+name = &quot;rapl&quot; # rapl plugin form compatible intel of amd cpus
+</code></pre>
+<p>One can note the value <code>perf-counters</code> which is specific to the
+<code>dumper</code> plugin and did not appear on the <code>divider</code> core. This value
+defines the list of perf events to watched for each cgroups monitored
+by vJoule, and defines the values that will be dumped inside the
+<em>cgroups.csv</em> file.</p>
+<a class="header" href="./user_guide/dumping_core.html#cgroups-file" id="cgroups-file"><h2>Cgroups file</h2></a>
+<p>The dumper core plugin uses another configuration file, in
+<code>/etc/vjoule/cgroups</code>, to filter the cgroups that are watched by the
+sensor, and ignore unwanted cgroups.  This configuration file is a
+list of rules, every rules must start with a slice (a cgroup that
+contains other cgroups).  For example <code>my.slice/*</code>., will make the
+sensor watch all the cgroups in the slice <code>my.slice</code>, and
+<code>system.slice/docker*</code> will watch all the cgroups in <code>system.slice</code>
+that starts with <code>docker</code>.  Basically, it lists all the cgroups that
+would be found if the command <code>ls my_rule</code> was run in the cgroup mount
+directory.  The following presents an example of configuration for
+cgroup listing that has to be placed in <code>/etc/vjoule/cgroups</code>.</p>
+<pre><code>vjoule.slice/*
+system.slice/docker*
+my_custom.slice/my_custom_cgroup
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./user_guide/divider_core.html" class="mobile-nav-chapters previous" title="Previous chapter">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./user_guide/sensor_plugins.html" class="mobile-nav-chapters next" title="Next chapter">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./user_guide/divider_core.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./user_guide/sensor_plugins.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:3001");
+        socket.onmessage = function (event) {
+            if (event.data === "reload") {
+                socket.close();
+                location.reload(true); // force reload from server (not from cache)
+            }
+        };
+
+        window.onbeforeunload = function() {
+            socket.close();
+        }
+    </script>
+
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS script -->
+        
+        <script type="text/javascript" src="custom.js"></script>
+        
+
+    </body>
+</html>
