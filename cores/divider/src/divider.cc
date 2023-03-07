@@ -258,7 +258,7 @@ namespace divider {
     }
    
     void Divider::configureCgroups () {
-	std::vector <std::string> events = {"PERF_COUNT_HW_CPU_CYCLES", "LLC_MISSES"};
+	std::vector <std::string> events = {"PERF_COUNT_HW_CPU_CYCLES", "PERF_COUNT_HW_CACHE_MISSES"};
 
 	std::vector <common::cgroup::Cgroup> rest;
 	std::vector <perf::PerfEventWatcher> watchers;
