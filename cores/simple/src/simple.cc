@@ -1,6 +1,5 @@
 #include "simple.hh"
 
-#include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
@@ -22,7 +21,7 @@ namespace simple {
 			this-> mountResultDir ();
 		}
 
-        utils::create_directory (this-> _outputDir);
+        utils::create_directory (this-> _outputDir, true);
 
 		if (!this-> configureGpuPlugins (factory)) return false;
 		if (!this-> configureCpuPlugin (factory)) return false;
@@ -188,7 +187,7 @@ namespace simple {
 		}
 
 		if (!utils::file_exists (this-> _outputDir)) {
-			std::filesystem::create_directory (this-> _outputDir);
+			utils::create_directory (this-> _outputDir, true);
 		}
 
 		int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
@@ -216,7 +215,7 @@ namespace simple {
         LOG_INFO (mntType, " ", this-> _outputDir);
 		if (mntType == "tmpfs") {
 			umount (this-> _outputDir.c_str ());
-			std::filesystem::remove (this-> _outputDir);
+			utils::remove (this-> _outputDir);
 		}
 
 		LOG_INFO ("Disposing simple core.");

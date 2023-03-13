@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <common/utils/error.hh>
 #include <vector>
+#include <dirent.h>
 
 #define VJOULE_DIR "/etc/vjoule/"
 
@@ -17,6 +18,11 @@ namespace common::utils {
      * @return: true if the file at path `name` exists, false otherwise
      */
     bool file_exists(const std::string& name);
+
+    /**
+     * @returns: the path of the current working directory
+     * */
+    std::string current_directory ();
 
     /**
      * Joins the path in one single path
@@ -45,13 +51,32 @@ namespace common::utils {
     bool directory_exists (const std::string & path);
 
     /*
+     * @returns: true if 'path' points to a directory and it is empty
+     * */
+    bool is_empty_directory (const std::string & path);
+
+    /*
      * Create a directory
      * @params:
      *    - path: the path of the directory to create
      *    - recursive: if true create parent directories that does not exist
      * @returns: false if the creation failed
      */
-    bool create_directory (const std::string & path, bool recursive = false);
+    bool create_directory (const std::string & path, bool recursive);
+
+    /*
+     * Remove the fs entry at 'path'
+     * @params:
+     *    - path: the path of the entry to remove
+     * @returns: true iif the entry was removed
+     * */
+    bool remove (const std::string & path);
+
+
+    /**
+     * Create a link at path 'linkPath' pointing to 'path'
+     * */
+    bool create_symlink (const std::string & linkPath, const std::string & path);
 
     /**
      * @return: the absolute path of the file
@@ -87,6 +112,43 @@ namespace common::utils {
      * @returns: the mount point of cgroup dir
      */
     std::string get_cgroup_mount_point (bool &isV2);
-    
-}
 
+
+    class DirIterator {
+
+        DIR * _dir;
+        struct dirent* _curr;
+        std::string _path;
+
+        public:
+
+            DirIterator (DIR* dir, const std::string & path);
+            void operator++ ();
+            bool operator!= (const DirIterator&) const;
+            std::string operator* () const;
+
+            void dispose ();
+
+            ~DirIterator ();
+    };
+
+    class DirIteratorCtor {
+
+        std::string _path;
+
+        public:
+
+            DirIteratorCtor (const std::string & path);
+
+            DirIterator begin () const;
+
+            DirIterator end () const;
+
+    };
+
+
+
+    DirIteratorCtor directory_iterator (const std::string & path);
+
+
+}

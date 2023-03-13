@@ -18,6 +18,15 @@ namespace common::utils {
 		utils::CommonError (msg)
     {}
 
+	std::string current_directory () {
+		char cwd[PATH_MAX];
+		if (getcwd (cwd, sizeof (cwd)) != nullptr) {
+			return std::string (cwd);
+		}
+
+		return "";
+	}
+
     bool file_exists(const std::string& name) {
 		struct stat buffer;
 		return (stat(name.c_str(), &buffer) == 0);
@@ -29,6 +38,16 @@ namespace common::utils {
 		if (succ) closedir (dir);
 
 		return succ;
+	}
+
+
+	bool is_empty_directory (const std::string & path) {
+		if (!directory_exists (path)) return false;
+		for (auto it : directory_iterator (path)) {
+			return false;
+		}
+
+		return true;
 	}
 
     std::string join_path(const std::string& begin, const std::string& end) {
@@ -103,6 +122,18 @@ namespace common::utils {
 
 		throw FileError("File not found : " + file_name);
     }
+
+	bool remove (const std::string & path) {
+		if (directory_exists (path)) {
+			return (rmdir (path.c_str ()) == 0);
+		} else {
+			return (::remove (path.c_str ()) == 0);
+		}
+	}
+
+	bool create_symlink (const std::string & linkPath, const std::string & path) {
+		return symlink (path.c_str (), linkPath.c_str ());
+	}
 
     std::string get_absolute_path_if_exists(const std::string& relative, const std::string& sub_dir) {
 		try {
@@ -183,7 +214,62 @@ namespace common::utils {
 
 		return "";
     }
-    
+
+
+	DirIterator::DirIterator (DIR* dir, const std::string & path) : _dir (dir), _path (path) {
+		this-> operator++ ();
+	}
+
+	void DirIterator::operator++ () {
+		if (this-> _dir != nullptr) {
+			this-> _curr = readdir (this-> _dir);
+			if (this-> _curr == nullptr) this-> dispose ();
+			else {
+				if (std::string (this-> _curr-> d_name) == ".." || std::string (this-> _curr-> d_name) == ".") {
+					this-> operator++ ();
+				}
+			}
+		}
+	}
+
+	void DirIterator::dispose () {
+		if (this-> _dir != nullptr) {
+			closedir (this-> _dir);
+			this-> _dir = nullptr;
+		}
+	}
+
+	std::string DirIterator::operator* () const {
+		if (this-> _curr != nullptr) {
+			return utils::join_path (this-> _path, this-> _curr-> d_name);
+		} else return "";
+	}
+
+	bool DirIterator::operator!= (const DirIterator & other) const {
+		return this-> _dir != other._dir;
+	}
+
+	DirIterator::~DirIterator () {
+		this-> dispose ();
+	}
+
+
+	DirIteratorCtor::DirIteratorCtor (const std::string & path) : _path (path) {}
+
+	DirIterator DirIteratorCtor::begin () const {
+		return DirIterator (opendir (this-> _path.c_str ()), this-> _path);
+	}
+
+	DirIterator DirIteratorCtor::end () const {
+		return DirIterator (nullptr, "");
+	}
+
+
+	DirIteratorCtor directory_iterator (const std::string & path) {
+		return DirIteratorCtor (path);
+	}
+
+
 }
 
 

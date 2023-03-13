@@ -1,5 +1,4 @@
 #include <sensor/sensor.hh>
-#include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
@@ -33,8 +32,8 @@ namespace sensor {
 	
 		auto configPath = utils::get_absolute_path_if_exists (this-> _cfgPath);
 		if (configPath == "") {
-			LOG_DEBUG ("No config file found at : ", this-> _cfgPath);
-			return;
+			LOG_ERROR ("No config file found at : ", this-> _cfgPath);
+			exit (0);
 		}
 	
 		this-> configure (utils::parse_file (configPath));
@@ -207,6 +206,7 @@ namespace sensor {
     void Sensor::configure (const common::utils::config::dict & config) {	
 		auto sensorConfig = config.getOr <utils::config::dict> ("sensor", {});
 
+
 		this-> _freq = 1.0f / sensorConfig.getOr <float> ("freq", 1.0f);
 
 		auto newLogFile = sensorConfig.getOr <std::string> ("log-path", "");
@@ -226,8 +226,7 @@ namespace sensor {
 	
 		this-> _signalFD = fopen (signalFile.c_str (), "w");
 		utils::own_file (signalFile, "vjoule");
-	
-	
+
 		if (this-> _signalFD == nullptr) {
 			LOG_ERROR ("Failed to open ", signalFile, " permission denied");
 			throw std::runtime_error ("service.");
@@ -245,7 +244,7 @@ namespace sensor {
 				this-> configurePlugin (it, dict);
 			}
 		}
-	
+
 		if (sensorConfig.has <std::string> ("core")) {
 			this-> configureCore (sensorConfig);
 		} else {
@@ -283,6 +282,7 @@ namespace sensor {
 		auto success = initFunc (&config, &this-> _factory);
 	
 		if (success) {
+
 			this-> _computeCore = this-> _core-> getFunction <common::plugin::CoreComputeFunc_t> ("compute");
 			if (this-> _computeCore == nullptr) {
 				LOG_ERROR ("Core plugin has no 'void compute ()' function");

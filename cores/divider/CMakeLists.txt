@@ -1,8 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 project(divider)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++20 -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 -O3")
 
-file(  
+file(
   GLOB_RECURSE
   SRC
   src/*.cc
@@ -17,5 +17,3 @@ target_link_libraries (divider vjoule_common)
 set_target_properties(divider PROPERTIES PREFIX "")
 
 install (TARGETS divider DESTINATION /etc/vjoule/plugins/)
-
-

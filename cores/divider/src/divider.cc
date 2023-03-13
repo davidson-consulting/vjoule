@@ -1,6 +1,5 @@
 #include "divider.hh"
 
-#include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
@@ -236,8 +235,8 @@ namespace divider {
 				ident += this-> _perfEventValues [i][0];
 			}
 
+			this-> _results[""].ram += ramEnergy;
 			if (ident != 0.0f) {
-				this-> _results[""].ram += ramEnergy;
 				for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
 					auto & cgroup = this-> _results[this-> _cgroupList[i].getName ()];
 					cgroup.ram += ramEnergy * ((float) (this-> _perfEventValues[i][1]) / ident);
@@ -255,9 +254,8 @@ namespace divider {
 				ident += this-> _perfEventValues [i][0];
 			}
 
+			this-> _results[""].cpu += cpuEnergy;
 			if (ident != 0.0f) {
-				this-> _results[""].cpu += cpuEnergy;
-
 				for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
 					auto & cgroup = this-> _results[this-> _cgroupList[i].getName ()];
 					cgroup.cpu += cpuEnergy * ((float) (this-> _perfEventValues[i][0]) / ident);
@@ -348,23 +346,23 @@ namespace divider {
 		return rules;
     }
 
-		void Divider::mountResultDir () {
-			auto mntType = utils::get_mount_type (this-> _outputDir);
-			if (mntType == "tmpfs") {
-				umount (this-> _outputDir.c_str ());
-			}
-
-			if (!utils::file_exists (this-> _outputDir)) {
-				std::filesystem::create_directories (this-> _outputDir);
-			}
-
-			int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
-			if (rc != 0) {
-				LOG_WARN ("Failed to mount result dir ", this-> _outputDir, " in tmpfs.");
-			} else {
-				LOG_INFO ("Result dir ", this-> _outputDir, " is mounted in tmpfs");
-			}
+	void Divider::mountResultDir () {
+		auto mntType = utils::get_mount_type (this-> _outputDir);
+		if (mntType == "tmpfs") {
+			umount (this-> _outputDir.c_str ());
 		}
+
+		if (!utils::file_exists (this-> _outputDir)) {
+			utils::create_directory (this-> _outputDir, true);
+		}
+
+		int rc = mount ("tmpfs", this-> _outputDir.c_str (), "tmpfs", 0, "size=512M,uid=0,gid=0,mode=777");
+		if (rc != 0) {
+			LOG_WARN ("Failed to mount result dir ", this-> _outputDir, " in tmpfs.");
+		} else {
+			LOG_INFO ("Result dir ", this-> _outputDir, " is mounted in tmpfs");
+		}
+	}
 
     void Divider::createResultDirectory (const common::cgroup::Cgroup & c) {
 		LOG_INFO ("Create result directory for cgroup [", c.getName (), "]");
@@ -375,7 +373,7 @@ namespace divider {
 		}
 
 		resultDir = utils::join_path (this-> _outputDir, resultDir);
-		std::filesystem::create_directories (resultDir);
+		utils::create_directory (resultDir, true);
 
 		r.cpuFd = fopen (utils::join_path (resultDir, "cpu").c_str (), "w");
 		r.ramFd = fopen (utils::join_path (resultDir, "ram").c_str (), "w");
@@ -395,15 +393,16 @@ namespace divider {
 		if (c.getName ().size () > this-> _cgroupRoot.length ()) {
 			resultDir = c.getName ().substr (this-> _cgroupRoot.length ());
 		}
+
 		resultDir = utils::join_path (this-> _outputDir, resultDir);
 
 		this-> _results.erase (c.getName ());
-		std::filesystem::remove (utils::join_path (resultDir, "cpu").c_str ());
-		std::filesystem::remove (utils::join_path (resultDir, "ram").c_str ());
-		std::filesystem::remove (utils::join_path (resultDir, "gpu").c_str ());
+		utils::remove (utils::join_path (resultDir, "cpu"));
+		utils::remove (utils::join_path (resultDir, "ram"));
+		utils::remove (utils::join_path (resultDir, "gpu"));
 
-		while (std::filesystem::is_empty (resultDir)) {
-			std::filesystem::remove (resultDir);
+		while (utils::is_empty_directory (resultDir)) {
+			utils::remove (resultDir);
 			resultDir = utils::parent_directory (resultDir);
 		}
     }
@@ -420,7 +419,7 @@ namespace divider {
 		LOG_INFO (mntType, " ", this-> _outputDir);
 		if (mntType == "tmpfs") {
 			umount (this-> _outputDir.c_str ());
-			std::filesystem::remove (this-> _outputDir);
+			utils::remove (this-> _outputDir);
 		}
 
 		LOG_INFO ("Disposing divider core.");
