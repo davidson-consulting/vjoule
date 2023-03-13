@@ -175,7 +175,6 @@ namespace simple {
     void Simple::computeCpuEnergy () {
 		if (this-> _cpuGet != nullptr) {
 			float cpuEnergy = this-> _cpuGet ();
-            std::cout << cpuEnergy << std::endl;
             this-> _cpuEnergy += cpuEnergy;
         }
     }
