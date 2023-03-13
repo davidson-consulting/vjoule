@@ -105,24 +105,12 @@ namespace common::perf {
     }
     
     void PerfEventWatcher::configureCgroupWatch (const std::vector <std::string> & eventList, int nbCpus) {
-	int perfFlags = 0;
-	if (this-> _cgroupPath != "") {
-	    this-> _cgroupFd = open (this-> _cgroupPath.c_str (), O_RDONLY);
-	    if (this-> _cgroupFd == -1) {
-		LOG_ERROR ("Failed to open cgroup.");
-		return;
-	    }
-	    perfFlags = PERF_FLAG_PID_CGROUP;
-	} else {
-	    this-> _cgroupFd = -1;	    
-	}
-
 	this-> _cgroupFd = open (this-> _cgroupPath.c_str (), O_RDONLY);
-	if (this-> _cgroupFd == -1) {
+	if (this-> _cgroupFd == 0) {
 	    common::utils::Logger::globalInstance  ().error ("Failed to open cgroup.");
 	    return;
 	}
-	perfFlags = PERF_FLAG_PID_CGROUP;
+	int perfFlags = PERF_FLAG_PID_CGROUP;
 
 
 	std::vector <perf_event_attr> attrs = this-> findPerfEventAttrs (eventList, this-> _eventList);

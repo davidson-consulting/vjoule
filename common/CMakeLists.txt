@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 project(vjoule_common)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++20 -static -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17 -static -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -static")
 
 file(  

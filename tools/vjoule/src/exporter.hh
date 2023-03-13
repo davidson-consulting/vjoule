@@ -11,16 +11,16 @@ namespace tools::vjoule {
     float ram;
 
     Values operator - (const Values &v) const {
-      return Values(
-          cpu - v.cpu,
-          gpu - v.gpu,
-          ram - v.ram
-        );
+      return Values{
+      cpu - v.cpu,
+      gpu - v.gpu,
+      ram - v.ram
+    };
     }
   };
 
   class Exporter {
-  private :
+    private :
 
       // path to the vjoule result directory
       std::string _result_dir;
@@ -57,7 +57,7 @@ namespace tools::vjoule {
        * @params:
        *   - resultDir: the directory containing the result
        *   - cgroupName: the name of the cgroup created by the CLI
-       *   - cmd: the options passed to the CLI 
+       *   - cmd: the options passed to the CLI
        */
       void configure (const std::string & resultDir, const std::string & cgroupName, const CommandLine & cmd, std::string time);
       
