@@ -9,8 +9,8 @@ namespace common::utils {
 
        
     class FileError : public utils::CommonError {
-    public:
-	FileError(const std::string& msg);
+        public:
+            FileError(const std::string& msg);
     };
 		
     /**
@@ -38,7 +38,21 @@ namespace common::utils {
      * @returns: true of parent is a parent directory of path
      */
     bool is_parent_directory (const std::string & parent, const std::string & path);
-    
+
+    /**
+     * @returns: true iif the path is a directory
+     * */
+    bool directory_exists (const std::string & path);
+
+    /*
+     * Create a directory
+     * @params:
+     *    - path: the path of the directory to create
+     *    - recursive: if true create parent directories that does not exist
+     * @returns: false if the creation failed
+     */
+    bool create_directory (const std::string & path, bool recursive = false);
+
     /**
      * @return: the absolute path of the file
      * @info: the file will be search in INCLUDE_DIR and ADDONS
