@@ -19,6 +19,22 @@ namespace divider {
 		this-> _outputDir = cfg.getOr <std::string> ("output-dir", "/etc/vjoule/results");
 		LOG_INFO ("Divider will output in this dir: ", this-> _outputDir);
 		this-> _deleteRes = cfg.getOr <bool> ("delete-res", true);
+		this-> _sumBased = (cfg.getOr <std::string> ("perf-division-base", "machine") == "sum");
+
+		if (this-> _sumBased) {
+			LOG_INFO ("Divider will divide using the sum of watched cgroups");
+		} else {
+			LOG_INFO ("Divider will divide using the perf counter of the whole machine");
+		}
+
+		this-> _cpuCounter = (cfg.getOr<std::string> ("perf-division-cpu-type", "time"));
+		if (this-> _cpuCounter == "instrs") {
+			LOG_INFO ("Divider will use instructions as perf counter type");
+		} else if (this-> _cpuCounter == "cycles") {
+			LOG_INFO ("Divider will use cycles as perf counter type");
+		} else {
+			LOG_INFO ("Divider will use time as perf counter type");
+		}
 
 		bool v2 = false;
 		this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
@@ -230,9 +246,14 @@ namespace divider {
 			float ramEnergy = this-> _ramGet ();
 			// LLC_MISSES of the system
 
-			auto ident =  0.0f; //(float) (this-> _perfEventValues[0][0]);
-			for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
-				ident += this-> _perfEventValues [i][0];
+			float ident = 0.0f;
+			if (this-> _sumBased) {
+				auto ident =  0.0f;
+				for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
+					ident += this-> _perfEventValues [i][0];
+				}
+			} else {
+				ident = (float) (this-> _perfEventValues[0][0]);
 			}
 
 			this-> _results[""].ram += ramEnergy;
@@ -249,9 +270,13 @@ namespace divider {
 		if (this-> _cpuGet != nullptr) {
 			float cpuEnergy = this-> _cpuGet ();
 
-			auto ident = 0.0f; //(float) (this-> _perfEventValues[0][0]);
-			for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
-				ident += this-> _perfEventValues [i][0];
+			auto ident = 0.0f;
+			if (this-> _sumBased) {
+				for (uint64_t i = 1 ; i < this-> _perfEventValues.size () ; i++) {
+					ident += this-> _perfEventValues [i][0];
+				}
+			} else {
+				ident = (float) (this-> _perfEventValues[0][0]);
 			}
 
 			this-> _results[""].cpu += cpuEnergy;
@@ -266,6 +291,11 @@ namespace divider {
 
     void Divider::configureCgroups () {
 		std::vector <std::string> events = {"PERF_COUNT_SW_CPU_CLOCK", "PERF_COUNT_HW_CACHE_MISSES"};
+		if (this-> _cpuCounter == "cycles") {
+			events [0] = "PERF_COUNT_HW_CPU_CYCLES";
+		} else if (this-> _cpuCounter == "instrs"){
+			events [0] = "PERF_COUNT_HW_INSTRUCTIONS";
+		}
 
 		std::vector <common::cgroup::Cgroup> rest;
 		std::vector <perf::PerfEventWatcher> watchers;

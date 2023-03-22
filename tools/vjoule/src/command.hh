@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#define __VJOULE_VERSION__ "1.0.1"
+#define __VJOULE_VERSION__ "1.1.0"
 
 namespace tools::vjoule {
 

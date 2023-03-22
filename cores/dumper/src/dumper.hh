@@ -1,7 +1,7 @@
 #pragma once
 
 #define __PROJECT__ "DUMPER"
-#define __PLUGIN_VERSION__ "1.0.1"
+#define __PLUGIN_VERSION__ "1.1.0"
 
 #include <common/_.hh>
 #include <vector>
