@@ -40,7 +40,8 @@ namespace dumper {
 	
 		this-> _notif.onUpdate ().connect (this, &Dumper::onCgroupUpdate);
 		this-> configureCgroups ();
-	
+		this-> configureCpuFrequencies ();
+
 		this-> createResultsFiles ();
 	
 		return true;
@@ -146,6 +147,19 @@ namespace dumper {
 
 		return true;
     }
+
+	void Dumper::configureCpuFrequencies () {
+		auto root = "/sys/devices/system/cpu/";
+		for (uint32_t i = 0 ; ; i++) {
+			auto cpu = utils::join_path (root, "cpu" + std::to_string (i));
+			auto freq = utils::join_path (cpu, "cpufreq/scaling_cur_freq");
+			if (utils::file_exists (freq)) {
+				this-> _cpuFreqFds.push_back (fopen (freq.c_str (), "r"));
+			} else break;
+		}
+
+		this-> _cpuFreqs.resize (this-> _cpuFreqFds.size ());
+	}
     
     void Dumper::compute () {
 		if (this-> _needUpdate) {
@@ -162,6 +176,7 @@ namespace dumper {
 		this-> computeCpuEnergy ();
 		this-> computeRamEnergy ();
 		this-> computeGpuEnergy ();
+		this-> pollCpuFrequencies ();
 
 		this-> writeResults ();
     }
@@ -194,7 +209,11 @@ namespace dumper {
 		this-> _resultsPerfOs << std::endl;
 
 		this-> _resultsEnergyOs = std::ofstream(utils::join_path (this-> _outputDir, "energy.csv"), std::ios::out);
-		this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU" << std::endl;
+		this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU";
+		for (uint32_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
+			this-> _resultsEnergyOs << ";FREQ" << i;
+		}
+		this-> _resultsEnergyOs << std::endl;
     }
 
     void Dumper::writeResults() {
@@ -216,7 +235,11 @@ namespace dumper {
 			this-> _resultsPerfOs << std::endl;
 		}
 
-		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy << std::endl;
+		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
+		for (auto & it : this-> _cpuFreqs) {
+			this-> _resultsEnergyOs << ";" << it;
+		}
+		this-> _resultsEnergyOs << std::endl;
     }
 
 
@@ -225,6 +248,16 @@ namespace dumper {
 			this-> _cgroupWatchers[i].poll (this-> _perfEventValues[i]);
 		}
     }
+
+	void Dumper::pollCpuFrequencies () {
+		for (uint64_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
+			fseek (this-> _cpuFreqFds [i], 0, SEEK_SET);
+			if (fscanf (this-> _cpuFreqFds [i], "%ld", &this-> _cpuFreqs [i]) == 0) {
+				LOG_WARN ("Failed to read frequency")
+			}
+			fflush (this-> _cpuFreqFds [i]);
+		}
+	}
 
     void Dumper::computeGpuEnergy () {
 		for (uint64_t i = 0 ; i < this-> _gpuGet.size () ; i++) {
