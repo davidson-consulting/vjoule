@@ -1,0 +1,5 @@
+systemctl stop anon_service.service
+
+echo "sensor service stop"
+umount /etc/anon/results
+rm -rf /etc/anon

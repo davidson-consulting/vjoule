@@ -1,0 +1,12 @@
+[Unit]
+Description=anon service
+
+[Service]
+User=anon
+WorkingDirectory=/etc/anon/
+ExecStart=/usr/bin/anon_service
+Restart=always
+Slice=anon.slice
+
+[Install]
+WantedBy=multi-user.target

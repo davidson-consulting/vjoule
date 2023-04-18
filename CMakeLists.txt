@@ -1,0 +1,11 @@
+cmake_minimum_required (VERSION 3.1)
+project (anon)
+
+add_subdirectory (patch_libpfm)
+add_subdirectory (common)
+add_subdirectory (service)
+add_subdirectory (cores/divider)
+add_subdirectory (cores/dumper)
+add_subdirectory (cores/simple)
+add_subdirectory (plugins/rapl)
+add_subdirectory (plugins/nvidia)

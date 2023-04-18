@@ -1,0 +1,5 @@
+Package: anon-tools
+Version: 1.0.1
+Architecture: amd64
+Maintainer: anonymous
+Description: anon service, CLI and some other tools for energy consumption
