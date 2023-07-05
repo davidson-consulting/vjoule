@@ -1,0 +1,182 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Config files, logs and results - vJoule doc</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Documentation for vJoule.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+        <link rel="stylesheet" href="custom.css">
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html" class="active"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/profile.html"><strong>4.2.</strong> vjoule profile</a></li><li><a href="./cli/top.html"><strong>4.3.</strong> vjoule top</a></li></ul></li><li><a href="./api/index.html"><strong>5.</strong> API</a></li><li><ul class="section"><li><a href="./api/rust.html"><strong>5.1.</strong> rust</a></li><li><a href="./api/py.html"><strong>5.2.</strong> python</a></li></ul></li><li><a href="./tutorial/index.html"><strong>6.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>6.1.</strong> Measuring a program</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>7.</strong> Trouble-shooting</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars" title="Toggle sidebar"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush" title="Change theme"></i>
+                    </div>
+
+                    <h1 class="menu-title">vJoule doc</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./user_guide/directories_layout.html#files-of-interest" id="files-of-interest"><h1>Files of interest</h1></a>
+<p>Once vJoule is installed, you should find a directory located in
+<code>/etc/vjoule</code> that contains configurations, logs and results. For
+example, the service configuration is located in
+<code>/etc/vjoule/config.toml</code>.</p>
+<a class="header" href="./user_guide/directories_layout.html#configuration-files-and-logs" id="configuration-files-and-logs"><h2>Configuration files and logs</h2></a>
+<ul>
+<li><code>/etc/vjoule/config.toml</code>: the configuration file of the <code>vjoule_service</code>. It can be modified to change the log level and some other options that depends on the core plugin used.</li>
+<li><code>/etc/vjoule/service.log</code>: the log file of the <code>vjoule_service</code>,</li>
+</ul>
+<a class="header" href="./user_guide/directories_layout.html#energy-estimation-results" id="energy-estimation-results"><h2>Energy estimation results</h2></a>
+<p>Assuming you are using the <code>divider</code> core plugin (specified in the
+configuration file of the vjoule_service), the directory
+<code>/etc/vjoule/results/MYSLICE/MYCGROUP</code> contains the energy consumption
+estimation of the cgroup <code>MYSLICE/MYCGROUP</code>. This is where you will
+find the informations you're looking for.</p>
+<p>By default, vJoule is configured to monitor its own service in a
+cgroup named <code>vjoule.slice</code>. The energy consumption of the sensor will
+then be stored in self-updating files located in
+<code>/etc/vjoule/results/vjoule.slice/vjoule_service.service</code>.</p>
+<p>vJoule will give you up to five results files:</p>
+<ul>
+<li>ram - The energy consumption of the RAM</li>
+<li>cpu - The energy consumption of the CPU</li>
+<li>gpu - The energy consumption of the GPUs (sum if there are multiple gpus)</li>
+</ul>
+<p>The value stored in the file correspond to the energy consumption, in <strong>joule</strong>, since vJoule have started monitoring these processes.</p>
+<p>The <code>divider</code> core plugin also dumps the energy consumption of the
+whole system at the root of the result directory
+<code>/etc/vjoule/results</code>.  There can be found the three files <code>cpu</code>,
+<code>ram</code> and <code>gpu</code> that contains the energy consumption in <strong>joule</strong> of
+the whole system since the start of the vJoule service (as acquired by
+the sensor plugins).</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./user_guide/cgroups.html" class="mobile-nav-chapters previous" title="Previous chapter">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./user_guide/divider_core.html" class="mobile-nav-chapters next" title="Next chapter">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./user_guide/cgroups.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./user_guide/divider_core.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS script -->
+        
+        <script type="text/javascript" src="custom.js"></script>
+        
+
+    </body>
+</html>

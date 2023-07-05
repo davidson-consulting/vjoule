@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Sensor plugins - vJoule doc</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Documentation for vJoule.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+        <link rel="stylesheet" href="custom.css">
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/cgroups.html"><strong>3.1.</strong> cgroups</a></li><li><a href="./user_guide/directories_layout.html"><strong>3.2.</strong> Config files, logs and results</a></li><li><a href="./user_guide/divider_core.html"><strong>3.3.</strong> The divider core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.4.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html" class="active"><strong>3.5.</strong> Sensor plugins</a></li><li><a href="./user_guide/pullers.html"><strong>3.6.</strong> Fetching results with pullers</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/profile.html"><strong>4.2.</strong> vjoule profile</a></li><li><a href="./cli/top.html"><strong>4.3.</strong> vjoule top</a></li></ul></li><li><a href="./api/index.html"><strong>5.</strong> API</a></li><li><ul class="section"><li><a href="./api/rust.html"><strong>5.1.</strong> rust</a></li><li><a href="./api/py.html"><strong>5.2.</strong> python</a></li></ul></li><li><a href="./tutorial/index.html"><strong>6.</strong> Tutorials</a></li><li><ul class="section"><li><a href="./tutorial/mesuring.html"><strong>6.1.</strong> Measuring a program</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>7.</strong> Trouble-shooting</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars" title="Toggle sidebar"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush" title="Change theme"></i>
+                    </div>
+
+                    <h1 class="menu-title">vJoule doc</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./user_guide/sensor_plugins.html#sensor-plugins" id="sensor-plugins"><h1>Sensor plugins</h1></a>
+<p>Sensor plugins are plugins used to retreive the energy consumption of
+the hardware. They are different type of sensor plugins as there are
+different kind of hardware on which we can retreive energy
+consumption. In this version of vJoule, there are <code>cpu</code>, <code>ram</code> and
+<code>gpu</code> plugins implemented.</p>
+<p>Information about the plugins can be retreived by running the command :</p>
+<pre><code class="language-bash"># vjoule_service --ph plugin_name
+# for example
+
+$ vjoule_service --ph rapl
+</code></pre>
+<a class="header" href="./user_guide/sensor_plugins.html#rapl-plugin" id="rapl-plugin"><h2>Rapl plugin</h2></a>
+<p>The <code>rapl</code> plugin retreive the energy consumption of three kind of
+hardware, <code>cpu</code>, <code>ram</code> and <code>gpu</code> where here the gpu is the integrated
+gpu chip. RAPL is usable on intel cores only.</p>
+<p>Depending on the machine, gpu and ram may be unavailable, in that case
+during the configuration warnings will be displayed, and ram and gpu
+energy consumption retreiving will always return 0.</p>
+<p>Warning, there is no perf events on integrated GPU, meaning that the
+gpu consumption will be acquired for the whole system but will not be
+divided between cgroups when using the <code>divider</code> core plugin.</p>
+<a class="header" href="./user_guide/sensor_plugins.html#nvidia-plugin" id="nvidia-plugin"><h2>Nvidia plugin</h2></a>
+<p>The <code>nvidia</code> plugin retreives the consumption of nvidia graphics card
+using nvml. It can be only be used for the component <code>gpu</code>.  This
+plugin takes only one element of configuration <code>cgroup-consumption</code>.</p>
+<pre><code class="language-toml">[gpu]
+name = &quot;nvidia&quot;
+cgroup-consumption = true
+</code></pre>
+<p>If <code>cgroup-consumption</code> is true, then the plugin will retreive the
+name of the cgroups using the device, and their percentage of usage.
+Depending on the graphics card, cgroup usage can be available or
+not. Warning messages are displayed if it is not available.  The
+plugin is capable of managing multiple devices, if multiple graphics
+card are found on the machine.</p>
+<a class="header" href="./user_guide/sensor_plugins.html#combining-plugins" id="combining-plugins"><h2>Combining plugins</h2></a>
+<p>When there are a nvidia GPU, there can still be an integrated intel
+GPU. In that case multiple GPUs consumption are retreivable. To define
+that in the configuration file, the following can be written.</p>
+<pre><code class="language-toml">[gpu:0]
+name = &quot;rapl&quot;
+
+[gpu:1]
+name = &quot;nvidia&quot;
+</code></pre>
+<p>Both <code>divider</code> and <code>dumper</code> cores are able to manage multiple <code>gpu</code>
+plugins, but only one <code>cpu</code> and one <code>ram</code> plugin can be used at the
+same time.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./user_guide/dumping_core.html" class="mobile-nav-chapters previous" title="Previous chapter">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./user_guide/pullers.html" class="mobile-nav-chapters next" title="Next chapter">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./user_guide/dumping_core.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./user_guide/pullers.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS script -->
+        
+        <script type="text/javascript" src="custom.js"></script>
+        
+
+    </body>
+</html>
