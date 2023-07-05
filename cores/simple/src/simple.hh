@@ -1,7 +1,7 @@
 #pragma once
 
 #define __PROJECT__ "SIMPLE"
-#define __PLUGIN_VERSION__ "1.1.0"
+#define __PLUGIN_VERSION__ "1.2.0"
 
 #include <common/_.hh>
 #include <vector>

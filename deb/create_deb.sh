@@ -12,7 +12,4 @@ cp ../deb/preinst /tmp/vjoule_deb/DEBIAN/preinst
 chmod 755 /tmp/vjoule_deb/DEBIAN/*
 
 dpkg-deb -Zxz --build /tmp/vjoule_deb
-mv /tmp/vjoule_deb.deb ./vjoule-tools_1.0.1.deb
-
-
-
+mv /tmp/vjoule_deb.deb ./vjoule-tools_1.2.0.deb

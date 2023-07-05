@@ -1,6 +1,6 @@
 #pragma once
 
-#define __PLUGIN_VERSION__ "1.1.0"
+#define __PLUGIN_VERSION__ "1.2.0"
 #define __PROJECT__ "NVIDIA"
 
 #include <common/_.hh>
