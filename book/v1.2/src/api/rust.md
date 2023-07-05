@@ -27,7 +27,7 @@ waiting for service iterations to get the the next consumption, as we
 have seen in the user guide.
 
 Further information about the API is presented here [API
-Documentation](https://docs.rs/vjoule_api/1.1.1/vjoule_api/struct.VJouleAPI.html). And
+Documentation](https://docs.rs/vjoule_api/1.2.0/vjoule_api/struct.VJouleAPI.html). And
 a complete example can be found
 [here](https://github.com/davidson-consulting/vjoule/blob/main/tools/api/rust/example/src/main.rs).
 
