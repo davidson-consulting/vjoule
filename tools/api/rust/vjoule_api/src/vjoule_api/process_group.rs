@@ -151,7 +151,7 @@ impl ProcessGroup {
     
     fn force_signal (&mut self) {
 	let mut inotif = Inotify::init ().expect ("Error while initializing inotify instance");
-	inotif.add_watch (
+	inotif.watches ().add (
 	    format!("{}{}/cpu", VJOULE_RES_PATH, self.result_loc),
 	    WatchMask::MODIFY
 	).expect ("Failed to add watch");
