@@ -21,40 +21,49 @@
 
 namespace rapl {
 
+/**
+	 * ================================================================================
+	 * ================================================================================
+	 * ============================          MSR          =============================
+	 * ================================================================================
+	 * ================================================================================
+	 */
+
+
 #define MSR_RAPL_POWER_UNIT		0x606
 
-/*
- * Platform specific RAPL Domains.
- * Note that PP1 RAPL Domain is supported on 062A only
- * And DRAM RAPL Domain is supported on 062D only
- */
-/* Package RAPL Domain */
+    /*
+     * Platform specific RAPL Domains.
+     * Note that PP1 RAPL Domain is supported on 062A only
+     * And DRAM RAPL Domain is supported on 062D only
+     */
+    /* Package RAPL Domain */
 #define MSR_PKG_RAPL_POWER_LIMIT	0x610
 #define MSR_PKG_ENERGY_STATUS		0x611
 #define MSR_PKG_PERF_STATUS		0x613
 #define MSR_PKG_POWER_INFO		0x614
 
-/* PP0 RAPL Domain */
+    /* PP0 RAPL Domain */
 #define MSR_PP0_POWER_LIMIT		0x638
 #define MSR_PP0_ENERGY_STATUS		0x639
 #define MSR_PP0_POLICY			0x63A
 #define MSR_PP0_PERF_STATUS		0x63B
 
-/* PP1 RAPL Domain, may reflect to uncore devices */
+    /* PP1 RAPL Domain, may reflect to uncore devices */
 #define MSR_PP1_POWER_LIMIT		0x640
 #define MSR_PP1_ENERGY_STATUS		0x641
 #define MSR_PP1_POLICY			0x642
 
-/* DRAM RAPL Domain */
+    /* DRAM RAPL Domain */
 #define MSR_DRAM_POWER_LIMIT		0x618
 #define MSR_DRAM_ENERGY_STATUS		0x619
 #define MSR_DRAM_PERF_STATUS		0x61B
 #define MSR_DRAM_POWER_INFO		0x61C
 
-/* PSYS RAPL Domain */
+    /* PSYS RAPL Domain */
 #define MSR_PLATFORM_ENERGY_STATUS	0x64d
 
-/* RAPL UNIT BITMASK */
+    /* RAPL UNIT BITMASK */
 #define POWER_UNIT_OFFSET	0
 #define POWER_UNIT_MASK		0x0F
 
@@ -64,16 +73,16 @@ namespace rapl {
 #define TIME_UNIT_OFFSET	0x10
 #define TIME_UNIT_MASK		0xF000
 
-/**
- * Open the file msr for core 'core'
- * @returns: the file descriptor
- * @throws: std::runtime_error
- */
+    /**
+     * Open the file msr for core 'core'
+     * @returns: the file descriptor
+     * @throws: std::runtime_error
+     */
     int open_msr(int core);
 
-/**
- * Read the value of the msr file descriptor
- */
+    /**
+     * Read the value of the msr file descriptor
+     */
     uint64_t read_msr(int fd, int which, uint64_t & old);
 
     uint64_t read_msr_no_cache(int fd, int which);
@@ -115,9 +124,9 @@ namespace rapl {
 #define POWER_ENERGY_RAM_SCALE "/sys/bus/event_source/devices/power/events/energy-ram.scale"
 #define POWER_ENERGY_PSYS "/sys/bus/event_source/devices/power/events/energy-psys"
         
-/**
- * @returns: the model of cpu
- */
+    /**
+     * @returns: the model of cpu
+     */
     int detect_cpu();
 
 #define MAX_CPUS	1024
@@ -132,45 +141,45 @@ namespace rapl {
 
 
     struct EventAvail {
-	bool dram;
-	bool pp0;
-	bool pp1;
-	bool psys;
-	bool different_units;
+        bool dram;
+        bool pp0;
+        bool pp1;
+        bool psys;
+        bool different_units;
     };
 
     struct PackageCache {
-	uint64_t package;
-	uint64_t pp0;
-	uint64_t pp1;
-	uint64_t dram;
-	uint64_t psys;
+        uint64_t package;
+        uint64_t pp0;
+        uint64_t pp1;
+        uint64_t dram;
+        uint64_t psys;
     };
     
     struct PackageUnits {
-	// The unit of measurement of power
-	double powerUnits;
+        // The unit of measurement of power
+        double powerUnits;
 
-	// The unit of measurement of cpu energy
-	double cpuEnergyUnits;
+        // The unit of measurement of cpu energy
+        double cpuEnergyUnits;
 
-	// The unit of measurement of dram energy
-	double dramEnergyUnits;
+        // The unit of measurement of dram energy
+        double dramEnergyUnits;
 	
-	// The unit of measurement for time
-	double timeUnits;
+        // The unit of measurement for time
+        double timeUnits;
 
-	// The thermal information
-	double thermalSpecPower;
+        // The thermal information
+        double thermalSpecPower;
 
-	// The minimal power of package
-	double minimumPower;
+        // The minimal power of package
+        double minimumPower;
 
-	// The maximal power of the package
-	double maximumPower;
+        // The maximal power of the package
+        double maximumPower;
 
-	// The time window of a package
-	double timeWindow;
+        // The time window of a package
+        double timeWindow;
     };
 
     /**
@@ -185,11 +194,11 @@ namespace rapl {
 
 
     struct PackageContent {
-	double package;
-	double pp0;
-	double pp1;
-	double dram;
-	double psys;
+        double package;
+        double pp0;
+        double pp1;
+        double dram;
+        double psys;
     };
 
     /**
@@ -197,5 +206,29 @@ namespace rapl {
      */
     PackageContent read_package_values (int fd, EventAvail avail, PackageUnits units, PackageCache & cache);
 
-    
+
+	/**
+	 * ================================================================================
+	 * ================================================================================
+	 * ========================          PERF_EVENT          ==========================
+	 * ================================================================================
+	 * ================================================================================
+	 */
+
+#define NUM_RAPL_DOMAINS	5
+#define MAX_PACKAGES	16
+
+	EventAvail perf_event_open_packages (PackageUnits & units, std::vector <int> & packageMap, std::vector <int> & fds);
+
+    PackageContent perf_event_read_package_values (uint64_t pMap, EventAvail avail, PackageUnits units, std::vector <int> & fds);
+
+	/**
+	 * ================================================================================
+	 * ================================================================================
+	 * ==========================          POWERCAP          ==========================
+	 * ================================================================================
+	 * ================================================================================
+	 */
+
+
 }

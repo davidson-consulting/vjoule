@@ -171,7 +171,8 @@ impl VJouleAPI {
     ///
     /// Cgroups do not need to be watched by the vjoule service before calling this
     /// function, the api will make sure they are.
-    /// 
+    ///
+    #[deprecated = "Per cgroup consumption estimation is deprecated, it gives inconsistent results"]
     pub fn get_group (&mut self, name : &str)-> Result <ProcessGroup, VJouleError> {
 	let cgroup_name = String::from (&name[..]);
 	match self.groups.get (&cgroup_name) {
@@ -253,7 +254,8 @@ impl VJouleAPI {
     /// pg.attach (&[45, 897]);
     ///
     /// ```
-    /// 
+    ///
+    #[deprecated = "Per cgroup consumption estimation is deprecated, it gives inconsistent results"]
     pub fn create_group (&mut self, name : &str, pids : &[u64])-> Result<ProcessGroup, VJouleError> {
 	let mut owned : String = format!("vjoule_cgutils attach vjoule_api.slice/{}", name);
 	for i in pids {
@@ -281,7 +283,7 @@ impl VJouleAPI {
     /// 
     fn force_signal (&mut self) {
 	let mut inotif = Inotify::init ().expect ("Error while initializing inotify instance");
-	inotif.add_watch (
+	inotif.watches ().add (
 	    format!("{}/cpu", VJOULE_RES_PATH),
 	    WatchMask::MODIFY
 	).expect ("Failed to add watch");

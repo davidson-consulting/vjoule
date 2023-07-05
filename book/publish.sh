@@ -22,6 +22,15 @@ else
     rm -rf .build
     
     cd ../..
+
+    cd ../v1.1
+    cd src/images
+    
+    make clean
+    make all
+    rm -rf .build
+    
+    cd ../..
     
     mdbook build    
 
@@ -40,9 +49,11 @@ else
     git checkout gh-pages
     rm -rf v0.2
     rm -rf v1.0
+    rm -rf v1.1
 
     cp -r $SRC/v0.2/book v0.2
     cp -r $SRC/v1.0/book v1.0
+    cp -r $SRC/v1.1/book v1.1
     cp $SRC/index.html .
 
     git status .

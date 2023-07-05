@@ -34,7 +34,11 @@ extern "C" std::string help () {
     ss << "core = \"divider\" # the name of the core plugin to use for the sensor" << std::endl << std::endl;
     ss << "# the directory in which result will be written" << std::endl;
     ss << "output-dir = \"/etc/vjoule/results\""<< std::endl << std::endl;
-    
+
+    ss << "# Compute the division between cgroups based on perf counter from all machine" << std::endl;
+    ss << "#                                   or based on the sum of the perf counters of the watched cgroups" << std::endl;
+    ss << "perf-division-base = \"machine\" # \"sum\""  << std::endl << std::endl;
+
     ss << "# delete cgroup result directories when the cgroup no longer exists" << std::endl;
     ss << "delete-res = true" << std::endl << std::endl;
 
