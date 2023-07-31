@@ -172,6 +172,7 @@ namespace dumper {
 		}
 	
 		this-> pollPerfEvents ();
+		this-> pollMemoryUsages ();
 	
 		this-> computeCpuEnergy ();
 		this-> computeRamEnergy ();
@@ -206,7 +207,7 @@ namespace dumper {
 		for (auto perfEvent: this-> _perfEvents) {
 			this-> _resultsPerfOs << ";" << perfEvent;
 		}
-		this-> _resultsPerfOs << std::endl;
+		this-> _resultsPerfOs << ";MEMORY_ANON;MEMORY_FILE" << std::endl;
 
 		this-> _resultsEnergyOs = std::ofstream(utils::join_path (this-> _outputDir, "energy.csv"), std::ios::out);
 		this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU";
@@ -232,7 +233,8 @@ namespace dumper {
 			for(auto perfValue: this-> _perfEventValues[i]) {
 				this-> _resultsPerfOs << ";" << perfValue;
 			}
-			this-> _resultsPerfOs << std::endl;
+			this-> _resultsPerfOs << ";" << this-> _memoryUsageAnonValues [i];
+			this-> _resultsPerfOs << ";" << this-> _memoryUsageFileValues [i] << std::endl;
 		}
 
 		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
@@ -248,6 +250,24 @@ namespace dumper {
 			this-> _cgroupWatchers[i].poll (this-> _perfEventValues[i]);
 		}
     }
+
+	void Dumper::pollMemoryUsages () {
+		for (uint64_t i = 0 ; i < this-> _cgroupList.size () ; i++) {
+			std::ifstream f (this-> _memoryUsageFiles [i]);
+			std::string type;
+			uint64_t value, j = 0;
+			while (f >> type >> value) {
+				if (j == 0) this-> _memoryUsageAnonValues [i] = value;
+				else {
+					this-> _memoryUsageFileValues [i] = value;
+					break;
+				}
+				j += 1;
+			}
+
+			f.close ();
+		}
+	}
 
 	void Dumper::pollCpuFrequencies () {
 		for (uint64_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
@@ -286,6 +306,9 @@ namespace dumper {
 		std::vector <std::vector <uint64_t> > cache;
 		bool empty = false;
 
+		bool v2 = false;
+		std::string cgroupRoot = utils::get_cgroup_mount_point (v2);
+
 		auto rules = this-> readCgroupRules ();
 		cgroup::CgroupLister lister (rules);
 		auto lst = lister.run ();
@@ -318,6 +341,13 @@ namespace dumper {
 			this-> _cgroupWatchers.push_back (std::move (pw));
 			this-> _perfEventValues.push_back({});
 			this-> _perfEventValues.back ().resize (this-> _perfEvents.size ());
+			this-> _memoryUsageAnonValues.push_back (0);
+			this-> _memoryUsageFileValues.push_back (0);
+			if (it.getName () == "") {
+				this-> _memoryUsageFiles.push_back (cgroupRoot + "/memory.stat");
+			} else {
+				this-> _memoryUsageFiles.push_back (it.getName () + "/memory.stat");
+			}
 			this-> _cgroupList.push_back (it);
 		}
 

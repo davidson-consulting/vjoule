@@ -11,8 +11,8 @@
 #include "notif.hh"
 
 namespace dumper {    
-    class Dumper {
-    private:
+	class Dumper {
+	private:
 	
 		// directory where results should be written
 		std::string _outputDir;
@@ -28,6 +28,15 @@ namespace dumper {
 
 		// The values of the perf event counters of the last poll
 		std::vector <std::vector <uint64_t> > _perfEventValues;
+
+		// The list of cgroup to watch
+		std::vector <std::string> _memoryUsageFiles;
+
+		// The memory usage of the last poll
+		std::vector <uint64_t> _memoryUsageAnonValues;
+
+		// The memory usage of the last poll
+		std::vector <uint64_t> _memoryUsageFileValues;
 
 		// The file listing cgroup to watch
 		std::string _cgroupFile;
@@ -50,7 +59,7 @@ namespace dumper {
 		// The notifier used to check cgroup modifications
 		Notifier _notif;
 	
-    private : 	
+	private :
 	
 		// The list of gpu plugins
 		std::vector <common::plugin::Plugin*> _gpuPlugins;
@@ -64,7 +73,7 @@ namespace dumper {
 		// The cache for power consumption reading on gpu
 		std::vector <std::vector <float> > _gpuEnergyCache;
 	
-    private : 
+	private :
 	
 		// The plugin for cpu consumption
 		common::plugin::Plugin* _cpuPlugin;
@@ -72,7 +81,7 @@ namespace dumper {
 		// The get power function of the cpu plugin
 		common::plugin::CpuGetEnergy_t _cpuGet = nullptr;
 	
-    private: 
+	private:
 	
 		// The plugin for ram consumption
 		common::plugin::Plugin* _ramPlugin;
@@ -88,13 +97,13 @@ namespace dumper {
 		// The current cpu frequency
 		std::vector <uint64_t> _cpuFreqs;
 
-    private : 
+	private :
 	
 		// The list of plugins used by the dumper
 		// We use a set because we need to poll the plugins only one time, even if they are used for different metrics
 		std::set <common::plugin::PluginPollFunc_t> _pollFunctions;
 	
-    public :
+	public :
 
 		/**
 		 * Create an empty dumper
@@ -119,7 +128,7 @@ namespace dumper {
 		 */
 		void dispose ();
 
-    private: 
+	private:
 	
 		/**
 		 * Configure the cgroups watched by the dumper
@@ -151,12 +160,17 @@ namespace dumper {
 		 */
 		void configureCpuFrequencies ();
 
-    private: 
+	private:
 
 		/**
 		 * Poll the performance events
 		 */
 		void pollPerfEvents ();
+
+		/**
+		 * Poll the memory usage
+		   */
+		void pollMemoryUsages ();
 
 		/**
 		 * Read the file describing cpu frequencies
@@ -198,6 +212,6 @@ namespace dumper {
 		 */
 		void mountResultDir ();
 	
-    };
+	};
     
 }
