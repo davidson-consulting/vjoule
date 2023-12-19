@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <vjoule_api.hh>
 #include <sys/wait.h>
 #include <exec.hh>
 #include <command.hh>
@@ -37,9 +38,12 @@ int main(int argc, char * argv[]) {
         return -1;
     } catch (const TopError & error) {
         return -1;
-    } // catch (const ExecError & error) {
-    //     return -1;
-    // }
+    } catch (const ::vjoule::vjoule_error & error) {
+        std::cerr << error.msg << std::endl;
+        return -1;
+    }
+
+
     
     return 0;
 }

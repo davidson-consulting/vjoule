@@ -5,22 +5,24 @@
 #include "reader.hh"
 
 
-yocto::YoctoReader __GLOBAL_Yocto__;
-
 extern "C" bool init (const common::utils::config::dict* d) {
-  return __GLOBAL_Yocto__.configure (d);
+  return yocto::YoctoReader::__GLOBAL_Yocto__.configure (d);
 }
 
 extern "C" void poll () {
-  __GLOBAL_Yocto__.poll ();
+  yocto::YoctoReader::__GLOBAL_Yocto__.poll ();
 }
 
 extern "C" float pdu_get_energy () {
-  return __GLOBAL_Yocto__.getEnergy ();
+  return yocto::YoctoReader::__GLOBAL_Yocto__.getEnergy ();
+}
+
+extern "C" float pdu_get_power () {
+  return yocto::YoctoReader::__GLOBAL_Yocto__.getPower ();
 }
 
 extern "C" void dispose () {
-  __GLOBAL_Yocto__.dispose ();
+  yocto::YoctoReader::__GLOBAL_Yocto__.dispose ();
 }
 
 extern "C" std::string help () {
@@ -34,7 +36,7 @@ extern "C" std::string help () {
   ss << "===" << std::endl;
   ss << "[gpu]" << std::endl;
   ss << "name = \"nvidia\"" << std::endl;
-  ss << "cgroup-consumption = \"YWATTMK1-276146\"" << std::endl;
+  ss << "target = \"YWATTMK1-276146\"" << std::endl;
   ss << "===" << std::endl << std::endl << std::endl;
   ss << "This configuration is optional, if disabled, the first YoctoWatt device found will be used." << std::endl;
 

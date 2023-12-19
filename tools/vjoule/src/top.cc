@@ -126,7 +126,7 @@ namespace tools::vjoule {
 		this-> _glob.cpuW = diff.cpu / time;
 		this-> _glob.ramW = diff.ram / time;
 		this-> _glob.gpuW = diff.gpu / time;
-		this-> _glob.pduW = diff.pdu / time;
+		this-> _glob.pduW = f.pdu_watts;
 	    
 		this-> _glob.cpuJ = f.cpu;
 		this-> _glob.ramJ = f.ram;

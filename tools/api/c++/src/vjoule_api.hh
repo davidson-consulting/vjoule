@@ -24,6 +24,9 @@ namespace vjoule {
         // The instant of the consumption
         std::chrono::system_clock::time_point timestamp;
 
+        // The PDU consumption in watts (average during last tick)
+        double pdu_watts;
+
         // The PDU consumption in Joule
         double pdu;
 

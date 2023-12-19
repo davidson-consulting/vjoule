@@ -18,8 +18,6 @@ file(
 
 add_library (vjoule_cpp ${SRC})
 
-target_link_libraries (vjoule_cpp LINK_PUBLIC vjoule_common)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 install (TARGETS vjoule_cpp DESTINATION /usr/lib/)
 install (FILES ${HEADERS} DESTINATION /usr/include/vjoule/)

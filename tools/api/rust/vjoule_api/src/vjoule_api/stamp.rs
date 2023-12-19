@@ -12,6 +12,7 @@ use crate::vjoule_api::diff::{ConsumptionDiff};
 #[derive(Debug, Copy, Clone)]
 pub struct ConsumptionStamp {
     pub time : SystemTime,
+    pub pdu_watts : f64,
     pub pdu : f64,
     pub cpu : f64,
     pub gpu : f64,

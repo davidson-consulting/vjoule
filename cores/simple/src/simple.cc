@@ -84,13 +84,21 @@ namespace simple {
 				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'float pdu_get_energy ()' function");
 				return false;
 			}
-			this-> _pduGet = get;
+			this-> _pduGetEner = get;
+
+            get = this-> _pduPlugin-> getFunction <common::plugin::PduGetEnergy_t> ("pdu_get_power");
+			if (get == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'float pdu_get_power ()' function");
+				return false;
+			}
+			this-> _pduGetPower = get;
 		} else {
 			this-> _pduPlugin = nullptr;
 			LOG_INFO ("No 'pdu' plugin in use");
 		}
 
-        this-> _pduRes = fopen (utils::join_path (this-> _outputDir, "pdu").c_str (), "w");
+        this-> _pduResEner = fopen (utils::join_path (this-> _outputDir, "pdu_energy").c_str (), "w");
+        this-> _pduResPower = fopen (utils::join_path (this-> _outputDir, "pdu_power").c_str (), "w");
 		return true;
     }
 
@@ -182,10 +190,14 @@ namespace simple {
 			fflush (this-> _ramRes);
         }
 
-        if (this-> _pduRes != nullptr) {
-            fseek (this-> _pduRes, 0, SEEK_SET);
-            fprintf (this-> _pduRes, "%lf", this-> _pduEnergy);
-            fflush (this-> _pduRes);
+        if (this-> _pduResEner != nullptr) {
+            fseek (this-> _pduResEner, 0, SEEK_SET);
+            fprintf (this-> _pduResEner, "%lf", this-> _pduEnergy);
+            fflush (this-> _pduResEner);
+
+            fseek (this-> _pduResPower, 0, SEEK_SET);
+            fprintf (this-> _pduResPower, "%lf", this-> _pduPower);
+            fflush (this-> _pduResPower);
         }
     }
 
@@ -215,9 +227,10 @@ namespace simple {
     }
 
     void Simple::computePduEnergy () {
-        if (this-> _pduGet != nullptr) {
-            float pduEnergy = this-> _pduGet ();
+        if (this-> _pduGetEner != nullptr) {
+            float pduEnergy = this-> _pduGetEner ();
             this-> _pduEnergy += pduEnergy;
+            this-> _pduPower = this-> _pduGetPower ();
         }
     }
 
@@ -252,8 +265,14 @@ namespace simple {
             fclose (this-> _ramRes);
         }
 
-        if (this-> _pduRes != nullptr) {
-            fclose (this-> _pduRes);
+        if (this-> _pduResEner != nullptr) {
+            fclose (this-> _pduResEner);
+            this-> _pduResEner = nullptr;
+        }
+
+        if (this-> _pduResPower != nullptr) {
+            fclose (this-> _pduResPower);
+            this-> _pduResPower = nullptr;
         }
 
         auto mntType = utils::get_mount_type (this-> _outputDir);

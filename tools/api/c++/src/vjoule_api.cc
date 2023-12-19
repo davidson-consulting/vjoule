@@ -28,7 +28,7 @@ namespace vjoule {
         }
 
         this-> _inotifFd = inotify_init ();
-        this-> _inotifFdW = inotify_add_watch (this-> _inotifFd, utils::join_path (VJOULE_DIR, "results").c_str (), IN_MODIFY | IN_CREATE);
+        this-> _inotifFdW = inotify_add_watch (this-> _inotifFd, utils::api::join_path (VJOULE_DIR, "results").c_str (), IN_MODIFY | IN_CREATE);
 
         this-> force_sig ();
 	
@@ -36,10 +36,11 @@ namespace vjoule {
 
     consumption_stamp_t vjoule_api::get_machine_current_consumption_no_force () const {
         consumption_stamp_t t (std::chrono::system_clock::now (), 0, 0, 0);
-        auto cpu = utils::join_path (VJOULE_DIR, "results/cpu");
-        auto gpu = utils::join_path (VJOULE_DIR, "results/gpu");
-        auto ram = utils::join_path (VJOULE_DIR, "results/ram");
-        auto pdu = utils::join_path (VJOULE_DIR, "results/pdu");
+        auto cpu = utils::api::join_path (VJOULE_DIR, "results/cpu");
+        auto gpu = utils::api::join_path (VJOULE_DIR, "results/gpu");
+        auto ram = utils::api::join_path (VJOULE_DIR, "results/ram");
+        auto pdu = utils::api::join_path (VJOULE_DIR, "results/pdu_energy");
+        auto pdu_p = utils::api::join_path (VJOULE_DIR, "results/pdu_power");
         {
             std::ifstream f (cpu);
             if (f.is_open ()) {
@@ -68,6 +69,13 @@ namespace vjoule {
             }
         }
 
+        {
+            std::ifstream f (pdu_p);
+            if (f.is_open ()) {
+                f >> t.pdu_watts;
+            }
+        }
+
         return t;
     }
 
@@ -79,7 +87,7 @@ namespace vjoule {
 
     void vjoule_api::force_sig () const {
         for (uint64_t i = 0 ; i < 2 ; i++) {
-            FILE * f = fopen (utils::join_path (VJOULE_DIR, "signal").c_str (), "w");
+            FILE * f = fopen (utils::api::join_path (VJOULE_DIR, "signal").c_str (), "w");
             if (f == nullptr) throw vjoule::vjoule_error ("failed to signal service.");
             fprintf (f, "%d\n", 1);
             fflush (f);
@@ -130,8 +138,9 @@ namespace vjoule {
 
 std::ostream & operator << (std::ostream & o, const vjoule::consumption_stamp_t & c) {
     char buffer[255];
-    snprintf (buffer, 255, "stamp (%ld, pdu: %.2fJ, cpu: %.2fJ, ram: %.2fJ, gpu: %.2fJ)",
+    snprintf (buffer, 255, "stamp (%ld, pdu_watts: %.2fW, pdu: %.2fJ, cpu: %.2fJ, ram: %.2fJ, gpu: %.2fJ)",
               c.timestamp.time_since_epoch ().count (),
+              c.pdu_watts,
               c.pdu,
               c.cpu,
               c.ram,

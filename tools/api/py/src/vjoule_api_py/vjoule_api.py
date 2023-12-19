@@ -41,7 +41,6 @@ class VJouleAPI:
         self._inotifFd = inotify.adapters.Inotify ()
         self._inotifFdW = self._inotifFd.add_watch (self._VJOULE_DIR + "results")
 
-
         self.__forceSig ()
 
 
@@ -71,10 +70,15 @@ class VJouleAPI:
             ret.gpu = float (i.read ())
             i.close ()
 
-        if (os.path.isfile (self._VJOULE_DIR + "results/pdu")) :
-            i = open (self._VJOULE_DIR + "results/pdu", "r")
+        if (os.path.isfile (self._VJOULE_DIR + "results/pdu_energy")) :
+            i = open (self._VJOULE_DIR + "results/pdu_energy", "r")
             ret.pdu = float (i.read ())
             i.close ()
+
+        if (os.path.isfile (self._VJOULE_DIR + "results/pdu_power")) :
+            with open (self._VJOULE_DIR + "results/pdu_power", "r") as f:
+                x = f.read ()
+                ret.pdu_watts = float (x)
 
         return ret
 
@@ -115,6 +119,7 @@ class VJouleConsumptionStamp :
     
     def __init__ (self, time) :
         self.time = time
+        self.pdu_watts = 0
         self.pdu = 0
         self.cpu = 0
         self.ram = 0

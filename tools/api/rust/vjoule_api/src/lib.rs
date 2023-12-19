@@ -77,16 +77,19 @@ impl VJouleAPI {
 	    let cpu_path = format!("{}/cpu", VJOULE_RES_PATH);
 	    let ram_path = format!("{}/ram", VJOULE_RES_PATH);
 	    let gpu_path = format!("{}/gpu", VJOULE_RES_PATH);
-        let pdu_path = format!("{}/pdu", VJOULE_RES_PATH);
+        let pdu_e_path = format!("{}/pdu_energy", VJOULE_RES_PATH);
+        let pdu_p_path = format!("{}/pdu_power", VJOULE_RES_PATH);
 
         let cpu = self.read_value (&cpu_path[..]);
         let ram = self.read_value (&ram_path[..]);
 	    let gpu = self.read_value (&gpu_path[..]);
-        let pdu = self.read_value (&pdu_path[..]);
+        let pdu_e = self.read_value (&pdu_e_path[..]);
+        let pdu_p = self.read_value (&pdu_p_path[..]);
 
 	    Ok (ConsumptionStamp {
 	        time : SystemTime::now (),
-            pdu : pdu,
+            pdu_watts : pdu_p,
+            pdu : pdu_e,
 	        cpu : cpu,
 	        ram : ram,
 	        gpu : gpu

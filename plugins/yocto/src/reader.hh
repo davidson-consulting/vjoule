@@ -14,44 +14,58 @@
 
 namespace yocto {
 
-  class YoctoReader {
+    class YoctoReader {
 
-    // The yocto sensor
-    YPower * _psensor;
+        // The yocto sensor
+        YPower * _psensor;
 
-    // The current energy value
-    double _currentEnergy;
+        // The current energy value
+        double _currentEnergy;
 
-      // double _last;
+        // The last meter value read
+        double _last;
 
-  public:
+    public:
 
-    /**
-     * Configure the yocto plugin
-     */
-    bool configure (const common::utils::config::dict *);
+        // The sum of the watts read
+        double _currentWatts;
 
-    /**
-     * Poll energy value
-     */
-    void poll ();
+        // The number of watt points
+        int _nbWatts;
 
-    /**
-     * @returns: the energy measured by of the yocto wattmeter since last time
-     */
-    double getEnergy () const;
+        static YoctoReader __GLOBAL_Yocto__;
 
-    /**
-     * Clear the api
-     */
-    void dispose ();
+        /**
+         * Configure the yocto plugin
+         */
+        bool configure (const common::utils::config::dict *);
 
-    /**
-     * this-> dispose ()
-     */
-    ~YoctoReader ();
+        /**
+         * Poll energy value
+         */
+        void poll ();
 
-  };
+        /**
+         * @returns: the energy measured by of the yocto wattmeter since last time
+         */
+        double getEnergy () const;
+
+        /**
+         * @returns: the average power since the last read
+         */
+        double getPower () const;
+
+        /**
+         * Clear the api
+         */
+        void dispose ();
+
+        /**
+         * this-> dispose ()
+         */
+        ~YoctoReader ();
+
+    };
 
 
 }
