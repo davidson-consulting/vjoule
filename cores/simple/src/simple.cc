@@ -217,7 +217,6 @@ namespace simple {
     void Simple::computePduEnergy () {
         if (this-> _pduGet != nullptr) {
             float pduEnergy = this-> _pduGet ();
-            std::cout << this-> _pduEnergy << std::endl;
             this-> _pduEnergy += pduEnergy;
         }
     }

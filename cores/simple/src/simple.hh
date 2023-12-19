@@ -16,7 +16,7 @@ namespace simple {
         std::string _outputDir;
 
         // The current energy values
-        float _pduEnergy;
+        double _pduEnergy;
         float _cpuEnergy;
         float _ramEnergy;
         float _gpuEnergy;

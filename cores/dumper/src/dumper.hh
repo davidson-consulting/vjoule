@@ -48,6 +48,7 @@ namespace dumper {
 		float _cpuEnergy;
 		float _ramEnergy;
 		float _gpuEnergy;
+		double _pduEnergy;
 
 		// The result files
 		std::ofstream _resultsPerfOs;
@@ -80,7 +81,15 @@ namespace dumper {
 
 		// The get power function of the cpu plugin
 		common::plugin::CpuGetEnergy_t _cpuGet = nullptr;
-	
+
+	private:
+
+		// The plugin for ram consumption
+		common::plugin::Plugin* _pduPlugin;
+
+		// The get power function of the ram plugin
+		common::plugin::PduGetEnergy_t _pduGet = nullptr;
+
 	private:
 	
 		// The plugin for ram consumption
@@ -146,6 +155,11 @@ namespace dumper {
 		bool configureCpuPlugin (common::plugin::Factory & factory);
 
 		/**
+		 * Configure the pdu plugin
+		 */
+		bool configurePduPlugin (common::plugin::Factory & factory);
+
+		/**
 		 * Configure the ram plugin
 		 */
 		bool configureRamPlugin (common::plugin::Factory & factory);
@@ -178,9 +192,14 @@ namespace dumper {
 		void pollCpuFrequencies ();
 
 		/**
-		 * Compute the cpu power consumption per cgroup
+		 * Compute the cpu power consumption
 		 */
 		void computeCpuEnergy ();
+
+		/**
+		 * Compute the pdu power consumption
+		 */
+		void computePduEnergy () ;
 
 		/**
 		 * Compute the ram power consumption per cgroup

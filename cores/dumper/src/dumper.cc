@@ -19,6 +19,7 @@ namespace dumper {
 		if (!this-> configureGpuPlugins (factory)) return false;
 		if (!this-> configureCpuPlugin (factory)) return false;
 		if (!this-> configureRamPlugin (factory)) return false;
+		if (!this-> configurePduPlugin (factory)) return false;
 
 		bool v2 = false;
 		this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
@@ -95,6 +96,32 @@ namespace dumper {
 		return true;
     }
 
+	bool Dumper::configurePduPlugin (common::plugin::Factory & factory) {
+		auto pdus = factory.getPlugins ("pdu");
+		if (pdus.size () > 0) {
+			this-> _pduPlugin = pdus[0];
+			if (pdus.size () > 1) LOG_WARN ("Core 'dumper' can manage only one PDU plugin.");
+			auto poll = this-> _pduPlugin-> getFunction<common::plugin::PluginPollFunc_t> ("poll");
+			if (poll == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'void poll ()' function");
+				return false;
+			}
+			this-> _pollFunctions.emplace (poll);
+
+			auto get = this-> _pduPlugin-> getFunction <common::plugin::PduGetEnergy_t> ("pdu_get_energy");
+			if (get == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'float pdu_get_energy ()' function");
+				return false;
+			}
+			this-> _pduGet = get;
+		} else {
+			this-> _pduPlugin = nullptr;
+			LOG_INFO ("No 'pdu' plugin in use");
+		}
+
+		return true;
+	}
+
     bool Dumper::configureCpuPlugin (common::plugin::Factory & factory) {
 		auto cpus = factory.getPlugins ("cpu");
 		if (cpus.size () > 0) {
@@ -117,7 +144,7 @@ namespace dumper {
 			this-> _cpuPlugin = nullptr;
 			LOG_INFO ("No 'cpu' plugin in use");
 		}
-	
+
 		return true;
     }
 
@@ -177,6 +204,7 @@ namespace dumper {
 		this-> computeCpuEnergy ();
 		this-> computeRamEnergy ();
 		this-> computeGpuEnergy ();
+		this-> computePduEnergy ();
 		// this-> pollCpuFrequencies ();
 
 		this-> writeResults ();
@@ -210,7 +238,7 @@ namespace dumper {
 		this-> _resultsPerfOs << ";MEMORY_ANON;MEMORY_FILE" << std::endl;
 
 		this-> _resultsEnergyOs = std::ofstream(utils::join_path (this-> _outputDir, "energy.csv"), std::ios::out);
-		this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU";
+		this-> _resultsEnergyOs << "TIMESTAMP;PDU;CPU;RAM;GPU";
 		// for (uint32_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
 		// 	this-> _resultsEnergyOs << ";FREQ" << i;
 		// }
@@ -237,7 +265,7 @@ namespace dumper {
 			this-> _resultsPerfOs << ";" << this-> _memoryUsageFileValues [i] << std::endl;
 		}
 
-		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
+		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _pduEnergy << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
 		// for (auto & it : this-> _cpuFreqs) {
 		// 	this-> _resultsEnergyOs << ";" << it;
 		// }
@@ -299,7 +327,13 @@ namespace dumper {
 			this-> _cpuEnergy += this-> _cpuGet ();
 		}
     }
-  
+
+	void Dumper::computePduEnergy () {
+		if (this-> _pduGet != nullptr) {
+			this-> _pduEnergy += this-> _pduGet ();
+		}
+	}
+
     void Dumper::configureCgroups () {
 		std::vector <common::cgroup::Cgroup> rest;
 		std::vector <perf::PerfEventWatcher> watchers;

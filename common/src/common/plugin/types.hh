@@ -13,7 +13,7 @@ namespace common::plugin {
     typedef void (*PluginDisposeFunc_t) ();
     typedef void (*PluginPollFunc_t) ();
 
-    typedef float (*PduGetEnergy_t) ();
+    typedef double (*PduGetEnergy_t) ();
     typedef float (*CpuGetEnergy_t) ();
     typedef float (*RamGetEnergy_t) ();
     

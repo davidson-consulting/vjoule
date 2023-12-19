@@ -35,6 +35,9 @@ namespace yocto {
       return false;
     }
 
+    LOG_INFO ("Yocto Watt PDU ", this-> _psensor-> get_friendlyName (), " configured.");
+    LOG_INFO ("Power precision[", this-> _psensor-> get_friendlyName (), "] = ", this-> _psensor-> get_resolution (), this-> _psensor-> get_unit ());
+
     return true;
   }
 
