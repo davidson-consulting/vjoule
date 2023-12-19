@@ -1,5 +1,5 @@
 Package: vjoule-tools
-Version: 1.2.0
+Version: 1.3.0
 Architecture: amd64
 Maintainer: dimitri.saingre@davidson.fr, emile.cadorel@davidson.fr
 Description: vjoule service, CLI and some other tools for energy consumption
