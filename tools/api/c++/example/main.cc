@@ -13,80 +13,39 @@ double computePi (uint64_t prec) {
     return res;
 }
 
-void evalComputePi () {
+vjoule::consumption_diff_t evalComputePi (uint64_t prec) {
     try {
-	vjoule::vjoule_api api;
+        vjoule::vjoule_api api;
 
-	// The api create a process group containing the pid by default
-	// Its name is this
-	auto pg = api.get_group ("this");
+        // The api can be use to make stamp of consumption for the whole machine
+        auto m_begin = api.get_machine_current_consumption ();
 
-	// The api can be use to make stamp of consumption for the whole machine
-	auto m_begin = api.get_machine_current_consumption ();
+        // perform some computation
+        auto pi = computePi (prec);
 
-	// Using a process group, we can get a stamp of its consumption
-	auto p_begin = pg.get_current_consumption (); 
 
-	// perform some computation
-	auto pi = computePi (100000000);
 
-	// Get another stamp of consumption
-	auto p_end = pg.get_current_consumption ();
+        // Get a stamp of machine consumption
+        auto m_end = api.get_machine_current_consumption ();
 
-	// lose sometime 
-	sleep (1);
-
-	// Get a stamp of machine consumption
-	auto m_end = api.get_machine_current_consumption ();
-
-	// Compute the difference to get the consumption of the part that interest us
-	auto m_diff = m_end - m_begin;
-	auto p_diff = p_end - p_begin;
+        // Compute the difference to get the consumption of the part that interest us
+        auto m_diff = m_end - m_begin;
 
 	
-	std::cout << "RESULT : " << pi << " " << std::endl;
-	std::cout << "THIS : " << p_diff << std::endl;
+        std::cout << "RESULT : " << pi << " " << std::endl;
+        std::cout << "CONSUMPTION : " << m_diff << std::endl;
 
-	// operator '%' can be used to evaluate the percentage of a consumption diff over another
-	std::cout << "THIS_PERC : " << (p_diff % m_diff) << std::endl;
-	std::cout << "MACHINE : " << m_diff << std::endl;
-	
+        return m_diff;
     } catch (vjoule::vjoule_error & err) {
-	std::cerr << err.msg << std::endl;
-    }    
-}
-
-
-void evalExtern () {
-    try {
-	vjoule::vjoule_api api;
-
-	// Create a process group for a list of pids
-	auto ext_pg = api.create_group ("extern", {12345, 12346});
-
-	// Get a consumption stamp for this process group
-	auto e_begin = ext_pg.get_current_consumption ();
-	auto m_begin = api.get_machine_current_consumption ();
-
-	// Wait a second to given time for the external processes to consume energy
-	sleep (1);
-
-	auto e_end = ext_pg.get_current_consumption ();
-	auto m_end = api.get_machine_current_consumption ();
-
-	// display the estimation of the consumption of the external processes during this elapsed period
-	std::cout << "EXTERN : " << e_end - e_begin << std::endl;
-
-	// display the real consumption of the machine during this elapsed period of time
-	std::cout << "MACHINE : " << m_end - m_begin << std::endl;	
-    } catch (vjoule::vjoule_error & err) {
-	std::cerr << err.msg << std::endl;
+        std::cerr << err.msg << std::endl;
+        throw err;
     }
 }
 
-
 int main () {
-    evalComputePi ();
+    auto fst = evalComputePi (100000000);
     std::cout << "======" << std::endl;
-    evalExtern ();    
+    auto scd = evalComputePi (200000000);
+
+    std::cout << fst % scd << std::endl;
 }

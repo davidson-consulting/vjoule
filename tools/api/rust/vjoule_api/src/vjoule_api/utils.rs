@@ -9,14 +9,14 @@ pub fn read_lines(filename: String) -> Vec<String> {
     let mut v = Vec::new ();
     
     for l in lines {
-	let mut i = String::from (&l.unwrap ()[..]);
-	if i.len () > 1 && &i [i.len () - 1 ..] == "\n" {
-	    i = String::from (&i[.. i.len () - 1]);
-	}
-	
-	if i != "" {
-	    v.push (i);
-	}
+	    let mut i = String::from (&l.unwrap ()[..]);
+	    if i.len () > 1 && &i [i.len () - 1 ..] == "\n" {
+	        i = String::from (&i[.. i.len () - 1]);
+	    }
+
+	    if i != "" {
+	        v.push (i);
+	    }
     }
 
     v

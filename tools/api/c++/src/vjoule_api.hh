@@ -13,7 +13,7 @@ namespace vjoule {
      * Error that can be thrown by the vjoule api
      */
     struct vjoule_error {
-	std::string msg;
+        std::string msg;
     };
     
     /**
@@ -21,17 +21,20 @@ namespace vjoule {
      */
     struct consumption_stamp_t {
 
-	// The instant of the consumption 
-	std::chrono::system_clock::time_point timestamp;
-	
-	// The CPU consumption in Joule
-	double cpu;
+        // The instant of the consumption
+        std::chrono::system_clock::time_point timestamp;
 
-	// The GPU consumption in Joule
-	double gpu;
+        // The PDU consumption in Joule
+        double pdu;
 
-	// The RAM consumption in Joule
-	double ram;
+        // The CPU consumption in Joule
+        double cpu;
+
+        // The GPU consumption in Joule
+        double gpu;
+
+        // The RAM consumption in Joule
+        double ram;
 	
     };
 
@@ -40,17 +43,20 @@ namespace vjoule {
      */
     struct consumption_diff_t {
 
-	// The duration in second of the diff
-	float duration;
+        // The duration in second of the diff
+        float duration;
 
-	// The CPU consumption in Joule during the duration
-	double cpu;
+        // The PDU consumption in Joule during the duration
+        double pdu;
 
-	// The GPU consumption in Joule during the duration
-	double gpu;
+        // The CPU consumption in Joule during the duration
+        double cpu;
 
-	// The RAM consumption in Joule during the duration
-	double ram;
+        // The GPU consumption in Joule during the duration
+        double gpu;
+
+        // The RAM consumption in Joule during the duration
+        double ram;
 	
     };
 
@@ -59,21 +65,22 @@ namespace vjoule {
      */
     struct consumption_perc_t {
 
-	// The percentage of duration
-	float duration;
+        // The percentage of duration
+        float duration;
 
-	// The percentage of cpu consumption
-	float cpu;
+        // The percentage of pdu consumption
+        float pdu;
 
-	// The percentage of gpu consumption
-	float gpu;
+        // The percentage of cpu consumption
+        float cpu;
 
-	// The percentage of ram consumption
-	float ram;
+        // The percentage of gpu consumption
+        float gpu;
+
+        // The percentage of ram consumption
+        float ram;
 
     };
-
-    class process_group;
 
 
     /**
@@ -82,117 +89,57 @@ namespace vjoule {
     class vjoule_api {
     private: 
 
-	friend process_group;
-	
-	/**
-	 * The list of opened group process (cgroup)
-	 */
-	std::map <std::string, process_group> _groups;
 
-	// The inotify handle
-	int _inotifFd = 0;
+        // The inotify handle
+        int _inotifFd = 0;
 
-	// The watch handle
-	int _inotifFdW = 0;
+        // The watch handle
+        int _inotifFdW = 0;
 
     private:
 
-	vjoule_api (const vjoule_api & other);
+        vjoule_api (const vjoule_api & other);
 
-	void operator= (const vjoule_api & other);
+        void operator= (const vjoule_api & other);
 	
     public: 
 	
-	/**
-	 * Create a vjoule api
-	 */
-	vjoule_api ();
+        /**
+         * Create a vjoule api
+         */
+        vjoule_api ();
 
-	/**
-	 * Create a process group
-	 * @params: 
-	 *   - name: the name of the group
-	 *   - pid: the list of pids to put in the group
-	 * @returns: the group process that was created
-	 */
-	process_group create_group (const std::string & name, const std::vector <uint64_t> & pid);
+        /**
+         * @returns: the consumption of the machine
+         */
+        consumption_stamp_t get_machine_current_consumption () const;
 	
-	/**
-	 * @returns: a process group whose name is name
-	 */
-	process_group get_group (const std::string & name) const; 
-
-	/**
-	 * @returns: the consumption of the machine
-	 */
-	consumption_stamp_t get_machine_current_consumption () const;
-	
-	/**
-	 * Clean everything started by the api
-	 */
-	~vjoule_api ();	
+        /**
+         * Clean everything started by the api
+         */
+        ~vjoule_api ();
 
 
     private:
 
-	/**
-	 * Force an iteration of the vjoule service
-	 */
-	void force_sig () const;
+        /**
+         * Force an iteration of the vjoule service
+         */
+        void force_sig () const;
 
-	/**
-	 * Wait for the service to finish computing an iteration
-	 */
-	void wait_iteration () const;
+        /**
+         * Wait for the service to finish computing an iteration
+         */
+        void wait_iteration () const;
 
-	/**
-	 * When sig handler is triggered
-	 */
-	void on_exit ();
+        /**
+         * When sig handler is triggered
+         */
+        void on_exit ();
 	
     };
     
-    
-    class process_group {
-    private:
 
-	friend vjoule_api;
-
-	// The context of the process group
-	vjoule_api & _context;
-
-	// The name of the cgroup
-	std::string  _name;
-	
-	/**
-	 * Create a process group with a pid list
-	 */
-	process_group (vjoule_api & api, const std::string & name);
-		
-    public: 
-
-	/**
-	 * @returns: the name of the process group
-	 */
-	const std::string & get_name () const;
-	
-	/**
-	 * @returns: the consumption of the group process
-	 */
-	consumption_stamp_t get_current_consumption () const;
-
-	/**
-	 * @returns: true if the group process is correctly monitered and can return valid consumption_stamp_t 
-	 */
-	bool is_monitored () const;
-	
-	/**
-	 * Stop monitoring the group process
-	 */
-	void close ();
-	
-    };
-    
 }
 
 std::ostream & operator << (std::ostream & o, const vjoule::consumption_stamp_t & c);
