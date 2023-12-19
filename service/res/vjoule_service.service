@@ -2,7 +2,7 @@
 Description=vjoule service
 
 [Service]
-User=vjoule
+User=root
 WorkingDirectory=/etc/vjoule/
 ExecStart=/usr/bin/vjoule_service
 Restart=always
