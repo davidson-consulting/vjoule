@@ -78,14 +78,8 @@ namespace dumper {
 				LOG_ERROR ("Invalid 'gpu' plugin '", it-> getName (), "' has no 'void gpu_get_energy (float * energyDevices)' function");
 				return false;
 			}
-			this-> _gpuGet.push_back (get);
 
-			auto perf_event = it-> getFunction<common::plugin::GpuGetDeviceUsage_t> ("gpu_cgroup_usage");
-			if (perf_event == nullptr) {
-				LOG_ERROR ("Invalid 'gpu' plugin '", it-> getName (), "' has no 'float gpu_cgroup_usage (uint32_t device, const char* cgroupName)' function");
-				return false;
-			}
-			this-> _gpuPerfEvents.push_back (perf_event);
+			this-> _gpuGet.push_back (get);
 		}
 
 		if (this-> _gpuPlugins.size () == 0) {

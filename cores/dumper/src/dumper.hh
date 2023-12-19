@@ -1,7 +1,7 @@
 #pragma once
 
 #define __PROJECT__ "DUMPER"
-#define __PLUGIN_VERSION__ "1.2.0"
+#define __PLUGIN_VERSION__ "1.3.0"
 
 #include <common/_.hh>
 #include <vector>
@@ -68,9 +68,6 @@ namespace dumper {
 		// The list of get power function of the gpu plugins
 		std::vector <common::plugin::GpuGetEnergy_t> _gpuGet;
 
-		// The list of get perf percentage usage function of the gpu plugins
-		std::vector <common::plugin::GpuGetDeviceUsage_t> _gpuPerfEvents;
-	
 		// The cache for power consumption reading on gpu
 		std::vector <std::vector <float> > _gpuEnergyCache;
 	

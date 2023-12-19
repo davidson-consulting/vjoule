@@ -21,11 +21,11 @@ int main (int argc, char ** argv) {
     signal(SIGKILL, &ctrlCHandler);
 
     try {
-	::sensor::Sensor s;
-	s.configure (argc, argv);
-	s.run ();
+        ::sensor::Sensor s;
+        s.configure (argc, argv);
+        s.run ();
     } catch (...) {
-	return -1;
+        return -1;
     }
     
     return 0;

@@ -42,30 +42,19 @@ namespace sensor {
     void Sensor::runAsync () {
 		LOG_DEBUG ("Starting sensor async");
 		this-> _th = concurrency::spawn (this, &Sensor::mainLoop);
-		this-> _ph = concurrency::spawn (this, &Sensor::pingNotification);
+		if (this-> _freq != 0) {
+			this-> _ph = concurrency::spawn (this, &Sensor::pingNotification);
+		}
     }
     
     void Sensor::run () {	
 		LOG_DEBUG ("Starting main loop");
-		this-> _ph = concurrency::spawn (this, &Sensor::pingNotification);
+		if (this-> _freq != 0) {
+			this-> _ph = concurrency::spawn (this, &Sensor::pingNotification);
+		}
 		this-> mainLoop (0);
     }
 
-    void Sensor::stop () {
-		this-> _isRunning = false;
-		if (this-> _th != 0) {
-	    
-			this-> _mt.lock ();
-			fseek (this-> _signalFD, 0, SEEK_SET);
-			int i = 1;
-			fwrite (&i, sizeof (int), 1, this-> _signalFD);
-			fflush (this-> _signalFD);
-			this-> _mt.unlock ();
-	    
-			concurrency::join (this-> _th);
-		}
-    }
-    
     void Sensor::forcedIteration () {
 		this-> _mt.lock ();
 		this-> _computeCore ();
@@ -136,24 +125,27 @@ namespace sensor {
     void Sensor::dispose () {
 		LOG_INFO ("Disposing service.");
 
-		if (this-> _ph != 0) {
-			this-> _isRunning = false;
-
+		this-> _isRunning = false;
+		if (this-> _signalFD != nullptr) {
 			this-> _mt.lock ();
 			fseek (this-> _signalFD, 0, SEEK_SET);
 			int i = 1;
 			fwrite (&i, sizeof (int), 1, this-> _signalFD);
 			fflush (this-> _signalFD);
 			this-> _mt.unlock ();
+		}
 
-			if (this-> _th != 0) {
-				concurrency::join (this-> _th);
-				this-> _th = 0;
-			}
-	    
+		if (this-> _th != 0) {
+			concurrency::join (this-> _th);
+			this-> _th = 0;
+		}
+
+		if (this-> _ph != 0) {
 			concurrency::join (this-> _ph);
 			this-> _ph = 0;
 		}
+
+		LOG_INFO ("Finish waiting.");
 
 		if (this-> _inotifFdW != 0) {
 			inotify_rm_watch (this-> _inotifFd, this-> _inotifFdW);
@@ -161,17 +153,26 @@ namespace sensor {
 			this-> _inotifFd = 0;
 			this-> _inotifFdW = 0;
 		}
-	
+
+		LOG_INFO ("Closed inotify.");
+
 		if (this-> _signalFD != nullptr) {
 			fclose (this-> _signalFD);
 			this-> _signalFD = nullptr;
 		}
 
+		LOG_INFO ("Closed signal file.");
+
 		this-> _factory.dispose ();
+		LOG_INFO ("Disposed plugins.");
+
 		this-> _core-> dispose ();
+		LOG_INFO ("Disposed core plugin.");
+
 		utils::Logger::clear ();
 	
 		pfm_terminate ();
+		LOG_INFO ("Terminated.");
     }    
     
     /**
@@ -206,9 +207,12 @@ namespace sensor {
     void Sensor::configure (const common::utils::config::dict & config) {	
 		auto sensorConfig = config.getOr <utils::config::dict> ("sensor", {});
 
-
-		this-> _freq = 1.0f / sensorConfig.getOr <float> ("freq", 1.0f);
-
+		auto fr = sensorConfig.getOr <float> ("freq", 1.0f);
+		if (fr == 0) {
+			this-> _freq = 0;
+		} else {
+			this-> _freq = 1.0f / fr;
+		}
 		auto newLogFile = sensorConfig.getOr <std::string> ("log-path", "");
 		if (utils::parent_directory (newLogFile) == "" || utils::parent_directory (newLogFile) == "/") {
 			LOG_ERROR ("Cannot put log file in root directory.");
@@ -237,7 +241,11 @@ namespace sensor {
 	
 		this-> configureSignal ();
 		this-> configureOptions ();
-	
+
+		if (this-> _freq == 0) {
+			LOG_INFO ("Sensor started in synchronus mode.");
+		}
+
 		for (auto it : config.keys ()) {
 			if (it != "sensor") {
 				auto dict = config.get<utils::config::dict> (it);
@@ -269,7 +277,12 @@ namespace sensor {
 		}
 
 		if (this-> _freqOpt-> count () > 0) {
-			this-> _freq = 1.0 / this-> _freqOpt-> as<float> ();
+			auto fr = this-> _freqOpt-> as<float> ();
+			if (fr == 0) {
+				this-> _freq = 0;
+			} else {
+				this-> _freq=  1.0 / fr;
+			}
 		}
     }   
 

@@ -106,11 +106,6 @@ namespace sensor {
 	void run () ;
 
 	/**
-	 * Stop the service
-	 */
-	void stop ();
-	
-	/**
 	 * Force the execution of an iteration
 	 */
 	void forcedIteration ();
