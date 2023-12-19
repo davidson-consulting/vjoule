@@ -35,6 +35,8 @@ namespace yocto {
       return false;
     }
 
+    this-> _psensor-> set_resolution (0.00001);
+
     LOG_INFO ("Yocto Watt PDU ", this-> _psensor-> get_friendlyName (), " configured.");
     LOG_INFO ("Power precision[", this-> _psensor-> get_friendlyName (), "] = ", this-> _psensor-> get_resolution (), this-> _psensor-> get_unit ());
 
@@ -43,7 +45,7 @@ namespace yocto {
 
   void YoctoReader::poll () {
     if (this-> _psensor-> isOnline ()) {
-      this-> _currentEnergy = this-> _psensor-> get_meter () * 3600;
+      this-> _currentEnergy = this-> _psensor-> get_meter () * 3600 ;
       this-> _psensor-> reset ();
     }
   }

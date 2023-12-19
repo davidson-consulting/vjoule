@@ -34,8 +34,7 @@ namespace vjoule {
 	
     }
 
-    consumption_stamp_t vjoule_api::get_machine_current_consumption () const {
-        this-> force_sig ();
+    consumption_stamp_t vjoule_api::get_machine_current_consumption_no_force () const {
         consumption_stamp_t t (std::chrono::system_clock::now (), 0, 0, 0);
         auto cpu = utils::join_path (VJOULE_DIR, "results/cpu");
         auto gpu = utils::join_path (VJOULE_DIR, "results/gpu");
@@ -47,14 +46,14 @@ namespace vjoule {
                 f >> t.cpu;
             }
         }
-	
+
         {
             std::ifstream f (gpu);
             if (f.is_open ()) {
                 f >> t.gpu;
             }
         }
-	
+
         {
             std::ifstream f (ram);
             if (f.is_open ()) {
@@ -70,6 +69,12 @@ namespace vjoule {
         }
 
         return t;
+    }
+
+
+    consumption_stamp_t vjoule_api::get_machine_current_consumption () const {
+        this-> force_sig ();
+        return this-> get_machine_current_consumption_no_force ();
     }
 
     void vjoule_api::force_sig () const {

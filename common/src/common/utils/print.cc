@@ -64,5 +64,26 @@ namespace common::utils {
 	return std::equal (word.begin (), word.end (), str.begin ());
     }
     
-    
+    std::string duration_format (float duration) {
+        std::stringstream out;
+        if (duration < 0) { out << "-"; duration = -duration; }
+        int weeks = (int) duration / (7 * 24 * 3600);
+        int days = (int) duration / (24 * 3600) % 7;
+        int hours = (int) duration / 3600 % 24;
+        int minutes = (int) duration / 60 % 60;
+        int seconds = (int) duration % 60;
+        int millis = (int) (duration * 1000) % 1000;
+        int micros = (int) (duration * 1000000) % 1000;
+
+        if (weeks > 0) out << weeks << "w";
+        if (days > 0) out << days << "d";
+        if (hours > 0) out << hours << "h";
+        if (minutes > 0) out << minutes << "m";
+        if (seconds > 0) out << seconds << "s";
+        if (millis > 0) out << millis << "ms";
+        if (micros > 0) out << micros << "µs";
+
+        return out.str ();
+    }
+
 }

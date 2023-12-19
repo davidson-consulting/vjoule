@@ -110,6 +110,11 @@ namespace vjoule {
         vjoule_api ();
 
         /**
+         * @returns: the consumption of the machine without forcing a new read from the service
+         */
+        consumption_stamp_t get_machine_current_consumption_no_force () const;
+
+        /**
          * @returns: the consumption of the machine
          */
         consumption_stamp_t get_machine_current_consumption () const;

@@ -22,6 +22,8 @@ namespace yocto {
     // The current energy value
     double _currentEnergy;
 
+      // double _last;
+
   public:
 
     /**
