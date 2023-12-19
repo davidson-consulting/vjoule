@@ -10,109 +10,126 @@
 
 namespace simple {
     class Simple {
-        private:
+    private:
 
-            // directory where results should be written
-            std::string _outputDir;
+        // directory where results should be written
+        std::string _outputDir;
 
-            // The current energy values
-            float _cpuEnergy;
-            float _ramEnergy;
-            float _gpuEnergy;
+        // The current energy values
+        float _pduEnergy;
+        float _cpuEnergy;
+        float _ramEnergy;
+        float _gpuEnergy;
 
-            FILE * _cpuRes;
-            FILE * _ramRes;
-            FILE * _gpuRes;
+        FILE * _cpuRes;
+        FILE * _ramRes;
+        FILE * _gpuRes;
+        FILE * _pduRes;
 
-        private :
+    private :
 
-            // The list of gpu plugins
-            std::vector <common::plugin::Plugin*> _gpuPlugins;
+        // The list of gpu plugins
+        std::vector <common::plugin::Plugin*> _gpuPlugins;
 
-            // The list of get power function of the gpu plugins
-            std::vector <common::plugin::GpuGetEnergy_t> _gpuGet;
+        // The list of get power function of the gpu plugins
+        std::vector <common::plugin::GpuGetEnergy_t> _gpuGet;
 
-            // The cache for power consumption reading on gpu
-            std::vector <std::vector <float> > _gpuEnergyCache;
+        // The cache for power consumption reading on gpu
+        std::vector <std::vector <float> > _gpuEnergyCache;
 
-        private :
+    private :
 
-            // The plugin for cpu consumption
-            common::plugin::Plugin* _cpuPlugin;
+        // The plugin for cpu consumption
+        common::plugin::Plugin* _cpuPlugin;
 
-            // The get power function of the cpu plugin
-            common::plugin::CpuGetEnergy_t _cpuGet = nullptr;
+        // The get power function of the cpu plugin
+        common::plugin::CpuGetEnergy_t _cpuGet = nullptr;
 
-        private:
+    private:
 
-            // The plugin for ram consumption
-            common::plugin::Plugin* _ramPlugin;
+        // The plugin for pdu consumption
+        common::plugin::Plugin * _pduPlugin;
 
-            // The get power function of the ram plugin
-            common::plugin::RamGetEnergy_t _ramGet = nullptr;
+        // The get power function of the pdu plugin
+        common::plugin::PduGetEnergy_t _pduGet = nullptr;
 
-        private :
+    private:
 
-            // The list of plugins used by the simple
-            // We use a set because we need to poll the plugins only one time, even if they are used for different metrics
-            std::set <common::plugin::PluginPollFunc_t> _pollFunctions;
+        // The plugin for ram consumption
+        common::plugin::Plugin* _ramPlugin;
 
-        public :
+        // The get power function of the ram plugin
+        common::plugin::RamGetEnergy_t _ramGet = nullptr;
 
-            /**
-             * Create an empty simple
-             */
-            Simple ();
+    private :
 
-            /**
-             * Configure the simple
-             * @params:
-             *    - cfg: the configuration of the simple
-             */
-            bool configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory);
+        // The list of plugins used by the simple
+        // We use a set because we need to poll the plugins only one time, even if they are used for different metrics
+        std::set <common::plugin::PluginPollFunc_t> _pollFunctions;
 
-            /**
-             * Poll the energy consumption of the different monitored components, the perf events and output
-             * results in the CSV result files
-             */
-            void compute ();
+    public :
 
-            /**
-             * Dispose the divider and all its handles
-             */
-            void dispose ();
+        /**
+         * Create an empty simple
+         */
+        Simple ();
 
-        private:
+        /**
+         * Configure the simple
+         * @params:
+         *    - cfg: the configuration of the simple
+         */
+        bool configure (const common::utils::config::dict & cfg, common::plugin::Factory & factory);
 
-            /**
-             * Configure the gpu plugins
-             */
-            bool configureGpuPlugins (common::plugin::Factory & factory);
+        /**
+         * Poll the energy consumption of the different monitored components, the perf events and output
+         * results in the CSV result files
+         */
+        void compute ();
 
-            /**
-             * Configure the cpu plugin
-             */
-            bool configureCpuPlugin (common::plugin::Factory & factory);
+        /**
+         * Dispose the divider and all its handles
+         */
+        void dispose ();
 
-            /**
-             * Configure the ram plugin
-             */
-            bool configureRamPlugin (common::plugin::Factory & factory);
+    private:
 
-        private:
+        /**
+         * Configure the gpu plugins
+         */
+        bool configureGpuPlugins (common::plugin::Factory & factory);
 
-            void computeCpuEnergy ();
+        /**
+         * Configure the cpu plugin
+         */
+        bool configureCpuPlugin (common::plugin::Factory & factory);
 
-            void computeRamEnergy ();
+        /**
+         * Configure the ram plugin
+         */
+        bool configureRamPlugin (common::plugin::Factory & factory);
 
-            void computeGpuEnergy ();
+        /**
+         * Configure the pdu plugin
+         */
+        bool configurePduPlugin (common::plugin::Factory & factory);
 
-            void writeConsumption ();
+    private:
 
-            /**
-             * Mount the result directory in tmpfs
-             */
-            void mountResultDir ();
+        void computeCpuEnergy ();
+
+        void computeRamEnergy ();
+
+        void computeGpuEnergy ();
+
+        void computePduEnergy ();
+
+        void writeConsumption ();
+
+        /**
+         * Mount the result directory in tmpfs
+         */
+        void mountResultDir ();
 
     };
 

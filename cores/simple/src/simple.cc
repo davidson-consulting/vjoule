@@ -23,6 +23,7 @@ namespace simple {
 
         utils::create_directory (this-> _outputDir, true);
 
+        if (!this-> configurePduPlugin (factory)) return false;
 		if (!this-> configureGpuPlugins (factory)) return false;
 		if (!this-> configureCpuPlugin (factory)) return false;
 		if (!this-> configureRamPlugin (factory)) return false;
@@ -63,6 +64,33 @@ namespace simple {
 		}
 
         this-> _gpuRes = fopen (utils::join_path (this-> _outputDir, "gpu").c_str (), "w");
+		return true;
+    }
+
+    bool Simple::configurePduPlugin (common::plugin::Factory & factory) {
+        auto pdus = factory.getPlugins ("pdu");
+        if (pdus.size () > 0) {
+            this-> _pduPlugin = pdus [0];
+            if (pdus.size () > 1) LOG_WARN ("Core 'simple' can manage only one PDU plugin.");
+            auto poll = this-> _pduPlugin-> getFunction <common::plugin::PluginPollFunc_t> ("poll");
+            if (poll == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'void poll ()' function");
+				return false;
+			}
+			this-> _pollFunctions.emplace (poll);
+
+			auto get = this-> _pduPlugin-> getFunction <common::plugin::PduGetEnergy_t> ("pdu_get_energy");
+			if (get == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'float pdu_get_energy ()' function");
+				return false;
+			}
+			this-> _pduGet = get;
+		} else {
+			this-> _pduPlugin = nullptr;
+			LOG_INFO ("No 'pdu' plugin in use");
+		}
+
+        this-> _pduRes = fopen (utils::join_path (this-> _outputDir, "pdu").c_str (), "w");
 		return true;
     }
 
@@ -129,6 +157,7 @@ namespace simple {
 		this-> computeCpuEnergy ();
 		this-> computeRamEnergy ();
 		this-> computeGpuEnergy ();
+        this-> computePduEnergy ();
 
 		this-> writeConsumption ();
     }
@@ -151,6 +180,12 @@ namespace simple {
 			fseek (this-> _ramRes, 0, SEEK_SET);
 			fprintf (this-> _ramRes, "%lf", this-> _ramEnergy);
 			fflush (this-> _ramRes);
+        }
+
+        if (this-> _pduRes != nullptr) {
+            fseek (this-> _pduRes, 0, SEEK_SET);
+            fprintf (this-> _pduRes, "%lf", this-> _pduEnergy);
+            fflush (this-> _pduRes);
         }
     }
 
@@ -176,6 +211,14 @@ namespace simple {
 		if (this-> _cpuGet != nullptr) {
 			float cpuEnergy = this-> _cpuGet ();
             this-> _cpuEnergy += cpuEnergy;
+        }
+    }
+
+    void Simple::computePduEnergy () {
+        if (this-> _pduGet != nullptr) {
+            float pduEnergy = this-> _pduGet ();
+            std::cout << this-> _pduEnergy << std::endl;
+            this-> _pduEnergy += pduEnergy;
         }
     }
 
@@ -208,6 +251,10 @@ namespace simple {
 
         if (this-> _ramRes != nullptr) {
             fclose (this-> _ramRes);
+        }
+
+        if (this-> _pduRes != nullptr) {
+            fclose (this-> _pduRes);
         }
 
         auto mntType = utils::get_mount_type (this-> _outputDir);

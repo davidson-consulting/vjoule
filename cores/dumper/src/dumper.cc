@@ -177,7 +177,7 @@ namespace dumper {
 		this-> computeCpuEnergy ();
 		this-> computeRamEnergy ();
 		this-> computeGpuEnergy ();
-		this-> pollCpuFrequencies ();
+		// this-> pollCpuFrequencies ();
 
 		this-> writeResults ();
     }
@@ -211,9 +211,9 @@ namespace dumper {
 
 		this-> _resultsEnergyOs = std::ofstream(utils::join_path (this-> _outputDir, "energy.csv"), std::ios::out);
 		this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU";
-		for (uint32_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
-			this-> _resultsEnergyOs << ";FREQ" << i;
-		}
+		// for (uint32_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
+		// 	this-> _resultsEnergyOs << ";FREQ" << i;
+		// }
 		this-> _resultsEnergyOs << std::endl;
     }
 
@@ -238,9 +238,9 @@ namespace dumper {
 		}
 
 		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
-		for (auto & it : this-> _cpuFreqs) {
-			this-> _resultsEnergyOs << ";" << it;
-		}
+		// for (auto & it : this-> _cpuFreqs) {
+		// 	this-> _resultsEnergyOs << ";" << it;
+		// }
 		this-> _resultsEnergyOs << std::endl;
     }
 
