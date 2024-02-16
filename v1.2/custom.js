@@ -14,7 +14,7 @@ $( document ).ready(function() {
     version_button.classList.add ("fa")
 
     var version_name = document.createElement ("span");
-    version_name.textContent = "v1.0";
+    version_name.textContent = "v1.2";
 
     version_button.appendChild (version_name);
     
@@ -31,6 +31,7 @@ $( document ).ready(function() {
             $('.version-popup').remove();
         } else {
             var popup = $('<div class="version-popup"></div>')
+            .append($('<div class="version" id="v1.3">v1.3</div>'))
 	        .append($('<div class="version" id="v1.2">v1.2</div>'))
 	    	.append($('<div class="version" id="v1.0">v1.0</div>'))
                 .append($('<div class="version" id="v0.2">v0.2</div>'));
