@@ -15,14 +15,13 @@ fn compute_pi (prec : u64)-> f64 {
 
 fn test_pi (api : &mut VJouleAPI, prec : u64)-> Result<ConsumptionDiff, VJouleError> {
     let m_beg = api.get_current_machine_consumption ()?;
-    
+
     let pi = compute_pi (prec);
 
-    // Same here
-    let m_end = api.get_current_machine_consumption_no_force ()?;
+    let m_end = api.get_current_machine_consumption ()?;
 
     let m_diff = m_end - m_beg;
-    
+
     println!("PI : {}", pi);
     println!("{}", m_diff);
 

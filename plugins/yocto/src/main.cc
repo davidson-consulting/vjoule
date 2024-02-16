@@ -34,11 +34,10 @@ extern "C" std::string help () {
   ss << "It can be used for the [pdu] component." << std::endl;
   ss << "This plugin takes only one element of configuration 'target'." << std::endl << std::endl;
   ss << "===" << std::endl;
-  ss << "[gpu]" << std::endl;
-  ss << "name = \"nvidia\"" << std::endl;
-  ss << "target = \"YWATTMK1-276146\"" << std::endl;
+  ss << "[pdu]" << std::endl;
+  ss << "name = \"yocto\"" << std::endl;
+  ss << "target = \"YWATTMK1-276146\" # optional, only use if there are multiple PDU connected to the same device" << std::endl;
   ss << "===" << std::endl << std::endl << std::endl;
-  ss << "This configuration is optional, if disabled, the first YoctoWatt device found will be used." << std::endl;
 
   return ss.str ();
 }

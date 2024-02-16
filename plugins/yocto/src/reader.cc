@@ -18,7 +18,11 @@ namespace yocto {
   }
 
   bool YoctoReader::configure (const common::utils::config::dict * config) {
-    std::string target = config-> getOr<std::string> ("target", "any");
+    std::string target = "any";
+    if (config != nullptr) {
+      target = config-> getOr<std::string> ("target", "any");
+    }
+
     std::string errmsg;
 
     if (YAPI::RegisterHub ("usb", errmsg) != YAPI::SUCCESS) {

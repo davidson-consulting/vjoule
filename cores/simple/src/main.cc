@@ -60,6 +60,9 @@ extern "C" std::string help () {
     ss << "# For example a integrated GPU, and an nvidia GPU card" << std::endl;
     ss << "[gpu:1] # configuration to enable GPU energy " << std::endl;
     ss << "name = \"rapl\" # rapl plugin form compatible intel of amd cpus" << std::endl;
+    ss << std::endl;
+    ss << "[pdu] #configuration to enable smart PDU reading" << std::endl;
+    ss << "name = \"yocto\" # the yocto plugin to read YoctoWatt PDU consumption" << std::endl;
     ss << "===" << std::endl << std::endl;
 
     return ss.str ();
