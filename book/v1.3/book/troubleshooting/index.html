@@ -1,0 +1,218 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Trouble-shooting - vJoule doc</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Documentation for vJoule.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+        <link rel="stylesheet" href="custom.css">
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/directories_layout.html"><strong>3.1.</strong> Config files and logs</a></li><li><a href="./user_guide/simple_core.html"><strong>3.2.</strong> The simple core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.3.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.4.</strong> Sensor plugins</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/top.html"><strong>4.2.</strong> vjoule top</a></li></ul></li><li><a href="./api/index.html"><strong>5.</strong> API</a></li><li><ul class="section"><li><a href="./api/c++.html"><strong>5.1.</strong> C++</a></li><li><a href="./api/rust.html"><strong>5.2.</strong> Rust</a></li><li><a href="./api/py.html"><strong>5.3.</strong> Python</a></li></ul></li><li><a href="./troubleshooting/index.html" class="active"><strong>6.</strong> Trouble-shooting</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars" title="Toggle sidebar"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush" title="Change theme"></i>
+                    </div>
+
+                    <h1 class="menu-title">vJoule doc</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./troubleshooting/index.html#trouble-shooting" id="trouble-shooting"><h1>Trouble-shooting</h1></a>
+<a class="header" href="./troubleshooting/index.html#a-vjoule-does-not-seem-to-start" id="a-vjoule-does-not-seem-to-start"><h2>A. vJoule does not seem to start...</h2></a>
+<p>The log file <code>/etc/vjoule/service.log</code> is very useful to determine the reason of the error.</p>
+<p>Here are some common errors with some explanations :</p>
+<ul>
+<li>
+<p><code>[Error][RAPL] RaplReader : failed to configure.</code></p>
+<p>Rapl is not available on your machine. For the moment this is the only sensor plugin that can read CPU consumption. You can still disable it if your not interested in the CPU consumption, but only on the consumption of nvidia GPU. cf. <a href="./user_guide/sensor_plugins.html">Sensor plugins</a></p>
+</li>
+</ul>
+<ul>
+<li>
+<p><code>[Error][NVIDIA] NVML is not available.</code></p>
+<p>If you don't have an nvidia graphic card, the explanation is easy the plugin won't work. You will have to deactivate it in the configuration file. cf. <a href="./user_guide/sensor_plugins.html">Sensor plugins</a>.</p>
+<p>However, if you have a nvidia GPU make sure you have installed the Nvidia management library and that it matches the version of the nvidia drivers (sometimes it does not because.. nvidia). A quick test can be to run the command <code>nvidia-smi</code>. <a href="https://developer.nvidia.com/nvidia-management-library-nvml">Nvidia NVML</a>.</p>
+</li>
+</ul>
+<a class="header" href="./troubleshooting/index.html#b-vjoule-is-running-but-i-dont-have-any-consumption-for-my-processes-" id="b-vjoule-is-running-but-i-dont-have-any-consumption-for-my-processes-"><h2>B. vJoule is running but I don't have any consumption for my processes ?</h2></a>
+<p>Here are some common tracks for explanation :</p>
+<ul>
+<li>
+<p>First you can check the result files of the whole system
+(<code>/etc/vjoule/results/cpu</code> for example). If they increment the
+sensor plugin and divider core are effectively running and
+working. Or run the command <code>vjoule top</code> to verify that vjoule is
+running and working properly.</p>
+</li>
+<li>
+<p>The service runs at a given speed specified in the configuration file
+by the <code>freq</code> parameter. This specifies the number of iteration of the
+service per seconds (default being 1). This is an important
+information, if your application took less that a second to be
+executed, maybe the service just didn't have enough time to see it. To
+make sure your application will be seen by the service here a simple
+procedure to follow.</p>
+<ol>
+<li>
+<p>Configure vJoule service to monitor your cgroups, and create them (cf. <a href="./getting_started/cgroups.html">Cgroups</a>).</p>
+</li>
+<li>
+<p>Watch the file <code>/etc/vjoule/results/cpu</code> using iowatch, or inotify and wait for a modification.
+Here you can check wether the directory corresponding to your cgroups are correctly created.</p>
+</li>
+<li>
+<p>Start your application and wait its end, or an event you have defined for your usecase.</p>
+</li>
+<li>
+<p>Watch the file <code>/etc/vjoule/results/cpu</code> using iowatch or inotify to make sure the service has finished its iteration.</p>
+</li>
+<li>
+<p>Read the result in the corresponding directory of your cgroups.</p>
+</li>
+<li>
+<p>Delete your cgroups, and remove them from the vjoule service configuration.</p>
+</li>
+</ol>
+<p>Step 2 to 5 can be repeated multiple times, if you want to run multiple execution using the same cgroups.</p>
+</li>
+<li>
+<p>If the cgroups you are watching appears and disappear during the execution (for example docker containers).
+Maybe the divider core plugin has simply deleted the result file when the cgroup disappeared. You can remove that behavior by modifying the flag <code>delete-res</code> in the configuration file of the service (cf. <a href="./user_guide/divider_core.html">Divider core</a>).</p>
+</li>
+</ul>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./api/py.html" class="mobile-nav-chapters previous" title="Previous chapter">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+
+            </div>
+
+            
+                <a href="./api/py.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:3001");
+        socket.onmessage = function (event) {
+            if (event.data === "reload") {
+                socket.close();
+                location.reload(true); // force reload from server (not from cache)
+            }
+        };
+
+        window.onbeforeunload = function() {
+            socket.close();
+        }
+    </script>
+
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS script -->
+        
+        <script type="text/javascript" src="custom.js"></script>
+        
+
+    </body>
+</html>
