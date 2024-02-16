@@ -1,5 +1,5 @@
 example: main.cc
-	g++ main.cc -lvjoule_api -o example
+	g++ main.cc -lvjoule_cpp -o example
 
 clean:
 	rm example

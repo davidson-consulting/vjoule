@@ -12,17 +12,13 @@ _vjoule() {
 
     GLOBAL_COMMANDS="\
 		exec\
-		profile\
 		top"
 
     GLOBAL_OPTIONS="\
 		-h --help -v --version"
 
     EXEC_OPTIONS="\
-		-h --help -v --version -nv --no-nvidia -nr --no-rapl --no-cpu --no-ram --no-gpu -o --output"
-
-    PROFILE_OPTIONS="\
-		-h --help -v --version"
+		-h --help -v --version -o --output"
 
     TOP_OPTIONS="\
 		-h --help -v --version"
@@ -33,9 +29,6 @@ _vjoule() {
 	exec)
 	    complete_options="$EXEC_OPTIONS"
 	    complete_words="*"
-	    ;;
-	profile)
-	    complete_options="$PROFILE_OPTIONS"
 	    ;;
 	top)
 	    complete_options="$TOP_OPTIONS"

@@ -22,20 +22,20 @@ namespace tools::vjoule {
     while (true) {
       auto len = read (fd, buffer, EVENT_BUF_LEN);
       if (len == 0) { // file descriptor was closed without notice ?
-	throw std::runtime_error ("waiting inotify");
+        throw std::runtime_error ("waiting inotify");
       }
 
       int i = 0;
       while (i < len) {
-	struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+        struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
 	
-	if (event-> len != 0 && event-> mask & IN_MODIFY && strcmp (event-> name, this-> _file.c_str()) == 0) {
-	  inotify_rm_watch (fd, wd);
-	  close (fd);
-	  return;
-	}
+        if (event-> len != 0 && event-> mask & IN_MODIFY && strcmp (event-> name, this-> _file.c_str()) == 0) {
+          inotify_rm_watch (fd, wd);
+          close (fd);
+          return;
+        }
 
-	i += EVENT_SIZE + event->len;
+        i += EVENT_SIZE + event->len;
       }
     }
   }

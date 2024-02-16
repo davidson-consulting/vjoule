@@ -34,15 +34,7 @@ namespace tools::vjoule {
      */    
 
     void Top::configure () {
-		auto check = concurrency::SubProcess ("systemctl", {"is-active","--quiet", "vjoule_service.service"}, ".");
-		check.start ();
-
-		exitSignal.connect (this, &Top::dispose);
-	
-		if (check.wait () != 0) {
-			std::cout << "vJoule service is not running." << std::endl;
-			throw TopError ();
-		}
+		this-> _start = this-> _api.get_machine_current_consumption_no_force ();
 
 		this-> _cfgPath = utils::join_path (VJOULE_DIR, "config.toml");
 		auto configPath = utils::get_absolute_path_if_exists (this-> _cfgPath);
@@ -58,7 +50,6 @@ namespace tools::vjoule {
 		this-> _freq = sensor.getOr <int> ("freq", 1);
 		this-> _summary = this-> createSummary ();
 
-		this-> createAndRegisterCgroup ();
 		if (this-> _cmd.output != "") {
 			this-> _output = fopen (this-> _cmd.output.c_str (), "w");
 			if (this-> _output == nullptr) {
@@ -66,7 +57,7 @@ namespace tools::vjoule {
 				throw TopError ();
 			}
 	    
-			fprintf (this-> _output, "%17s ; %55s ; %8s ; %8s ; %8s\n", "TIMESTAMP", "CGROUP", "CPU", "RAM", "GPU");
+			fprintf (this-> _output, "%17s ; %8s ; %8s ; %8s ; %8s\n", "TIMESTAMP", "PDU", "CPU", "RAM", "GPU");
 			fflush (this-> _output);
 		}
     }
@@ -90,21 +81,7 @@ namespace tools::vjoule {
 		}
     }
 
-    void Top::createAndRegisterCgroup () {
-		cgroup::Cgroup c ("vjoule.slice/top");
-		c.create ();
-	
-		if (!c.attach (getpid ())) {
-			std::cerr << "vJoule failed to create cgroup" << std::endl;
-			throw TopError ();
-		}
-    }
-
     void Top::dispose () {
-		cgroup::Cgroup c ("vjoule.slice/top");
-		c.detachAll ();
-		c.remove ();
-
 		if (this-> _output != nullptr) {
 			fclose (this-> _output);
 		}
@@ -139,66 +116,25 @@ namespace tools::vjoule {
     void Top::fetch () {
 		auto t = this-> _timer.time_since_start ();
 		this-> _timer.reset ();
-	
-		std::map <std::string, Result> res;
-		this-> readCgroupTree (res, utils::join_path (VJOULE_DIR, "results"), t);
-
-		this-> _results = std::move (res);
+		this-> readConsumption (t);
     }
 
-    void Top::readCgroupTree (std::map <std::string, Result> & res, const std::string & currentPath, float time) {
-		if (utils::file_exists (utils::join_path (currentPath, "cpu"))) {
-			this-> readCgroupConsumption (res, currentPath, time);
-		}
+    void Top::readConsumption (float time) {
+		auto f = this-> _api.get_machine_current_consumption_no_force ();
+		auto diff = f - this-> _start;
 
-		for (const auto & entry : utils::directory_iterator (currentPath)) {
-			if (utils::directory_exists (entry)) {
-				this-> readCgroupTree (res, entry, time);
-			}
-		}
-    }
-
-    void Top::readCgroupConsumption (std::map <std::string, Result> & res, const std::string & cgroupPath, float time) {
-		auto cpu = this-> readConsumption (cgroupPath, "cpu");
-		auto ram = this-> readConsumption (cgroupPath, "ram");
-		auto gpu = this-> readConsumption (cgroupPath, "gpu");
-		auto cgroupName = cgroupPath.substr (utils::join_path (VJOULE_DIR, "results").length ());
-	
-		if (cgroupName == "") {
-			this-> _glob.cpuP = 100;
-			this-> _glob.ramP = 100;
-			this-> _glob.gpuP = 100;
-
-			if (this-> _glob.cpuJ != 0) {
-				this-> _glob.cpuW = (cpu - this-> _glob.cpuJ) / time;
-				this-> _glob.ramW = (ram - this-> _glob.ramJ) / time;
-				this-> _glob.gpuW = (gpu - this-> _glob.gpuJ) / time;
-			}
+		this-> _glob.cpuW = diff.cpu / time;
+		this-> _glob.ramW = diff.ram / time;
+		this-> _glob.gpuW = diff.gpu / time;
+		this-> _glob.pduW = f.pdu_watts;
 	    
-			this-> _glob.cpuJ = cpu;
-			this-> _glob.ramJ = ram;
-			this-> _glob.gpuJ = gpu;
+		this-> _glob.cpuJ = f.cpu;
+		this-> _glob.ramJ = f.ram;
+		this-> _glob.gpuJ = f.gpu;
+		this-> _glob.pduJ = f.pdu;
 
-			res.emplace ("#SYSTEM", this-> _glob);
-			this-> insertHistory ();
-		} else {
-			auto it = this-> _results.find (cgroupName);
-			Result r {
-			.cpuJ = cpu, .ramJ = ram, .gpuJ = gpu,
-			.cpuW = 0, .ramW = 0, .gpuW = 0,
-			.cpuP = cpu / max (1, this-> _glob.cpuJ) * 100,
-			.ramP = ram / max (1, this-> _glob.ramJ) * 100,
-			.gpuP = gpu / max (1, this-> _glob.gpuJ) * 100
-	    };
-	    
-			if (it != this-> _results.end ()) {
-				r.cpuW = (cpu - it-> second.cpuJ) / time;
-				r.ramW = (ram - it-> second.ramJ) / time;
-				r.gpuW = (gpu - it-> second.gpuJ) / time;
-			}
-
-			res.emplace (cgroupName, r);
-		}
+		this-> insertHistory ();
+		this-> _start = f;
     }
 
     double Top::readConsumption (const std::string & path, const std::string & type) const {
@@ -217,6 +153,7 @@ namespace tools::vjoule {
 		this-> _cpuHist.push_back (this-> _glob.cpuW);
 		this-> _ramHist.push_back (this-> _glob.ramW);
 		this-> _gpuHist.push_back (this-> _glob.gpuW);
+		this-> _pduHist.push_back (this-> _glob.pduW);
     }
     
     void Top::waitServiceIteration () const {
@@ -307,31 +244,12 @@ namespace tools::vjoule {
 		return window(text(L" Summary "), content);
     }
 
-
-    std::vector <std::pair <std::string, Result> > Top::sortByCpu () const {
-		std::vector <std::pair <std::string, Result> > res;
-		for (auto & it : this-> _results) {
-			res.push_back (it);
-		}
-
-		sort (res.begin (), res.end (), [](const std::pair <std::string, Result> & r1,
-										   const std::pair <std::string, Result> & r2) {
-			return r1.second.cpuP > r2.second.cpuP;
-		});
-
-		return res;
-    }
-    
     void Top::exportCsv () {
 		static int i = 0;
 		struct timeval start;
 		gettimeofday(&start, NULL);
-		auto r = this-> sortByCpu ();
-		for (auto & it : r) {
-			fprintf (this-> _output, "%ld.%ld ; %55s ; %8.2lf ; %8.2lf ; %8.2lf\n", start.tv_sec, start.tv_usec, it.first.c_str (), it.second.cpuJ, it.second.ramJ, it.second.gpuJ);
-		}
+		fprintf (this-> _output, "%ld.%ld ; %8.2lf ; %8.2lf ; %8.2lf ; %8.2lf\n", start.tv_sec, start.tv_usec, this-> _glob.pduJ, this-> _glob.cpuJ, this-> _glob.ramJ, this-> _glob.gpuJ);
 		fflush (this-> _output);
-
 	
 		std::cout << ".";
 		std::cout.flush ();
@@ -344,38 +262,67 @@ namespace tools::vjoule {
 
     Element Top::createTable () const {
 		std::vector <std::vector <std::string> > rows;
-		std::vector <std::string> head {"Cgroup", "CPU", "RAM", "GPU"};
+		std::vector <std::string> head {"PDU", "CPU", "RAM", "GPU"};
 		rows.push_back (head);
 
-		auto r = this-> sortByCpu ();
-		for (auto & it : r) {
-			char buf [255];
-			snprintf (buf, 255, "%.2lfW / %.2lfJ (%.1lf%c)", it.second.cpuW, it.second.cpuJ, it.second.cpuP, '%');
-			std::string cpu (buf);
-
-			snprintf (buf, 255, "%.2lfW / %.2lfJ (%.1lf%c)", it.second.ramW, it.second.ramJ, it.second.ramP, '%');
-			std::string ram (buf);
-
-			snprintf (buf, 255, "%.2lfW / %.2lfJ (%.1lf%c)", it.second.gpuW, it.second.gpuJ, it.second.gpuP, '%');
-			std::string gpu (buf);
-
-	    
-			std::vector <std::string> row {it.first, cpu, ram, gpu};
-			rows.push_back (row);
+		char buf [255];
+		if (this-> _glob.cpuJ >= 10000) {
+			snprintf (buf, 255, "%.2lf W / %.2lf kJ", this-> _glob.cpuW, this-> _glob.cpuJ / 1000);
+		} else {
+			snprintf (buf, 255, "%.2lf W / %.2lf J", this-> _glob.cpuW, this-> _glob.cpuJ);
 		}
-	
+
+		std::string cpu (buf);
+
+		if (this-> _glob.ramJ >= 10000) {
+			snprintf (buf, 255, "%.2lf W / %.2lf kJ", this-> _glob.ramW, this-> _glob.ramJ / 1000);
+		} else {
+			snprintf (buf, 255, "%.2lf W / %.2lf J", this-> _glob.ramW, this-> _glob.ramJ);
+		}
+		std::string ram (buf);
+
+		if (this-> _glob.pduJ > 10000) {
+			snprintf (buf, 255, "%.2lf W / %.2lf kJ", this-> _glob.pduW, this-> _glob.pduJ / 1000);
+		} else {
+			snprintf (buf, 255, "%.2lf W / %.2lf J", this-> _glob.pduW, this-> _glob.pduJ);
+		}
+		std::string pdu (buf);
+
+		if (this-> _glob.gpuJ > 10000) {
+			snprintf (buf, 255, "%.2lf W / %.2lf kJ", this-> _glob.gpuW, this-> _glob.gpuJ / 1000);
+		} else {
+			snprintf (buf, 255, "%.2lf W / %.2lf J", this-> _glob.gpuW, this-> _glob.gpuJ);
+		}
+		std::string gpu (buf);
+
+		std::vector <std::string> row {pdu, cpu, ram, gpu};
+		rows.push_back (row);
+
 		auto tab = Table (rows);
 		tab.SelectAll ().Border (LIGHT);
-		tab.SelectColumn (0).DecorateCells (flex);
-		tab.SelectColumns (1, 3).DecorateCells (size (WIDTH, GREATER_THAN, 40));
+		tab.SelectColumns (0, 3).DecorateCells (size (WIDTH, GREATER_THAN, 40));
 		tab.SelectRow (0).Border (DOUBLE);
 		tab.SelectRow (0).Separator (LIGHT);
-		tab.SelectRectangle (0, 0, 1, 1).DecorateCells (bold);
+
 
 		return std::move (tab).Render ();
     }
 
     Element Top::createGraph () {
+		auto pduGraph = graph ([&](int w,int h) {
+			std::vector <int> o (w);
+			if (this-> _pduHist.size () > w) {
+				auto i = this-> _pduHist.size () - w;
+				this-> _pduHist = std::vector <double> (this-> _pduHist.begin () + i, this-> _pduHist.end ());
+			}
+
+			auto scale = (double) h / this-> findMax (this-> _pduHist);
+			for (int i = 0; i < this-> _pduHist.size () ; i++) {
+				o[i] = this-> _pduHist[i] * scale;
+			}
+			return o;
+		}) | color (Color::GreenLight);
+
 		auto cpuGraph = graph ([&](int w,int h) {
 			std::vector <int> o (w);
 			if (this-> _cpuHist.size () > w) {
@@ -412,7 +359,7 @@ namespace tools::vjoule {
 				auto i = this-> _gpuHist.size () - w;
 				this-> _gpuHist = std::vector <double> (this-> _gpuHist.begin () + i, this-> _gpuHist.end ());
 			}
-	    
+
 			auto scale = (double) h / this-> findMax (this-> _gpuHist);
 			for (int i = 0; i < this-> _gpuHist.size () ; i++) {
 				o[i] = this-> _gpuHist[i] * scale;
@@ -420,16 +367,18 @@ namespace tools::vjoule {
 			return o;
 		}) | color (Color::YellowLight);
 
-	
+
+		pduGraph = vbox({text (std::to_string (this-> findMax (this-> _pduHist))), pduGraph});
 		cpuGraph = vbox({text (std::to_string (this-> findMax (this-> _cpuHist))), cpuGraph});
 		gpuGraph = vbox({text (std::to_string (this-> findMax (this-> _gpuHist))), gpuGraph});
 		ramGraph = vbox({text (std::to_string (this-> findMax (this-> _ramHist))), ramGraph});
 
 		return vbox ({
-			window (text (" CPU "), cpuGraph | flex) | flex,
-			window (text (" RAM "), ramGraph | flex) | flex,
-			window (text (" GPU "), gpuGraph | flex) | flex
-		}) | flex;
+				window (text (" PDU "), pduGraph | flex) | flex,
+				window (text (" CPU "), cpuGraph | flex) | flex,
+				window (text (" RAM "), ramGraph | flex) | flex,
+				window (text (" GPU "), gpuGraph | flex) | flex
+			}) | flex;
     }
 
 

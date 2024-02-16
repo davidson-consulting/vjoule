@@ -5,7 +5,7 @@
 
 #define VJOULE_DIR "/etc/vjoule/"
 
-namespace common::utils {
+namespace common::utils::api {
 		
     /**
      * @return: true if the file at path `name` exists, false otherwise
@@ -17,7 +17,6 @@ namespace common::utils {
      */
     std::string join_path(const std::string& begin, const std::string& end);
 
-    
     /**
      * @returns: the parent directory of the path
      */
@@ -28,20 +27,4 @@ namespace common::utils {
      */
     bool is_parent_directory (const std::string & parent, const std::string & path);
 
-    /**
-     * @returns: the type of mount of a given path
-     */
-    std::string get_mount_type (const std::string & path);
-
-    /**
-     * @returns: the list of path that are mounted with type type
-     */
-    std::vector <std::string> get_mount_loc (const std::string & type);
-
-    /**
-     * @returns: the mount point of cgroup dir
-     */
-    std::string get_cgroup_mount_point (bool &isV2);
-    
 }
-

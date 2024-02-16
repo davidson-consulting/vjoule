@@ -19,6 +19,7 @@ namespace dumper {
 		if (!this-> configureGpuPlugins (factory)) return false;
 		if (!this-> configureCpuPlugin (factory)) return false;
 		if (!this-> configureRamPlugin (factory)) return false;
+		if (!this-> configurePduPlugin (factory)) return false;
 
 		bool v2 = false;
 		this-> _cgroupRoot = utils::get_cgroup_mount_point (v2);
@@ -77,14 +78,8 @@ namespace dumper {
 				LOG_ERROR ("Invalid 'gpu' plugin '", it-> getName (), "' has no 'void gpu_get_energy (float * energyDevices)' function");
 				return false;
 			}
-			this-> _gpuGet.push_back (get);
 
-			auto perf_event = it-> getFunction<common::plugin::GpuGetDeviceUsage_t> ("gpu_cgroup_usage");
-			if (perf_event == nullptr) {
-				LOG_ERROR ("Invalid 'gpu' plugin '", it-> getName (), "' has no 'float gpu_cgroup_usage (uint32_t device, const char* cgroupName)' function");
-				return false;
-			}
-			this-> _gpuPerfEvents.push_back (perf_event);
+			this-> _gpuGet.push_back (get);
 		}
 
 		if (this-> _gpuPlugins.size () == 0) {
@@ -94,6 +89,32 @@ namespace dumper {
 	
 		return true;
     }
+
+	bool Dumper::configurePduPlugin (common::plugin::Factory & factory) {
+		auto pdus = factory.getPlugins ("pdu");
+		if (pdus.size () > 0) {
+			this-> _pduPlugin = pdus[0];
+			if (pdus.size () > 1) LOG_WARN ("Core 'dumper' can manage only one PDU plugin.");
+			auto poll = this-> _pduPlugin-> getFunction<common::plugin::PluginPollFunc_t> ("poll");
+			if (poll == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'void poll ()' function");
+				return false;
+			}
+			this-> _pollFunctions.emplace (poll);
+
+			auto get = this-> _pduPlugin-> getFunction <common::plugin::PduGetEnergy_t> ("pdu_get_energy");
+			if (get == nullptr) {
+				LOG_ERROR ("Invalid 'pdu' plugin '", this-> _pduPlugin-> getName (), "' has no 'float pdu_get_energy ()' function");
+				return false;
+			}
+			this-> _pduGet = get;
+		} else {
+			this-> _pduPlugin = nullptr;
+			LOG_INFO ("No 'pdu' plugin in use");
+		}
+
+		return true;
+	}
 
     bool Dumper::configureCpuPlugin (common::plugin::Factory & factory) {
 		auto cpus = factory.getPlugins ("cpu");
@@ -117,7 +138,7 @@ namespace dumper {
 			this-> _cpuPlugin = nullptr;
 			LOG_INFO ("No 'cpu' plugin in use");
 		}
-	
+
 		return true;
     }
 
@@ -172,11 +193,13 @@ namespace dumper {
 		}
 	
 		this-> pollPerfEvents ();
+		this-> pollMemoryUsages ();
 	
 		this-> computeCpuEnergy ();
 		this-> computeRamEnergy ();
 		this-> computeGpuEnergy ();
-		this-> pollCpuFrequencies ();
+		this-> computePduEnergy ();
+		// this-> pollCpuFrequencies ();
 
 		this-> writeResults ();
     }
@@ -206,13 +229,13 @@ namespace dumper {
 		for (auto perfEvent: this-> _perfEvents) {
 			this-> _resultsPerfOs << ";" << perfEvent;
 		}
-		this-> _resultsPerfOs << std::endl;
+		this-> _resultsPerfOs << ";MEMORY_ANON;MEMORY_FILE" << std::endl;
 
 		this-> _resultsEnergyOs = std::ofstream(utils::join_path (this-> _outputDir, "energy.csv"), std::ios::out);
-		this-> _resultsEnergyOs << "TIMESTAMP;CPU;RAM;GPU";
-		for (uint32_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
-			this-> _resultsEnergyOs << ";FREQ" << i;
-		}
+		this-> _resultsEnergyOs << "TIMESTAMP;PDU;CPU;RAM;GPU";
+		// for (uint32_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
+		// 	this-> _resultsEnergyOs << ";FREQ" << i;
+		// }
 		this-> _resultsEnergyOs << std::endl;
     }
 
@@ -232,13 +255,14 @@ namespace dumper {
 			for(auto perfValue: this-> _perfEventValues[i]) {
 				this-> _resultsPerfOs << ";" << perfValue;
 			}
-			this-> _resultsPerfOs << std::endl;
+			this-> _resultsPerfOs << ";" << this-> _memoryUsageAnonValues [i];
+			this-> _resultsPerfOs << ";" << this-> _memoryUsageFileValues [i] << std::endl;
 		}
 
-		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
-		for (auto & it : this-> _cpuFreqs) {
-			this-> _resultsEnergyOs << ";" << it;
-		}
+		this-> _resultsEnergyOs << start.tv_sec << "." << start.tv_usec << ";" << this-> _pduEnergy << ";" << this-> _cpuEnergy << ";" << this-> _ramEnergy << ";" << this-> _gpuEnergy;
+		// for (auto & it : this-> _cpuFreqs) {
+		// 	this-> _resultsEnergyOs << ";" << it;
+		// }
 		this-> _resultsEnergyOs << std::endl;
     }
 
@@ -248,6 +272,24 @@ namespace dumper {
 			this-> _cgroupWatchers[i].poll (this-> _perfEventValues[i]);
 		}
     }
+
+	void Dumper::pollMemoryUsages () {
+		for (uint64_t i = 0 ; i < this-> _cgroupList.size () ; i++) {
+			std::ifstream f (this-> _memoryUsageFiles [i]);
+			std::string type;
+			uint64_t value, j = 0;
+			while (f >> type >> value) {
+				if (j == 0) this-> _memoryUsageAnonValues [i] = value;
+				else {
+					this-> _memoryUsageFileValues [i] = value;
+					break;
+				}
+				j += 1;
+			}
+
+			f.close ();
+		}
+	}
 
 	void Dumper::pollCpuFrequencies () {
 		for (uint64_t i = 0 ; i < this-> _cpuFreqFds.size () ; i++) {
@@ -279,12 +321,21 @@ namespace dumper {
 			this-> _cpuEnergy += this-> _cpuGet ();
 		}
     }
-  
+
+	void Dumper::computePduEnergy () {
+		if (this-> _pduGet != nullptr) {
+			this-> _pduEnergy += this-> _pduGet ();
+		}
+	}
+
     void Dumper::configureCgroups () {
 		std::vector <common::cgroup::Cgroup> rest;
 		std::vector <perf::PerfEventWatcher> watchers;
 		std::vector <std::vector <uint64_t> > cache;
 		bool empty = false;
+
+		bool v2 = false;
+		std::string cgroupRoot = utils::get_cgroup_mount_point (v2);
 
 		auto rules = this-> readCgroupRules ();
 		cgroup::CgroupLister lister (rules);
@@ -318,6 +369,13 @@ namespace dumper {
 			this-> _cgroupWatchers.push_back (std::move (pw));
 			this-> _perfEventValues.push_back({});
 			this-> _perfEventValues.back ().resize (this-> _perfEvents.size ());
+			this-> _memoryUsageAnonValues.push_back (0);
+			this-> _memoryUsageFileValues.push_back (0);
+			if (it.getName () == "") {
+				this-> _memoryUsageFiles.push_back (cgroupRoot + "/memory.stat");
+			} else {
+				this-> _memoryUsageFiles.push_back (it.getName () + "/memory.stat");
+			}
 			this-> _cgroupList.push_back (it);
 		}
 
