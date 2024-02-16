@@ -17,5 +17,5 @@ name = "rapl"
 [gpu:0]
 name = "rapl"
 
-[pdu]
-name = "yocto"
+# [pdu]
+# name = "yocto"
