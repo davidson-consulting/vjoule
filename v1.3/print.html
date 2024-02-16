@@ -1,0 +1,704 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>vJoule doc</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Documentation for vJoule.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+        <link rel="stylesheet" href="custom.css">
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./home/index.html"><strong>1.</strong> Home</a></li><li><a href="./getting_started/index.html"><strong>2.</strong> Getting started</a></li><li><ul class="section"><li><a href="./getting_started/what_is_vjoule.html"><strong>2.1.</strong> What is vJoule?</a></li><li><a href="./getting_started/installation.html"><strong>2.2.</strong> Installation</a></li><li><a href="./getting_started/first_tests.html"><strong>2.3.</strong> First tests</a></li></ul></li><li><a href="./user_guide/index.html"><strong>3.</strong> User Guide</a></li><li><ul class="section"><li><a href="./user_guide/directories_layout.html"><strong>3.1.</strong> Config files and logs</a></li><li><a href="./user_guide/simple_core.html"><strong>3.2.</strong> The simple core</a></li><li><a href="./user_guide/dumping_core.html"><strong>3.3.</strong> The dumper core</a></li><li><a href="./user_guide/sensor_plugins.html"><strong>3.4.</strong> Sensor plugins</a></li></ul></li><li><a href="./cli/index.html"><strong>4.</strong> vjoule CLI</a></li><li><ul class="section"><li><a href="./cli/exec.html"><strong>4.1.</strong> vjoule exec</a></li><li><a href="./cli/top.html"><strong>4.2.</strong> vjoule top</a></li></ul></li><li><a href="./api/index.html"><strong>5.</strong> API</a></li><li><ul class="section"><li><a href="./api/c++.html"><strong>5.1.</strong> C++</a></li><li><a href="./api/rust.html"><strong>5.2.</strong> Rust</a></li><li><a href="./api/py.html"><strong>5.3.</strong> Python</a></li></ul></li><li><a href="./troubleshooting/index.html"><strong>6.</strong> Trouble-shooting</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars" title="Toggle sidebar"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush" title="Change theme"></i>
+                    </div>
+
+                    <h1 class="menu-title">vJoule doc</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="print.html#welcome-to-vjoules-documentation" id="welcome-to-vjoules-documentation"><h1>Welcome to vJoule's documentation</h1></a>
+<p>The environmental costs of the software and infrastructure they build and deploy
+are increasingly important to developers today. However, the collection of
+energy consumption data from machines can be time consuming and is generally
+hardware dependent.</p>
+<style>
+.custom-image { 
+  width: 400px;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
+}
+</style>
+<p><img src="images/computer.svg" class="custom-image"></p>
+<p>vJoule is a tool that interfaces multiple sources of energy consumption and
+centralizes all energy readings in one place to provide a higher abstraction for
+developers and to help measure energy consumption. This document will give you
+all the information you need to have a successful start with vJoule.</p>
+<p>vJoule is a tool developed at Davidson Consulting and inspired by other tools
+like PowerAPI.</p>
+<p><img src="images/vjoule_concept.svg" class="custom-image"></p>
+<a class="header" href="print.html#getting-started" id="getting-started"><h1>Getting started</h1></a>
+<p>This section will help you get started with vJoule.</p>
+<p>You'll learn how vJoules works, how to install it and how to test it.</p>
+<a class="header" href="print.html#what-is-vjoule" id="what-is-vjoule"><h2>What is vJoule?</h2></a>
+<p>vJoule is a tool that can be used to retreive the energy consumption of a linux
+operated device. Technically, vJoule is built on a plugin system with two
+different kind of plugins :</p>
+<ul>
+<li><code>core</code>, this kind of plugin will define the behavior of vJoule and perform the information gathering from sensor plugins and the effective result computation. In this vJoule version two core plugins are implemented :
+<ul>
+<li><code>simple</code> retreives the consumption acquired by sensor plugins and store them in files to be read by external programs. (%CPU, %GPU, etc.).</li>
+<li><code>dumper</code> retreives the consumption acquired by sensor plugins, and system usage of running processes and dump those metrics in csv files for cold analysis.</li>
+</ul>
+</li>
+<li><code>sensor</code>, this kind of plugin are used to retreive system information usefull for the core plugin. There are different kind of sensor plugin, in this vJoule version three plugin types are implemented :
+<ul>
+<li><code>cpu</code> plugin that retreives the energy consumption of the CPU of the system, (<code>rapl</code>)</li>
+<li><code>ram</code> plugin that retreives the energy consumption of the RAM of the system  (<code>rapl</code>)</li>
+<li><code>gpu</code> plugin that retreives the energy consumption of the GPUs of the system  (<code>rapl</code>, <code>nvidia</code>)</li>
+<li><code>pdu</code> plugin that retreives the energy consumption from a Smart PDU (<code>yocto</code>)</li>
+</ul>
+</li>
+</ul>
+<p>To monitor your consumption of your machine the <code>simple</code> core plugin will come
+in handy. This documentation will mainly focus on this core plugin.</p>
+<p>There are currently have two ways to interact with vJoule :</p>
+<ul>
+<li>As a <strong>command line interface</strong> : useful for easy and quick usage</li>
+<li>As set of APIs in different languages, useful if you want to interact with
+vJoule in a program, and monitor more complex applications.</li>
+</ul>
+<a class="header" href="print.html#installation" id="installation"><h2>Installation</h2></a>
+<a class="header" href="print.html#from-deb-package-recommended" id="from-deb-package-recommended"><h3>From deb package (recommended)</h3></a>
+<p>vJoule can be installed from deb files found in the Github
+releases. The <code>vjoule-tools_&lt;VERSION&gt;.deb</code> package will install a
+systemd service: <code>vjoule_service</code> and a client program simply named
+<code>vjoule</code>.</p>
+<p>You can install the <code>.deb</code> file (once downloaded) by running <code>dpkg -i vjoule-tools_&lt;VERSION&gt;.deb</code>.</p>
+<a class="header" href="print.html#from-sources" id="from-sources"><h3>From sources</h3></a>
+<p>vJoules uses CMake as a build tool.</p>
+<p>You will need to have installed cmake, g++, git and nvidia-ml.</p>
+<pre><code class="language-bash">git clone https://github.com/davidson-consulting/vjoule.git
+
+cd vjoule
+mkdir .build
+cd .build 
+cmake ..
+make -j8
+
+sudo make install
+</code></pre>
+<a class="header" href="print.html#first-tests" id="first-tests"><h1>First tests</h1></a>
+<p>Now that vJoule is installed on your computer, let's try it. Remember that vJoule is available through two interfaces:</p>
+<ul>
+<li>A <strong>command line interface</strong>, useful for simple and quick usage</li>
+<li>A linux <strong>service</strong>, useful if you need to embed vJoule in a program</li>
+</ul>
+<p>This section presents just a basic test to make sure vjoule is
+properly installed. A more thorough tutorial is presented in the
+section <a href="./user_guide/simple_core.html">Simple core</a>.</p>
+<a class="header" href="print.html#vjoule-through-the-service" id="vjoule-through-the-service"><h2>vJoule, through the service</h2></a>
+<p>vJoule is available through a linux systemd service.</p>
+<pre><code class="language-bash">$ sudo systemctl start vjoule_service
+</code></pre>
+<p>You can verify that the service is up either by checking with <code>systemctl</code>:</p>
+<pre><code class="language-bash">$ sudo systemctl status vjoule_service
+</code></pre>
+<p>Or by checking for the log file :</p>
+<pre><code class="language-bash">$ cat /etc/vjoule/service.log
+</code></pre>
+<p>The default configuration of vJoule only retreive RAPL information. See section
+<a href="./user_guide/simple_core.html">Simple core</a>, for more configuration options.</p>
+<a class="header" href="print.html#vjoule-through-the-command-line-interface-cli" id="vjoule-through-the-command-line-interface-cli"><h2>vJoule, through the command line interface (CLI)</h2></a>
+<p>vJoule CLI is conveniently called <code>vjoule</code>. You can use it to estimate the energy consumption of a given command, like this:</p>
+<pre><code class="language-bash">$ # Here, ls is not a subcommand of vjoule
+$ # We mesure the energy consummed by the ls command execution
+$ vjoule ls
+
+time	21ms856µs
+PDU	0.00 J
+CPU	0.17 J
+RAM	0.03 J
+GPU	0.02 J
+</code></pre>
+<p>You can also use vjoule on a command that needs parameters. In this case, we will estimate the energy consumption of the <code>stress</code> command.</p>
+<pre><code class="language-bash">$ vjoule stress --cpu 2 --timeout 2s
+stress: info: [169371] dispatching hogs: 2 cpu, 0 io, 0 vm, 0 hdd
+stress: info: [169371] successful run completed in 2s
+
+
+time	2s53ms193µs
+PDU	79.20 J
+CPU	40.61 J
+RAM	0.00 J
+GPU	0.00 J
+</code></pre>
+<p>Of course, you can use vjoule to run, say, a Python script.</p>
+<pre><code class="language-bash">$ vjoule python myscript.py
+
+time	1s670ms197µs
+PDU	70.40 J
+CPU	35.71 J
+RAM	2.25 J
+GPU	1.78 J
+</code></pre>
+<a class="header" href="print.html#user-guide" id="user-guide"><h1>User Guide</h1></a>
+<p>In this section, you will learn more about the concepts and technical details about vJoule. In particular :</p>
+<ul>
+<li>vJoule uses cgroup to know which process to monitor. But what are cgroups ?</li>
+<li>Where are the main configuration files of vJoule? Where to find the different energy consumption estimations ?</li>
+<li>How can I fetch results from within a program ?</li>
+</ul>
+<a class="header" href="print.html#files-of-interest" id="files-of-interest"><h1>Files of interest</h1></a>
+<p>Once vJoule is installed, you should find a directory located in
+<code>/etc/vjoule</code> that contains configurations, logs and results. For
+example, the service configuration is located in
+<code>/etc/vjoule/config.toml</code>.</p>
+<a class="header" href="print.html#configuration-files-and-logs" id="configuration-files-and-logs"><h2>Configuration files and logs</h2></a>
+<ul>
+<li><code>/etc/vjoule/config.toml</code>: the configuration file of the <code>vjoule_service</code>. It
+can be modified to change the log level and some other options that depends on
+the core plugin used.</li>
+<li><code>/etc/vjoule/service.log</code>: the log file of the <code>vjoule_service</code>,</li>
+</ul>
+<a class="header" href="print.html#the-simple-core" id="the-simple-core"><h1>The simple core</h1></a>
+<p>The <code>simple</code> core is the core plugin used by default by the vJoule service. It
+read the consumptions retreived using the sensors, and dump the results into
+files. It can monitor four different kind of sensor plugins <code>cpu</code>, <code>gpu</code>, <code>ram</code>
+and <code>pdu</code>.</p>
+<a class="header" href="print.html#result-files" id="result-files"><h2>Result files</h2></a>
+<p>A result directory is created, in which five files <code>cpu</code>, <code>ram</code>, <code>gpu</code>,
+<code>pdu_energy</code> and <code>pdu_power</code> can be found in the result directory (by default
+<code>/etc/vjoule/results/</code>):</p>
+<ul>
+<li><code>cpu</code>: the consumption of energy of the CPU(s) in joules since the start of the service</li>
+<li><code>ram</code>: the consumption of energy of the RAM in joules since the start of the service</li>
+<li><code>gpu</code>: the consumption of energy of the GPU(s) in joules since the start of the service</li>
+<li><code>pdu_energy</code>: the consumption of energy of the machine, according to the PDU in joules since the start of the service</li>
+<li><code>pdu_power</code>: the current power consumption measured by the PDU in watts.</li>
+</ul>
+<a class="header" href="print.html#usage" id="usage"><h2>Usage</h2></a>
+<p>A default configuration and explanation of the <code>simple</code> core plugin can be
+acquired by running the command <code>vjoule_service --ph simple</code>.</p>
+<a class="header" href="print.html#for-api-usage" id="for-api-usage"><h3>For API usage</h3></a>
+<p>The configuration of the <code>simple</code> core plugin takes the parameter <code>freq</code>. This
+parameter defines the number of iterations per second of reading from the
+sensors and writing the results. However, when using an API, reading at a given
+frequency can be a bit laborious and may lead to inaccurate results. For that
+reason, the APIs are able to trigger the vjoule service, and no longer rely on
+the service frequency. If the service is only to be used within an API (no
+<code>vjoule top</code>), the frequency can be set to 0.</p>
+<a class="header" href="print.html#default-configuration" id="default-configuration"><h2>Default configuration</h2></a>
+<pre><code class="language-toml">[sensor]
+freq = 1 # frequency of update in hertz (the higher the faster)
+log-lvl = &quot;info&quot; # debug &lt; success &lt; info &lt; warn &lt; error &lt; none
+log-path = &quot;/etc/vjoule/log&quot; # log file (empty means stdout)
+core = &quot;simple&quot; # the name of the core plugin to use for the sensor
+
+# the directory in which result will be written
+output-dir = &quot;/etc/vjoule/results&quot;
+
+# if true mount the result directory in tmpfs (less i/o generated by vjoule)
+mount-tmpfs = true
+
+# following configuration is optional
+
+[cpu] # configuration to enable CPU energy reading
+name = &quot;rapl&quot; # rapl plugin for compatible intel or amd cpus
+
+[ram] # configuration to enable RAM energy reading
+name = &quot;rapl&quot; # rapl plugin for compatible intel or amd cpus
+
+[gpu:0] # configuration to enable GPU energy reading
+name = &quot;nvidia&quot; # nvidia plugin for nvidia GPUs
+
+# A machine can have different GPU from different constructors
+# For example a integrated GPU, and an nvidia GPU card
+[gpu:1] # configuration to enable GPU energy 
+name = &quot;rapl&quot; # rapl plugin form compatible intel or amd cpus
+
+[pdu] # configuration to enable smart PDU reading
+name = &quot;yocto&quot; # the yocto plugin to read YoctoWatt PDU consumption
+</code></pre>
+<p>On the other hand the flag <code>mount-tmpfs</code> will make the <code>divider</code> plugin mount
+the result directory in tmpfs, to avoid making I/O access when writting the
+result.</p>
+<a class="header" href="print.html#the-dumper-core" id="the-dumper-core"><h1>The dumper core</h1></a>
+<p>The <code>dumper</code> is a core plugin that can be used to dump the metrics of the
+system, and the different plugin sensors. It can monitor four different kind of
+sensor plugins <code>cpu</code>, <code>gpu</code>, <code>ram</code> and <code>pdu</code>, and be attached to different perf
+events for the cgroups that are determined by the configuration file.</p>
+<a class="header" href="print.html#result-files-1" id="result-files-1"><h2>Result files</h2></a>
+<p>Unlike the <code>divider</code> plugin, the <code>dumper</code> writes only two files in the result directory (by default <code>/etc/vjoule/results/</code>):</p>
+<ul>
+<li><code>cgroups.csv</code> - this file contains the perf events watched by the plugin, for each of the watched cgroups</li>
+<li><code>energy.csv</code> - this file contains the energy consumptions returned by the different connected plugins</li>
+</ul>
+<a class="header" href="print.html#usage-1" id="usage-1"><h2>Usage</h2></a>
+<p>As any plugin, a default configuration and explanation of the <code>dumper</code>
+plugin can be acquired by running the command <code>vjoule_service --ph dumper</code>.</p>
+<a class="header" href="print.html#default-configuration-1" id="default-configuration-1"><h2>Default configuration</h2></a>
+<p>Here is an explanation of configuration that can be used by the <code>dumper</code> plugin :</p>
+<pre><code class="language-toml">[sensor]
+freq = 1 # frequency of update in hertz (the higher the faster)
+log-lvl = &quot;info&quot; # debug &lt; success &lt; info &lt; warn &lt; error &lt; none
+log-path = &quot;/etc/vjoule/log&quot; # log file (empty means stdout)
+core = &quot;dumper&quot; # the name of the core plugin to use for the sensor
+# the directory in which result will be written
+output-dir = &quot;/etc/vjoule/results&quot;
+
+# delete cgroup result directories when the cgroup no longer exists
+delete-res = true
+
+# if true mount the result directory in tmpfs (less i/o generated by vjoule)
+mount-tmpfs = true
+
+perf-counters = [&quot;LLC_MISSES&quot;, &quot;PERF_COUNT_HW_CPU_CYCLES&quot;] # The list of performances counters to monitor
+
+# following configuration is optional
+# It activates some part of the dumper
+
+[cpu] # configuration to enable CPU energy reading
+name = &quot;rapl&quot; # rapl plugin for compatible intel or amd cpus
+
+[ram] # configuration to enable RAM energy reading
+name = &quot;rapl&quot; # rapl plugin for compatible intel or amd cpus
+
+[gpu:0] # configuration to enable GPU energy reading
+name = &quot;nvidia&quot; # nvidia plugin for nvidia GPUs
+
+# A machine can have different GPU from different constructors
+# For example a integrated GPU, and an nvidia GPU card
+[gpu:1] # configuration to enable GPU energy 
+name = &quot;rapl&quot; # rapl plugin form compatible intel or amd cpus
+
+[pdu] # configuration to enable smart PDU reading
+name = &quot;yocto&quot; # the yocto plugin to read YoctoWatt PDU consumption
+</code></pre>
+<p>One can note the value <code>perf-counters</code> which is specific to the
+<code>dumper</code> plugin and did not appear on the <code>divider</code> core. This value
+defines the list of perf events to watched for each cgroups monitored
+by vJoule, and defines the values that will be dumped inside the
+<em>cgroups.csv</em> file.</p>
+<a class="header" href="print.html#cgroups-file" id="cgroups-file"><h2>Cgroups file</h2></a>
+<p>The dumper core plugin uses another configuration file, in
+<code>/etc/vjoule/cgroups</code>, to filter the cgroups that are watched by the
+sensor, and ignore unwanted cgroups.  This configuration file is a
+list of rules, every rules must start with a slice (a cgroup that
+contains other cgroups).  For example <code>my.slice/*</code>., will make the
+sensor watch all the cgroups in the slice <code>my.slice</code>, and
+<code>system.slice/docker*</code> will watch all the cgroups in <code>system.slice</code>
+that starts with <code>docker</code>.  Basically, it lists all the cgroups that
+would be found if the command <code>ls my_rule</code> was run in the cgroup mount
+directory.  The following presents an example of configuration for
+cgroup listing that has to be placed in <code>/etc/vjoule/cgroups</code>.</p>
+<pre><code>vjoule.slice/*
+system.slice/docker*
+my_custom.slice/my_custom_cgroup
+</code></pre>
+<a class="header" href="print.html#sensor-plugins" id="sensor-plugins"><h1>Sensor plugins</h1></a>
+<p>Sensor plugins are plugins used to retreive the energy consumption of
+the hardware. They are different type of sensor plugins as there are
+different kind of hardware on which we can retreive energy
+consumption. In this version of vJoule, there are <code>cpu</code>, <code>ram</code> and
+<code>gpu</code> plugins implemented.</p>
+<p>Information about the plugins can be retreived by running the command :</p>
+<pre><code class="language-bash"># vjoule_service --ph plugin_name
+# for example
+
+$ vjoule_service --ph rapl
+</code></pre>
+<a class="header" href="print.html#rapl-plugin" id="rapl-plugin"><h2>Rapl plugin</h2></a>
+<p>The <code>rapl</code> plugin retreive the energy consumption of three kind of
+hardware, <code>cpu</code>, <code>ram</code> and <code>gpu</code> where here the gpu is the integrated
+gpu chip. RAPL is usable on intel cores only.</p>
+<p>Depending on the machine, gpu and ram may be unavailable, in that case
+during the configuration warnings will be displayed, and ram and gpu
+energy consumption retreiving will always return 0.</p>
+<p>Warning, there is no perf events on integrated GPU, meaning that the
+gpu consumption will be acquired for the whole system but will not be
+divided between cgroups when using the <code>divider</code> core plugin.</p>
+<a class="header" href="print.html#nvidia-plugin" id="nvidia-plugin"><h2>Nvidia plugin</h2></a>
+<p>The <code>nvidia</code> plugin retreives the consumption of nvidia graphics card using
+nvml. It can be only be used for the component <code>gpu</code>. This plugin does not take
+any parameter.</p>
+<pre><code class="language-toml">[gpu]
+name = &quot;nvidia&quot;
+</code></pre>
+<a class="header" href="print.html#yocto-plugin" id="yocto-plugin"><h2>Yocto plugin</h2></a>
+<p>The <code>yocto</code> plugin retreives the energy and power consumption of a <a href="https://www.yoctopuce.com/FR/products/capteurs-electriques-usb/yocto-watt">YoctoWatt
+smart
+PDU</a>.
+It can only be used for the component <code>pdu</code>. This plugin can take the parameter
+<code>target</code>. This parameter define the uniq identifier of the YoctoWatt PDU, when
+multiple YoctoWatt are connected to the device performing the reading. If only
+one smart PDU is connected, this option can simply be ignored.</p>
+<pre><code class="language-toml">[pdu]
+name = &quot;yocto&quot;
+target = &quot;YWATTMK1-276146&quot;
+</code></pre>
+<p>The precision of the yocto plugin is in milliwatt-hours (or 3.6 joules). It has
+better precision in immediate power consumption, which is why it provides two
+different metrics. RAPL measurement provides micro-joule measurements, so for
+really small values it may appear that YoctoWatt has detected 0 consumption,
+while RAPL measurement has. It is important to note that 3.6J is really small
+and in no way replicable, experiments should be much longer and consume much
+more than that to be considered valid (imagine comparing applications with
+benchmarks that take only 3.6 microseconds).</p>
+<a class="header" href="print.html#combining-plugins" id="combining-plugins"><h2>Combining plugins</h2></a>
+<p>When there are a nvidia GPU, there can still be an integrated intel GPU. In that
+case multiple GPUs consumption are retreivable. To define that in the
+configuration file, the following can be written.</p>
+<pre><code class="language-toml">[gpu:0]
+name = &quot;rapl&quot;
+
+[gpu:1]
+name = &quot;nvidia&quot;
+</code></pre>
+<p>Both <code>simple</code> and <code>dumper</code> cores are able to manage multiple <code>gpu</code> plugins, but
+only one <code>cpu</code>, one <code>ram</code> plugin and one <code>pdu</code> plugin can be used at the same
+time.</p>
+<a class="header" href="print.html#vjoule-cli" id="vjoule-cli"><h1>vjoule CLI</h1></a>
+<p>This section details how to use the three commands in the vjoule command line interface:</p>
+<ul>
+<li><strong>vjoule exec</strong> - used to estimate the energy consumption of a given command</li>
+<li><strong>vjoule top</strong> - used to visualize the energy consumption of your computer and the cgroups monitored by <em>vjoule service</em></li>
+</ul>
+<a class="header" href="print.html#vjoule-exec" id="vjoule-exec"><h1>vjoule exec</h1></a>
+<p>The <em>vjoule exec</em> command can be used to estimate the energy consumption of a given command.</p>
+<p>You can use it as follows:</p>
+<pre><code class="language-bash">$ vjoule exec python myscript.py
+
+time	1s670ms197µs
+PDU	0.00 J
+CPU	35.71 J
+RAM	2.25 J
+GPU	1.78 J
+</code></pre>
+<p><strong>Note:</strong> this is the default command in vJoule CLI, you can omit the <em>exec</em> subcommand and just use <em>vJoule</em>, as follows:</p>
+<pre><code class="language-bash">$ vjoule python myscript.py
+
+time	1s670ms197µs
+PDU	0.00 J
+CPU	35.71 J
+RAM	2.25 J
+GPU	1.78 J
+</code></pre>
+<a class="header" href="print.html#vjoule-top" id="vjoule-top"><h1>vjoule top</h1></a>
+<p><em>vjoule top</em> is a command that will start a terminal-based visualization of the
+current energy consumption of your computer. This can just be started using
+<code>vjoule top</code></p>
+<p><img src="images/vjouletop.png" alt="screenshot of vjoule top" /></p>
+<a class="header" href="print.html#vjoule-api" id="vjoule-api"><h1>vJoule API</h1></a>
+<p>This section details the vJoule API in C++, Rust and Python.</p>
+<a class="header" href="print.html#vjoule-api-in-c" id="vjoule-api-in-c"><h1>vJoule API in C++</h1></a>
+<p>The vJoule API for C++ is installed along with the vJoule service. No other
+installations are required.</p>
+<p>Here is a simple example using the installed API.</p>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdint&gt;
+#include &lt;vjoule/vjoule_api.hh&gt;
+
+double computePi (uint64_t prec) {
+    double res = 0;
+    for (uint64_t i = 0 ; i &lt; prec ; i++) {
+        res += (4.0 / prec) / (1.0 + ((i - 0.5) * (1.0 / prec)) * ((i - 0.5) * (1.0 / prec)));
+    }
+    
+    return res;
+}
+
+int main () {
+    vjoule::vjoule_api api;
+    
+    auto m_begin = api.get_machine_current_consumption ();
+    auto pi = computePi (100000000);
+    auto m_end = api.get_machine_current_consumption ();
+        
+    auto m_diff = m_end - m_begin;
+
+    std::cout &lt;&lt; &quot;RESULT : &quot; &lt;&lt; pi &lt;&lt; &quot; &quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;CONSUMPTION : &quot; &lt;&lt; m_diff &lt;&lt; std::endl;
+    
+    return 0;
+}
+</code></pre>
+<p>The compilation needs to the link the library <code>libvjoule_cpp</code>.</p>
+<pre><code class="language-shell">$ g++ main.cc -lvjoule_cpp
+$ ./a.out
+RESULT : 3.14159 
+CONSUMPTION : diff (time: 0.51s, pdu: 19.30J, cpu: 9.86J, ram: 0.31J, gpu: 0.00J)
+</code></pre>
+<a class="header" href="print.html#usage-2" id="usage-2"><h2>Usage</h2></a>
+<p>The API is base on the type <code>vjoule::vjoule_api</code>. This type is used to retreive
+the consumption of the machine from different components (enabled by the
+configuration of the vjoule_service).</p>
+<p>The C++ API uses the vjoule service to retrieve the consumption of the
+components. The service must be running, using the <code>simple</code> core plugin. The
+<code>getCurrentMachineConsumption</code> function triggers a consumption reading by the
+service, and retrieves the values of each enabled component (disabled components
+are set to 0). So there is no need to wait for the next iteration of the service
+to read a value. In fact, the service can be configured with a frequency of 0
+(i.e., no iteration at all).</p>
+<a class="header" href="print.html#vjoule-api-rust" id="vjoule-api-rust"><h1>vJoule API rust</h1></a>
+<p>The vJoule API for rust is accessible from the crate <code>vjoule_api</code>
+available in <a href="https://crates.io/crates/vjoule_api">crates.io</a>.</p>
+<a class="header" href="print.html#usage-3" id="usage-3"><h2>Usage</h2></a>
+<p>The API is base on the type <code>vjoule_api::VJouleAPI</code>. This type is used to
+retreive the consumption of the machine from different components (enabled by the
+configuration of the vjoule_service).</p>
+<p>The Rust API uses the vjoule service to retrieve the consumption of the
+components. The service must be running, using the <code>simple</code> core plugin. The
+<code>getCurrentMachineConsumption</code> function triggers a consumption reading by the
+service, and retrieves the values of each enabled component (disabled components
+are set to 0). So there is no need to wait for the next iteration of the service
+to read a value. In fact, the service can be configured with a frequency of 0
+(i.e., no iteration at all).</p>
+<p>Further information about the API is presented here <a href="https://docs.rs/vjoule_api/1.3.1/vjoule_api/struct.VJouleAPI.html">API
+Documentation</a>. And
+a complete example can be found
+<a href="https://github.com/davidson-consulting/vjoule/blob/main/tools/api/rust/example/src/main.rs">here</a>.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let api = vjoule_api::VJouleAPI::new ();
+
+let beg = api.get_current_machine_consumption ()?;
+foo ();
+let end = api.get_current_machine_consumption ()?;
+
+let diff = end - beg;
+println!(&quot;Foo took {}&quot;, diff);
+#}</code></pre></pre>
+<a class="header" href="print.html#vjoule-api-python" id="vjoule-api-python"><h1>vJoule API python</h1></a>
+<p>The vJoule API for python is accessible from the source repository of vJoule.</p>
+<a class="header" href="print.html#installation-1" id="installation-1"><h2>Installation</h2></a>
+<p>The installation is made using a local pip install.</p>
+<pre><code class="language-bash">git clone https://github.com/davidson-consulting/vjoule.git
+cd vjoule/tools/api/py/src/
+pip install .
+</code></pre>
+<p>Here is a simple example using the installed API.</p>
+<pre><code class="language-python">from vjoule_api_py.vjoule_api import *
+
+def computePi(prec):
+    res = 0
+    for i in range(prec):
+        i_prec = 1.0 / prec
+        res += (4.0 / prec) / (1.0 + ((i - 0.5) * i_prec) * ((i - 0.5) * i_prec))
+    return res
+
+
+api = VJouleAPI ()
+m_beg = api.getCurrentMachineConsumption ()
+    
+pi = computePi (10000000)
+
+m_end = api.getCurrentMachineConsumption ()
+
+m_diff = m_end - m_beg
+
+print (&quot;PI : &quot;, pi)
+print (m_diff)
+</code></pre>
+<pre><code class="language-shell">$ python main.py
+PI :  3.1415928535904256
+diff (time: 2.00s, pdu: 83.10J, cpu: 41.89J, ram1.56J, gpu: 0.30J)
+</code></pre>
+<a class="header" href="print.html#usage-4" id="usage-4"><h2>Usage</h2></a>
+<p>The API is base on the type <code>VJouleAPI</code>. This type is used to retreive
+the consumption of the machine from different components (enabled by the
+configuration of the vjoule_service).</p>
+<p>The Python API uses the vjoule service to retrieve the consumption of the
+components. The service must be running, using the <code>simple</code> core plugin. The
+<code>getCurrentMachineConsumption</code> function triggers a consumption reading by the
+service, and retrieves the values of each enabled component (disabled components
+are set to 0). So there is no need to wait for the next iteration of the service
+to read a value. In fact, the service can be configured with a frequency of 0
+(i.e., no iteration at all).</p>
+<a class="header" href="print.html#trouble-shooting" id="trouble-shooting"><h1>Trouble-shooting</h1></a>
+<a class="header" href="print.html#a-vjoule-does-not-seem-to-start" id="a-vjoule-does-not-seem-to-start"><h2>A. vJoule does not seem to start...</h2></a>
+<p>The log file <code>/etc/vjoule/service.log</code> is very useful to determine the reason of the error.</p>
+<p>Here are some common errors with some explanations :</p>
+<ul>
+<li>
+<p><code>[Error][RAPL] RaplReader : failed to configure.</code></p>
+<p>Rapl is not available on your machine. For the moment this is the only sensor plugin that can read CPU consumption. You can still disable it if your not interested in the CPU consumption, but only on the consumption of nvidia GPU. cf. <a href="./user_guide/sensor_plugins.html">Sensor plugins</a></p>
+</li>
+</ul>
+<ul>
+<li>
+<p><code>[Error][NVIDIA] NVML is not available.</code></p>
+<p>If you don't have an nvidia graphic card, the explanation is easy the plugin won't work. You will have to deactivate it in the configuration file. cf. <a href="./user_guide/sensor_plugins.html">Sensor plugins</a>.</p>
+<p>However, if you have a nvidia GPU make sure you have installed the Nvidia management library and that it matches the version of the nvidia drivers (sometimes it does not because.. nvidia). A quick test can be to run the command <code>nvidia-smi</code>. <a href="https://developer.nvidia.com/nvidia-management-library-nvml">Nvidia NVML</a>.</p>
+</li>
+</ul>
+<a class="header" href="print.html#b-vjoule-is-running-but-i-dont-have-any-consumption-for-my-processes-" id="b-vjoule-is-running-but-i-dont-have-any-consumption-for-my-processes-"><h2>B. vJoule is running but I don't have any consumption for my processes ?</h2></a>
+<p>Here are some common tracks for explanation :</p>
+<ul>
+<li>
+<p>First you can check the result files of the whole system
+(<code>/etc/vjoule/results/cpu</code> for example). If they increment the
+sensor plugin and divider core are effectively running and
+working. Or run the command <code>vjoule top</code> to verify that vjoule is
+running and working properly.</p>
+</li>
+<li>
+<p>The service runs at a given speed specified in the configuration file
+by the <code>freq</code> parameter. This specifies the number of iteration of the
+service per seconds (default being 1). This is an important
+information, if your application took less that a second to be
+executed, maybe the service just didn't have enough time to see it. To
+make sure your application will be seen by the service here a simple
+procedure to follow.</p>
+<ol>
+<li>
+<p>Configure vJoule service to monitor your cgroups, and create them (cf. <a href="./getting_started/cgroups.html">Cgroups</a>).</p>
+</li>
+<li>
+<p>Watch the file <code>/etc/vjoule/results/cpu</code> using iowatch, or inotify and wait for a modification.
+Here you can check wether the directory corresponding to your cgroups are correctly created.</p>
+</li>
+<li>
+<p>Start your application and wait its end, or an event you have defined for your usecase.</p>
+</li>
+<li>
+<p>Watch the file <code>/etc/vjoule/results/cpu</code> using iowatch or inotify to make sure the service has finished its iteration.</p>
+</li>
+<li>
+<p>Read the result in the corresponding directory of your cgroups.</p>
+</li>
+<li>
+<p>Delete your cgroups, and remove them from the vjoule service configuration.</p>
+</li>
+</ol>
+<p>Step 2 to 5 can be repeated multiple times, if you want to run multiple execution using the same cgroups.</p>
+</li>
+<li>
+<p>If the cgroups you are watching appears and disappear during the execution (for example docker containers).
+Maybe the divider core plugin has simply deleted the result file when the cgroup disappeared. You can remove that behavior by modifying the flag <code>delete-res</code> in the configuration file of the service (cf. <a href="./user_guide/divider_core.html">Divider core</a>).</p>
+</li>
+</ul>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+
+                
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+        <script>
+            $(document).ready(function() {
+                window.print();
+            })
+        </script>
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS script -->
+        
+        <script type="text/javascript" src="custom.js"></script>
+        
+
+    </body>
+</html>
