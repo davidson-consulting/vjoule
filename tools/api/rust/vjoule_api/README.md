@@ -24,37 +24,27 @@ fn compute_pi (prec : u64)-> f64 {
     res
 }
 
-fn test_pi (api : &mut VJouleAPI)-> Result<(), VJouleError> {
-    let mut pg = api.get_group ("this")?;
+fn test_pi (api : &mut VJouleAPI, prec : u64)-> Result<ConsumptionDiff, VJouleError> {
     let m_beg = api.get_current_machine_consumption ()?;
     
-    // No need to force the service iteration, it was already made by the previous call
-    let p_beg = pg.get_current_consumption_no_force ()?;
-    
-    let pi = compute_pi (100000000);
-    
-    let p_end = pg.get_current_consumption ()?;
-    
-    // Same here
+    let pi = compute_pi (prec);
+
     let m_end = api.get_current_machine_consumption_no_force ()?;
-   
+
     let m_diff = m_end - m_beg;
-    let p_diff = p_end - p_beg;
     
     println!("PI : {}", pi);
-    println!("{}", p_diff);
     println!("{}", m_diff);
-    println!("{}", p_diff % m_diff);
 
-    Ok (())
+    Ok (m_diff)
 }
 
 fn run_pi (mut api : &mut VJouleAPI) {
     match test_pi (&mut api) {
-	Err (s) => {
-	    println!("Pi error : {}", s);
-	}
-	Ok (_) => {}
+	    Err (s) => {
+	        println!("Pi error : {}", s);
+	    }
+	    Ok (_) => {}
     }
 }
 
@@ -62,12 +52,20 @@ fn run_pi (mut api : &mut VJouleAPI) {
 fn main() {
     let api = vjoule_api::VJouleAPI::new ();
     match api {
-	Ok (mut api) => {
-	    run_pi (&mut api);
-	}
-	Err (s) => {
-	    println!("{}", s);
-	}
+	    Ok (mut api) => {
+	        let a = run_pi (&mut api, 100000000);
+            let b = run_pi (&mut api, 200000000);
+
+            match (a, b) {
+                (Ok (x), Ok (y)) => {
+                    println!("{}", x % y);
+                }
+                _ => {}
+            }
+	    }
+	    Err (s) => {
+	        println!("{}", s);
+	    }
     }
 }
 ```
