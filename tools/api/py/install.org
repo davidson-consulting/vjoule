@@ -1,0 +1,14 @@
+#+title: Install
+
+```bash
+$ cd ./example/
+$ python3 -m venv .
+$ source ./bin/activate
+$
+$ pip3 install -e ../src/
+$ sudo systemctl start vjoule_service
+$ python3 main.py
+```
+
+
+Vjoule must be configured with the simple core plugin, and can be set to a frequency of 0 to be only activated by the api.
