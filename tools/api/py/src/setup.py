@@ -1,11 +1,12 @@
 from setuptools import setup, find_packages
+import setuptools
 
 setuptools.setup(name='vjoule_api_py',
 version='1.3',
 description='VJoule API in python',
 url='#',
 author='',
-install_requires=[''],
+install_requires=['inotify'],
 author_email='',
 packages=setuptools.find_packages(),
 zip_safe=False)
